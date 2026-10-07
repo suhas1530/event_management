@@ -1,0 +1,592 @@
+# Deploying avān. with PM2
+
+Production deployment guide for a **single Linux VPS** using PM2 + Nginx. No Docker.
+
+Covers the two Node processes this repo actually runs, the MongoDB/Prisma release step,
+and the environment variables each one needs.
+
+---
+
+## Architecture
+
+Two independent Node processes behind one Nginx reverse proxy:
+
+```
+                    ┌─────────────────────────────┐
+   Internet ──443──▶│  Nginx                     │
+                    │  avan.events      → :3000  │
+                    │  api.avan.events   → :5000  │
+                    └──────┬──────────────┬──────┘
+                           │              │
+                    ┌──────▼──────┐ ┌─────▼───────────────┐
+                    │ Next.js 16  │ │ Express API (PM2)   │
+                    │ (PM2)       │ │ Prisma 5            │
+                    │ port 3000   │ │ port 5000           │
+                    └─────────────┘ └─────┬───────────────┘
+                                            │
+                                      ┌─────▼──────┐
+                                      │  MongoDB   │
+                                      │  (Atlas)   │
+                                      └────────────┘
+```
+
+The browser calls the API **directly** using the absolute URL in
+`NEXT_PUBLIC_API_URL` (`lib/api.ts:6`). Tokens live in `localStorage`
+(`lib/api.ts:355-371`), so the API must be reachable from the browser and its
+CORS must allow your frontend origin.
+
+| Process | Working dir | Command | Port |
+|---|---|---|---|
+| `avan-api` | `backend/` | `node dist/index.js` | 5000 |
+| `avan-web` | repo root | `pnpm start` | 3000 |
+
+---
+
+## 1. Prerequisites
+
+```bash
+# Node 20.9+ required by Next.js 16
+node -v                    # must be >= v20.9.0
+npm -v
+
+# PM2
+npm i -g pm2
+pm2 -v
+
+# Build tools — required by the argon2 native module in backend/
+sudo apt update
+sudo apt install -y build-essential python3 git curl
+```
+
+> **`argon2` is a native module** (`backend/package.json:19`). Without
+> `build-essential` and `python3`, `npm ci` in `backend/` will fail. If you'd
+> rather avoid native compilation, the codebase already depends on `bcryptjs`.
+
+MongoDB does **not** need to run on this server if you're using MongoDB Atlas.
+For a local database instead: `sudo apt install -y mongodb-org`.
+
+---
+
+## 2. Get the code
+
+```bash
+sudo mkdir -p /srv/avan && sudo chown $USER /srv/avan
+cd /srv/avan
+git clone <your-repo-url> app
+cd app
+```
+
+Confirm `packageManager` in `package.json` — this repo pins `pnpm@12.3.4`:
+
+```bash
+corepack enable
+pnpm -v
+```
+
+---
+
+## 3. Environment variables
+
+### 3.1 Backend — `backend/.env`
+
+```bash
+cd /srv/avan/app/backend
+cp .env.example .env
+```
+
+```dotenv
+NODE_ENV=production
+PORT=5000
+
+# ─── Database ────────────────────────────────────────────────
+DATABASE_URL="mongodb+srv://<user>:<pass>@cluster0.mongodb.net/avan-events?retryWrites=true&w=majority"
+
+# ─── JWT — MANDATORY, generate fresh values ──────────────────
+JWT_SECRET=<openssl rand -hex 32>
+JWT_REFRESH_SECRET=<openssl rand -hex 32>
+
+# ─── CORS ────────────────────────────────────────────────────
+# Exact frontend origin. No trailing slash. No path.
+CORS_ORIGIN=https://avan.events
+FRONTEND_URL=https://avan.events
+
+# ─── AI (optional — there is a built-in fallback) ────────────
+AI_PROVIDER=openai
+AI_API_KEY=sk-...
+AI_MODEL=gpt-4-turbo-preview
+AI_BASE_URL=https://api.openai.com/v1
+```
+
+Generate the JWT secrets with:
+
+```bash
+openssl rand -hex 32
+```
+
+> ⚠️ **Critical.** `backend/src/config/index.ts:14-15` falls back to the literal
+> strings `your-super-secret-jwt-key-change-in-production` and
+> `your-refresh-secret-change-in-production` when these are unset. Production
+> tokens would be trivially forgeable. Always set both.
+
+Only `backend/.env` matters for the backend. The root `.env.example` lists
+`MONGODB_URI`, which nothing in the codebase reads — ignore it.
+
+### 3.2 Frontend — `.env.production.local` at repo root
+
+```bash
+cd /srv/avan/app
+cat > .env.production.local <<'EOF'
+NEXT_PUBLIC_API_URL=https://api.avan.events/api/v1
+NEXT_PUBLIC_APP_NAME=avān.
+NEXT_PUBLIC_APP_URL=https://avan.events
+EOF
+```
+
+> ⚠️ **Critical.** `NEXT_PUBLIC_*` variables are **inlined into the JavaScript
+> bundle during `next build`**. Setting them only in the PM2 `env` block at
+> runtime has no effect — the browser would keep calling
+> `http://localhost:5000`. They must be present in `.env.production.local`
+> (or exported) *before* you run `pnpm build`.
+
+`.gitignore` already excludes `.env`, `.env.local`, `.env.*.local` and
+`backend/.env`. Verify nothing sensitive is staged:
+
+```bash
+git status --ignored | grep -E '\.env'
+```
+
+---
+
+## 4. Install dependencies
+
+### Backend
+
+```bash
+cd /srv/avan/app/backend
+npm ci
+npx prisma generate
+```
+
+`npm ci` is required over `npm install` — `backend/package-lock.json` is
+committed and pins the tree.
+
+> The Prisma client is generated by an install hook in `@prisma/client`, but it
+> silently no-ops when dev dependencies are pruned. Add an explicit
+> `postinstall` to `backend/package.json` so production installs can't miss it:
+>
+> ```json
+> "scripts": {
+>   "postinstall": "prisma generate"
+> }
+> ```
+
+### Frontend
+
+```bash
+cd /srv/avan/app
+pnpm install --frozen-lockfile
+```
+
+---
+
+## 5. Database release step
+
+> ⚠️ **`prisma migrate dev` does not work with MongoDB.** The `prisma:migrate`
+> script in `backend/package.json:11` is `prisma migrate dev`, which errors out
+> with *"migrate is not supported for MongoDB"*. This connector uses
+> **`prisma db push`**, which syncs the schema directly.
+
+```bash
+cd /srv/avan/app/backend
+npx prisma db push          # sync schema (idempotent — safe to re-run)
+npx prisma generate
+```
+
+Seed demo data (optional, first deploy only):
+
+```bash
+npx tsx prisma/seed.ts
+```
+
+> **Ordering matters.** `prisma/seed.ts` sits outside `tsconfig.json`'s `include`
+> (`["src/**/*"]`), so it is **not** compiled into `dist/`. It must run through
+> `tsx`, which is a devDependency. Seed **before** pruning dev dependencies, or
+> install `tsx` globally, or run the seed from a machine that has dev deps.
+
+Confirm the schema landed:
+
+```bash
+npx prisma studio   # then Ctrl+C
+```
+
+---
+
+## 6. Raise the API rate limit before launch
+
+`backend/src/app.ts:29-36` applies this to **every** endpoint, **per IP**:
+
+```ts
+windowMs: 15 * 60 * 1000,  // 15 minutes
+max: 100,
+```
+
+100 requests per 15 minutes is a development value. Your frontend fires several
+parallel API calls per page (events list + categories + venues + featured), so
+real users will hit this in minutes. Edit `backend/src/config/index.ts:24-27`:
+
+```ts
+rateLimit: {
+  windowMs: 15 * 60 * 1000,
+  max: 1000,        // per 15 min per IP — or proxy the real limit in Nginx
+},
+```
+
+Rebuild the backend after changing it (it's compiled by `tsc`).
+
+---
+
+## 7. Build both applications
+
+```bash
+# Backend → dist/
+cd /srv/avan/app/backend
+npm run build            # tsc
+
+# Frontend → .next/
+cd /srv/avan/app
+pnpm build               # next build
+```
+
+`next.config.mjs` sets `typescript.ignoreBuildErrors: false`, so a type error
+fails the build. Fix types rather than working around it.
+
+Smoke-test both **before** putting Nginx in front of them:
+
+```bash
+cd /srv/avan/app/backend && node dist/index.js
+# 🚀 Server running on port 5000
+# ✅ Database connected successfully
+
+cd /srv/avan/app && pnpm start
+# ▲ Next.js 16.x  → http://localhost:3000
+```
+
+Then, in another shell:
+
+```bash
+curl -s http://localhost:5000/health
+# {"status":"ok","timestamp":"..."}
+```
+
+Note the health path is **`/health`**, not `/api/v1/health` — see
+`backend/src/app.ts:44`. It's outside the API prefix, which is convenient for
+load balancers and uptime monitors.
+
+Kill both with Ctrl+C when done.
+
+---
+
+## 8. PM2 ecosystem file
+
+Create `/srv/avan/app/ecosystem.config.js`:
+
+```js
+// ecosystem.config.js — PM2 process definitions for avān.
+module.exports = {
+  apps: [
+    {
+      name: 'avan-api',
+      cwd: './backend',
+      script: 'dist/index.js',
+      exec_mode: 'cluster',
+      instances: 2,
+      // Backend reads backend/.env via dotenv (backend/src/config/index.ts:1)
+      env: {
+        NODE_ENV: 'production',
+        PORT: '5000',
+      },
+      wait_ready: false,
+      autorestart: true,
+      max_memory_restart: '400M',
+      max_restarts: 10,
+      min_uptime: '20s',
+      kill_timeout: 12000,
+      out_file: './logs/api.out.log',
+      error_file: './logs/api.err.log',
+      merge_logs: true,
+      time: true,
+    },
+    {
+      name: 'avan-web',
+      cwd: './',
+      script: 'node_modules/.bin/next',
+      args: 'start --hostname 0.0.0.0 --port 3000',
+      exec_mode: 'cluster',
+      instances: 2,
+      env: {
+        NODE_ENV: 'production',
+        PORT: '3000',
+      },
+      autorestart: true,
+      max_memory_restart: '500M',
+      max_restarts: 10,
+      min_uptime: '20s',
+      kill_timeout: 12000,
+      out_file: './logs/web.out.log',
+      error_file: './logs/web.err.log',
+      merge_logs: true,
+      time: true,
+    },
+  ],
+};
+```
+
+```bash
+mkdir -p logs
+```
+
+### Notes on these settings
+
+- **`kill_timeout: 12000`** matters. `backend/src/index.ts:19-37` traps `SIGTERM`,
+  closes the HTTP server, then disconnects Prisma, with a 10-second forced-exit
+  fallback. PM2's default `kill_timeout` of 1600ms would SIGKILL the process
+  mid-shutdown and leak Prisma connections.
+- **`instances: 2` on `avan-web` is safe here.** Every page in `app/` is a
+  `'use client'` component that fetches from the API — there is no ISR, no
+  server-side data cache, and no Server Actions to keep consistent across
+  instances. On a general Next.js app you'd need a shared cache handler, a fixed
+  `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`, and a `deploymentId` for version-skew
+  protection. None of that applies to this codebase.
+- **Cluster mode multiplies the rate limit.** The limiter in
+  `backend/src/app.ts:29` is in-memory and per-process, so `instances: 2` makes
+  the effective ceiling 2× the configured `max`. Account for it in step 6.
+- Drop to `instances: 1` on a 1 GB VPS — two Node processes plus MongoDB will
+  fight for memory.
+- **Don't use `watch: true`.** PM2's file watching will restart `avan-web` on
+  every write to `.next/`, including during `next build`.
+
+---
+
+## 9. Start and manage
+
+```bash
+cd /srv/avan/app
+
+# Start everything
+pm2 start ecosystem.config.js
+
+# Verify both are online
+pm2 status
+pm2 list
+
+# Follow logs
+pm2 logs                  # all apps
+pm2 logs avan-api         # one app
+pm2 logs --lines 200
+
+# Resource monitor
+pm2 monit
+
+# Zero-downtime reload after a rebuild
+pm2 reload ecosystem.config.js
+
+# Restart one app
+pm2 restart avan-api
+
+# Stop / delete
+pm2 stop all
+pm2 delete ecosystem.config.js
+```
+
+### Survive reboots
+
+```bash
+pm2 startup          # prints a sudo command — run it verbatim
+pm2 save             # persist the current process list
+```
+
+Verify after a reboot with `pm2 list` and `curl https://avan.events/health`.
+
+---
+
+## 10. Nginx reverse proxy
+
+Don't expose ports 3000 or 5000 to the internet. Nginx absorbs rate limiting,
+payload limits and malformed requests so the Node processes only render.
+
+```bash
+sudo apt install -y nginx certbot python3-certbot-nginx
+sudo nano /etc/nginx/sites-available/avan
+```
+
+```nginx
+# ─── Frontend ─────────────────────────────────────────────────────────────
+server {
+    listen 80;
+    server_name avan.events www.avan.events;
+
+    # Next.js streaming/Suspense requires unbuffered proxying
+    proxy_buffering off;
+    proxy_request_buffering off;
+
+    client_max_body_size 10m;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade           $http_upgrade;
+        proxy_set_header Connection        'upgrade';
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+    }
+
+    # Immutable build assets — let the browser cache them hard
+    location /_next/static/ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_cache_valid 200 365d;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+}
+
+# ─── API ──────────────────────────────────────────────────────────────────
+server {
+    listen 80;
+    server_name api.avan.events;
+
+    # Must be >= the API's 10mb JSON body limit (backend/src/app.ts:39)
+    client_max_body_size 12m;
+
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+```bash
+sudo ln -s /etc/nginx/sites-available/avan /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+
+# TLS
+sudo certbot --nginx -d avan.events -d www.avan.events -d api.avan.events
+```
+
+Afterwards, point `CORS_ORIGIN` and `FRONTEND_URL` in `backend/.env` at the
+**https** URLs, then `pm2 restart avan-api`.
+
+### Optional: rate limiting at the edge
+
+Better than the in-process limiter, because it's shared across all PM2 instances:
+
+```nginx
+# http{} block, outside server{}
+limit_req_zone $binary_remote_addr zone=api_limit:10m rate=20r/s;
+
+# inside the api server{}
+location / {
+    limit_req zone=api_limit burst=40 nodelay;
+    proxy_pass http://127.0.0.1:5000;
+}
+```
+
+### Optional: MongoDB Atlas network access
+
+If you locked the Atlas cluster to specific IPs, allow this server's public IP
+under **Network Access** in the Atlas dashboard, or the API will hang on
+`prisma.$connect()` at boot.
+
+---
+
+## 11. Update workflow
+
+```bash
+cd /srv/avan/app
+git pull
+
+# Backend
+cd backend
+npm ci
+npx prisma db push        # picks up schema changes
+npm run build
+
+# Frontend
+cd /srv/avan/app
+pnpm install --frozen-lockfile
+pnpm build                # re-inlines NEXT_PUBLIC_* — redeploy if they changed
+
+# Reload both
+pm2 reload ecosystem.config.js
+```
+
+---
+
+## 12. Troubleshooting
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Browser console: CORS error | `CORS_ORIGIN` doesn't exactly match the frontend origin | Set it to `https://avan.events` — no trailing slash, no path (`backend/src/config/index.ts:21`) |
+| Browser: `ERR_CONNECTION_REFUSED` on `:5000` | `NEXT_PUBLIC_API_URL` was set at runtime instead of build time | Put it in `.env.production.local` and **rebuild** |
+| `Cannot find module '@prisma/client'` | Client not generated | `npx prisma generate` in `backend/` |
+| `PrismaClientInitializationError` / boot hang | Atlas IP allowlist | Add this server's IP in Atlas → Network Access |
+| `P1001` / `P2028` timeout | Wrong `DATABASE_URL` or Atlas cluster paused | Check the URI; unpause the cluster |
+| `migrate is not supported for MongoDB` | You ran `prisma:migrate` | Use `npx prisma db push` — MongoDB has no migration engine |
+| `error:0308010C:digital envelope routines::unsupported` | Node 17+ OpenSSL 3 vs old webpack | Upgrade Node to 20.9+ |
+| `node-gyp` build failure on `argon2` | Missing toolchain | `sudo apt install -y build-essential python3` |
+| 429 Too Many Requests | `max: 100` per 15 min | Raise `rateLimit.maxRequests` (`backend/src/config/index.ts:26`) |
+| `429` from Nginx `502`/`503` | App restarted or crashed | `pm2 logs avan-api --lines 100` |
+| Deploy didn't change the API URL | Build cache | `rm -rf .next && pnpm build` |
+| Login works locally, fails in prod | Default JWT secrets in use | Set `JWT_SECRET` + `JWT_REFRESH_SECRET`, then `pm2 restart avan-api` |
+
+Useful commands:
+
+```bash
+pm2 status
+pm2 describe avan-api          # restarts, uptime, memory, script path
+pm2 logs avan-api --lines 200
+pm2 flush                      # clear logs if they fill the disk
+pm2 env 0                      # show a process's environment
+pm2 monit
+curl -s https://api.avan.events/health
+df -h                          # PM2 logs can grow unbounded
+```
+
+---
+
+## 13. Pre-launch checklist
+
+- [ ] `JWT_SECRET` and `JWT_REFRESH_SECRET` set to fresh 32-byte random values
+- [ ] `CORS_ORIGIN` set to the exact https frontend origin
+- [ ] `NEXT_PUBLIC_API_URL` set **before** `pnpm build`
+- [ ] `rateLimit.maxRequests` raised from 100
+- [ ] `postinstall: prisma generate` added to `backend/package.json`
+- [ ] `kill_timeout: 12000` set on the API process
+- [ ] Atlas IP allowlist includes this server
+- [ ] TLS installed via certbot
+- [ ] `pm2 startup` + `pm2 save` verified across a reboot
+- [ ] Demo accounts rotated — `admin@avan.events` / `Admin@12345` are published in `README.md`
+- [ ] `git status` shows no committed `.env` files
+
+### Post-deploy smoke test
+
+```bash
+curl -s https://api.avan.events/health     # {"status":"ok",...}
+curl -sI https://avan.events | head -1     # HTTP/2 200
+```
+
+Then the journeys from the main `README.md`, against production:
+
+1. `/book/technician` → pick Plumbing → Tap Repair → address → slot → describe →
+   confirm → expect `TECH-2026-XXXXXX`
+2. `/admin/login` as admin → **Technicians** → open the booking → **Assign** →
+   advance status → confirm the timeline updates on `/dashboard`
+3. `/events` → open a wedding → request a booking → expect `EVT-2026-XXXXXX`
+4. `/admin/bookings` → open it → **Quote** tab → add line items → **Create & Send**
+   → customer sees the "Action required" banner and can approve

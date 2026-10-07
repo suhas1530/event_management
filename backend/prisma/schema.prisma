@@ -1,0 +1,920 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  CUSTOMER
+  ADMIN
+  SUPER_ADMIN
+  EVENT_MANAGER
+  VENDOR
+  TECHNICIAN
+}
+
+enum BookingStatus {
+  DRAFT
+  REQUESTED
+  PENDING_REVIEW
+  QUOTED
+  CUSTOMER_APPROVAL
+  PAYMENT_PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  RAZORPAY
+  STRIPE
+  BANK_TRANSFER
+  CASH
+}
+
+enum PaymentMethodType {
+  CASH
+  UPI
+  CARD
+  ONLINE
+  BANK_TRANSFER
+}
+
+enum EventType {
+  BIRTHDAY
+  BABY_SHOWER
+  WEDDING
+  ENGAGEMENT
+  ANNIVERSARY
+  NAMING_CEREMONY
+  HOUSEWARMING
+  CORPORATE
+  CONFERENCE
+  PRODUCT_LAUNCH
+  GRADUATION
+  FAREWELL
+  FESTIVAL
+  PROPOSAL
+  KIDS_PARTY
+  THEME_PARTY
+  PRIVATE_CELEBRATION
+  CUSTOM
+}
+
+enum ServiceCategory {
+  DECORATION
+  PHOTOGRAPHY
+  VIDEOGRAPHY
+  CATERING
+  CAKE
+  VENUE
+  DJ
+  MUSIC
+  ENTERTAINMENT
+  INVITATIONS
+  RETURN_GIFTS
+  MAKEUP
+  MEHENDI
+  FLOWERS
+  LIGHTING
+  STAGE_DECORATION
+  TRANSPORTATION
+}
+
+enum TechnicianCategory {
+  PLUMBING
+  ELECTRICAL
+  AC_SERVICE
+  APPLIANCE_REPAIR
+  CARPENTRY
+  PAINTING
+  CLEANING
+  COMPUTER_REPAIR
+  CCTV_INSTALLATION
+  PEST_CONTROL
+  OTHER
+}
+
+enum TechnicianBookingStatus {
+  PENDING
+  CONFIRMED
+  TECHNICIAN_ASSIGNED
+  TECHNICIAN_CONFIRMED
+  TECHNICIAN_ON_THE_WAY
+  TECHNICIAN_ARRIVED
+  SERVICE_STARTED
+  SERVICE_COMPLETED
+  PAYMENT_COMPLETED
+  REVIEW_SUBMITTED
+  CANCELLED
+  REJECTED
+}
+
+enum ServiceRequestType {
+  STANDARD
+  EMERGENCY
+  RECURRING
+}
+
+enum PricingType {
+  FIXED
+  PER_GUEST
+  PER_HOUR
+  CUSTOM_QUOTE
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  WHATSAPP
+  SMS
+}
+
+// ─── Core User & Admin ────────────────────────────────────────────────────────
+
+model User {
+  id                  String    @id @default(auto()) @map("_id") @db.ObjectId
+  email               String    @unique
+  phone               String?   @unique
+  passwordHash        String?
+  name                String
+  avatar              String?
+  role                Role      @default(CUSTOMER)
+  isActive            Boolean   @default(true)
+  isEmailVerified     Boolean   @default(false)
+  isPhoneVerified     Boolean   @default(false)
+  refreshToken        String?
+  passwordResetToken  String?
+  passwordResetExpiry DateTime?
+  lastLoginAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  bookings              Booking[]
+  technicianBookings    TechnicianBooking[]  @relation("CustomerTechnicianBookings")
+  technicianProfile     Technician?
+  technicianReviews     TechnicianReview[]   @relation("CustomerTechnicianReviews")
+  favorites             Favorite[]
+  aiDesigns             AIDesign[]
+  notifications         Notification[]
+  messages              Message[]            @relation("UserMessages")
+  reviews               Review[]
+  addresses             Address[]
+  eventRequests         EventRequest[]
+}
+
+model Admin {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         Role      @default(ADMIN)
+  avatar       String?
+  isActive     Boolean   @default(true)
+  refreshToken String?
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  auditLogs        AuditLog[]
+  assignedBookings Booking[] @relation("AssignedBookings")
+}
+
+// ─── Event models ─────────────────────────────────────────────────────────────
+
+model EventCategory {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String   @unique
+  slug         String   @unique
+  description  String?
+  image        String?
+  icon         String?
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  events   Event[]
+  services Service[]
+}
+
+model Event {
+  id               String        @id @default(auto()) @map("_id") @db.ObjectId
+  title            String
+  slug             String        @unique
+  description      String
+  shortDescription String?
+  categoryId       String        @db.ObjectId
+  category         EventCategory @relation(fields: [categoryId], references: [id])
+  type             EventType
+  theme            String?
+  colorPalette     String[]      @default([])
+  heroImages       String[]      @default([])
+  galleryImages    String[]      @default([])
+  videoUrl         String?
+  venueId          String?       @db.ObjectId
+  venue            Venue?        @relation(fields: [venueId], references: [id])
+  minGuests        Int           @default(1)
+  maxGuests        Int           @default(500)
+  startingPrice    Float
+  currency         String        @default("INR")
+  location         String
+  city             String
+  state            String?
+  country          String        @default("India")
+  latitude         Float?
+  longitude        Float?
+  isIndoor         Boolean       @default(false)
+  isOutdoor        Boolean       @default(false)
+  isLuxury         Boolean       @default(false)
+  isActive         Boolean       @default(true)
+  isFeatured       Boolean       @default(false)
+  averageRating    Float         @default(0)
+  totalReviews     Int           @default(0)
+  viewCount        Int           @default(0)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  eventServices EventService[]
+  packages      Package[]
+  bookings      Booking[]
+  reviews       Review[]
+  favorites     Favorite[]
+
+  @@index([categoryId])
+  @@index([type])
+  @@index([city])
+  @@index([isActive, isFeatured])
+}
+
+// Explicit M2M junction for Event ↔ Service
+model EventService {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  eventId   String  @db.ObjectId
+  event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  serviceId String  @db.ObjectId
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, serviceId])
+  @@index([eventId])
+  @@index([serviceId])
+}
+
+model Venue {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  slug         String   @unique
+  description  String?
+  address      String
+  city         String
+  state        String?
+  country      String   @default("India")
+  latitude     Float?
+  longitude    Float?
+  capacity     Int
+  minCapacity  Int      @default(1)
+  pricePerHour Float?
+  pricePerDay  Float?
+  images       String[] @default([])
+  amenities    String[] @default([])
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  events   Event[]
+  bookings Booking[]
+}
+
+model Service {
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  slug          String          @unique
+  description   String
+  category      ServiceCategory
+  categoryId    String?         @db.ObjectId
+  eventCategory EventCategory?  @relation(fields: [categoryId], references: [id])
+  images        String[]        @default([])
+  basePrice     Float
+  pricingType   PricingType     @default(FIXED)
+  pricePerGuest Float?
+  pricePerHour  Float?
+  location      String?
+  city          String?
+  isActive      Boolean         @default(true)
+  isPopular     Boolean         @default(false)
+  tags          String[]        @default([])
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  eventServices EventService[]
+  packages      PackageService[]
+  bookingItems  BookingItem[]
+}
+
+model Package {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  slug           String    @unique
+  description    String
+  eventId        String    @db.ObjectId
+  event          Event     @relation(fields: [eventId], references: [id])
+  price          Float
+  originalPrice  Float?
+  guestLimit     Int
+  images         String[]  @default([])
+  highlights     String[]  @default([])
+  includes       String[]  @default([])
+  excludes       String[]  @default([])
+  isActive       Boolean   @default(true)
+  isPopular      Boolean   @default(false)
+  displayOrder   Int       @default(0)
+  availableFrom  DateTime?
+  availableUntil DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  services PackageService[]
+  bookings Booking[]
+}
+
+model PackageService {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  packageId   String  @db.ObjectId
+  package     Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  serviceId   String  @db.ObjectId
+  service     Service @relation(fields: [serviceId], references: [id])
+  quantity    Int     @default(1)
+  customPrice Float?
+  isIncluded  Boolean @default(true)
+  sortOrder   Int     @default(0)
+
+  @@unique([packageId, serviceId])
+}
+
+// ─── Event Booking ────────────────────────────────────────────────────────────
+
+model Booking {
+  id                 String        @id @default(auto()) @map("_id") @db.ObjectId
+  bookingNumber      String        @unique @map("booking_number")
+  userId             String        @db.ObjectId
+  user               User          @relation(fields: [userId], references: [id])
+  eventId            String        @db.ObjectId
+  event              Event         @relation(fields: [eventId], references: [id])
+  packageId          String?       @db.ObjectId
+  package            Package?      @relation(fields: [packageId], references: [id])
+  venueId            String?       @db.ObjectId
+  venue              Venue?        @relation(fields: [venueId], references: [id])
+  assignedAdminId    String?       @db.ObjectId
+  assignedAdmin      Admin?        @relation("AssignedBookings", fields: [assignedAdminId], references: [id])
+  aiDesignId         String?       @db.ObjectId
+  aiDesign           AIDesign?     @relation("BookingAIDesign", fields: [aiDesignId], references: [id])
+  status             BookingStatus @default(DRAFT)
+  eventDate          DateTime
+  eventEndDate       DateTime?
+  guestCount         Int
+  budget             Float?
+  notes              String?
+  internalNotes      String?
+  specialRequests    String?
+  subtotal           Float         @default(0)
+  taxAmount          Float         @default(0)
+  discountAmount     Float         @default(0)
+  totalAmount        Float         @default(0)
+  paidAmount         Float         @default(0)
+  balanceAmount      Float         @default(0)
+  currency           String        @default("INR")
+  paymentStatus      PaymentStatus @default(PENDING)
+  confirmedAt        DateTime?
+  cancelledAt        DateTime?
+  cancellationReason String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  items     BookingItem[]
+  payments  Payment[]
+  quotes    Quote[]
+  messages  Message[]
+  timeline  BookingTimeline[]
+  documents BookingDocument[]
+
+  @@index([userId])
+  @@index([eventId])
+  @@index([status])
+  @@index([eventDate])
+}
+
+model EventRequest {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  requestNumber      String   @unique
+  customerId         String   @db.ObjectId
+  customer           User     @relation(fields: [customerId], references: [id])
+  eventType          String
+  eventDate          DateTime?
+  guestCount         Int?
+  city               String?
+  budgetLabel        String?
+  requirements       Json
+  referenceImages    String[] @default([])
+  status             String   @default("DRAFT")
+  assignedManagerId  String?  @db.ObjectId
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  proposals          EventProposal[]
+
+  @@index([customerId])
+  @@index([status])
+  @@index([eventDate])
+}
+
+model EventProposal {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  requestId      String       @db.ObjectId
+  request        EventRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  version        Int
+  createdBy      String       @db.ObjectId
+  items          Json
+  subtotal       Float
+  taxAmount      Float
+  discountAmount Float        @default(0)
+  totalAmount    Float
+  notes          String?
+  validUntil     DateTime?
+  status         String       @default("DRAFT")
+  changeRequests String[]     @default([])
+  createdAt      DateTime     @default(now())
+
+  @@unique([requestId, version])
+  @@index([requestId])
+}
+
+model BookingItem {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  bookingId   String  @db.ObjectId
+  booking     Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  serviceId   String  @db.ObjectId
+  service     Service @relation(fields: [serviceId], references: [id])
+  quantity    Int     @default(1)
+  unitPrice   Float
+  totalPrice  Float
+  customNotes String?
+  sortOrder   Int     @default(0)
+
+  @@index([bookingId])
+}
+
+model Payment {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  bookingId       String        @db.ObjectId
+  booking         Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amount          Float
+  currency        String        @default("INR")
+  method          PaymentMethod
+  status          PaymentStatus @default(PENDING)
+  transactionId   String?
+  gatewayOrderId  String?
+  gatewayResponse Json?
+  paidAt          DateTime?
+  refundedAt      DateTime?
+  refundAmount    Float         @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([bookingId])
+  @@index([transactionId])
+  @@index([gatewayOrderId])
+}
+
+model Quote {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  bookingId      String    @db.ObjectId
+  booking        Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  version        Int       @default(1)
+  items          Json
+  subtotal       Float
+  taxAmount      Float
+  discountAmount Float
+  totalAmount    Float
+  validUntil     DateTime
+  notes          String?
+  status         String    @default("DRAFT")
+  createdBy      String    @db.ObjectId
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  approvedAt     DateTime?
+  rejectedAt     DateTime?
+
+  @@index([bookingId])
+}
+
+model AIDesign {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String    @db.ObjectId
+  user            User      @relation(fields: [userId], references: [id])
+  eventType       EventType
+  theme           String
+  mood            String?
+  colors          String[]  @default([])
+  guestCount      Int
+  budget          Float
+  location        String?
+  eventDate       DateTime?
+  services        Json
+  decor           Json
+  food            Json
+  entertainment   Json
+  photography     Json
+  estimatedCost   Float
+  designPrompt    String
+  aiResponse      Json
+  moodboardImages String[]  @default([])
+  isSaved         Boolean   @default(false)
+  isBooked        Boolean   @default(false)
+  bookingId       String?   @db.ObjectId
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  bookings Booking[] @relation("BookingAIDesign")
+
+  @@index([userId])
+  @@index([eventType])
+}
+
+model Review {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id])
+  eventId    String   @db.ObjectId
+  event      Event    @relation(fields: [eventId], references: [id])
+  bookingId  String?  @db.ObjectId
+  rating     Int
+  title      String?
+  comment    String?
+  images     String[] @default([])
+  isVerified Boolean  @default(false)
+  isVisible  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, eventId])
+  @@index([eventId])
+  @@index([rating])
+}
+
+model Favorite {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId    String?  @db.ObjectId
+  event      Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  packageId  String?  @db.ObjectId
+  aiDesignId String?  @db.ObjectId
+  serviceId  String?  @db.ObjectId
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, eventId])
+  @@unique([userId, packageId])
+  @@unique([userId, aiDesignId])
+  @@unique([userId, serviceId])
+  @@index([userId])
+}
+
+model Notification {
+  id        String                @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String                @db.ObjectId
+  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  message   String
+  data      Json?
+  channels  NotificationChannel[]
+  isRead    Boolean               @default(false)
+  readAt    DateTime?
+  sentAt    DateTime?
+  createdAt DateTime              @default(now())
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+model Message {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  bookingId   String    @db.ObjectId
+  booking     Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  senderId    String    @db.ObjectId
+  sender      User      @relation("UserMessages", fields: [senderId], references: [id])
+  content     String
+  type        String    @default("text")
+  attachments String[]  @default([])
+  isRead      Boolean   @default(false)
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([bookingId])
+  @@index([senderId])
+}
+
+model BookingTimeline {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  bookingId   String        @db.ObjectId
+  booking     Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  status      BookingStatus
+  title       String
+  description String?
+  metadata    Json?
+  createdBy   String?       @db.ObjectId
+  createdAt   DateTime      @default(now())
+
+  @@index([bookingId])
+}
+
+model BookingDocument {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  bookingId  String   @db.ObjectId
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  name       String
+  url        String
+  type       String
+  size       Int
+  uploadedBy String   @db.ObjectId
+  createdAt  DateTime @default(now())
+
+  @@index([bookingId])
+}
+
+model Address {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label      String
+  line1      String
+  line2      String?
+  city       String
+  state      String?
+  postalCode String
+  country    String   @default("India")
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  adminId   String   @db.ObjectId
+  admin     Admin    @relation(fields: [adminId], references: [id])
+  action    String
+  entity    String
+  entityId  String
+  oldData   Json?
+  newData   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([adminId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+// ─── Technician models ────────────────────────────────────────────────────────
+
+model Technician {
+  id                String             @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String             @unique @db.ObjectId
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name              String
+  phone             String
+  email             String
+  avatar            String?
+  bio               String?
+  category          TechnicianCategory
+  experience        Int                @default(0)
+  rating            Float              @default(0)
+  totalReviews      Int                @default(0)
+  completedJobs     Int                @default(0)
+  isVerified        Boolean            @default(false)
+  isActive          Boolean            @default(true)
+  isAvailable       Boolean            @default(true)
+  serviceAreas      String[]           @default([])
+  skills            String[]           @default([])
+  certifications    String[]           @default([])
+  documents         String[]           @default([])
+  latitude          Float?
+  longitude         Float?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  services     TechnicianService[]
+  bookings     TechnicianBooking[]     @relation("TechnicianAssignedBookings")
+  availability TechnicianAvailability[]
+  reviews      TechnicianReview[]      @relation("TechnicianReviews")
+
+  @@index([category])
+  @@index([isActive, isAvailable])
+  @@index([rating])
+}
+
+model TechnicianService {
+  id                String             @id @default(auto()) @map("_id") @db.ObjectId
+  technicianId      String             @db.ObjectId
+  technician        Technician         @relation(fields: [technicianId], references: [id], onDelete: Cascade)
+  name              String
+  slug              String
+  description       String
+  category          TechnicianCategory
+  subCategory       String?
+  basePrice         Float
+  pricingType       PricingType        @default(FIXED)
+  pricePerHour      Float?
+  estimatedDuration Int?
+  images            String[]           @default([])
+  isActive          Boolean            @default(true)
+  isPopular         Boolean            @default(false)
+  tags              String[]           @default([])
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  bookings TechnicianBooking[]
+
+  @@unique([technicianId, slug])
+  @@index([technicianId])
+  @@index([category])
+}
+
+model TechnicianAvailability {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  technicianId String     @db.ObjectId
+  technician   Technician @relation(fields: [technicianId], references: [id], onDelete: Cascade)
+  dayOfWeek    Int
+  startTime    String
+  endTime      String
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([technicianId, dayOfWeek])
+  @@index([technicianId])
+}
+
+model TechnicianBooking {
+  id                 String                  @id @default(auto()) @map("_id") @db.ObjectId
+  bookingNumber      String                  @unique
+  customerId         String                  @db.ObjectId
+  customer           User                    @relation("CustomerTechnicianBookings", fields: [customerId], references: [id])
+  technicianId       String?                 @db.ObjectId
+  technician         Technician?             @relation("TechnicianAssignedBookings", fields: [technicianId], references: [id])
+  serviceId          String                  @db.ObjectId
+  service            TechnicianService       @relation(fields: [serviceId], references: [id])
+  category           TechnicianCategory
+  serviceDescription String?
+  requestType        ServiceRequestType      @default(STANDARD)
+  // Address stored as snapshot at booking time (not FK, to avoid orphan issues)
+  addressLine1       String
+  addressLine2       String?
+  addressCity        String
+  addressState       String?
+  addressPincode     String
+  addressLabel       String                  @default("Home")
+  scheduledDate      DateTime
+  timeSlotStart      String
+  timeSlotEnd        String
+  estimatedPrice     Float
+  finalPrice         Float?
+  visitCharge        Float                   @default(99)
+  materialCost       Float                   @default(0)
+  taxAmount          Float                   @default(0)
+  discountAmount     Float                   @default(0)
+  totalAmount        Float
+  paidAmount         Float                   @default(0)
+  balanceAmount      Float
+  paymentStatus      PaymentStatus           @default(PENDING)
+  paymentMethod      PaymentMethodType?
+  status             TechnicianBookingStatus @default(PENDING)
+  customerNotes      String?
+  technicianNotes    String?
+  attachments        String[]                @default([])
+  assignedAt         DateTime?
+  confirmedAt        DateTime?
+  startedAt          DateTime?
+  completedAt        DateTime?
+  cancelledAt        DateTime?
+  cancellationReason String?
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+
+  timeline TechnicianBookingTimeline[]
+  payments TechnicianPayment[]
+  review   TechnicianReview?
+
+  @@index([customerId])
+  @@index([technicianId])
+  @@index([serviceId])
+  @@index([status])
+  @@index([scheduledDate])
+}
+
+model TechnicianBookingTimeline {
+  id          String                  @id @default(auto()) @map("_id") @db.ObjectId
+  bookingId   String                  @db.ObjectId
+  booking     TechnicianBooking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  status      TechnicianBookingStatus
+  title       String
+  description String?
+  metadata    Json?
+  createdBy   String?                 @db.ObjectId
+  createdAt   DateTime                @default(now())
+
+  @@index([bookingId])
+}
+
+model TechnicianPayment {
+  id              String            @id @default(auto()) @map("_id") @db.ObjectId
+  bookingId       String            @db.ObjectId
+  booking         TechnicianBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amount          Float
+  currency        String            @default("INR")
+  method          PaymentMethodType
+  status          PaymentStatus     @default(PENDING)
+  transactionId   String?
+  gatewayOrderId  String?
+  gatewayResponse Json?
+  paidAt          DateTime?
+  refundedAt      DateTime?
+  refundAmount    Float             @default(0)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([bookingId])
+  @@index([transactionId])
+}
+
+model TechnicianReview {
+  id           String            @id @default(auto()) @map("_id") @db.ObjectId
+  bookingId    String            @unique @db.ObjectId
+  booking      TechnicianBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  technicianId String            @db.ObjectId
+  technician   Technician        @relation("TechnicianReviews", fields: [technicianId], references: [id])
+  customerId   String            @db.ObjectId
+  customer     User              @relation("CustomerTechnicianReviews", fields: [customerId], references: [id])
+  rating       Int
+  title        String?
+  comment      String?
+  images       String[]          @default([])
+  isVerified   Boolean           @default(false)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([technicianId])
+  @@index([customerId])
+  @@index([rating])
+}
+
+// ─── Contact ──────────────────────────────────────────────────────────────────
+
+enum ContactTopic {
+  TECHNICIAN
+  EVENT
+  BILLING
+  PARTNERSHIP
+  OTHER
+}
+
+enum ContactStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  SPAM
+}
+
+model ContactMessage {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String
+  phone     String?
+  topic     ContactTopic  @default(OTHER)
+  message   String
+  status    ContactStatus @default(NEW)
+  source    String        @default("website")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([status])
+  @@index([topic])
+  @@index([createdAt])
+}
