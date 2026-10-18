@@ -88,10 +88,11 @@ read_env_value() {
   local file="$1" key="$2" line value
   [[ -f "$file" ]] || return 1
   # dotenv tolerates whitespace around '=' , so match that here too.
-  line="$(grep -m1 -E "^[[:space:]]*${key}[[:space:]]*=" "$file" 2>/dev/null)" || return 1
-  # Strip a UTF-8 BOM — it prefixes the first key if the file was edited on
-  # Windows and would otherwise make that key unparseable.
-  line="${line#$'\xEF\xBB\xBF'}"
+  # Strip a UTF-8 BOM before matching — it prefixes the first key when the file
+  # was edited on Windows and would otherwise make that key unparseable.
+  local content
+  content="$(sed -e '1s/^\xEF\xBB\xBF//' "$file")" || return 1
+  line="$(printf '%s\n' "$content" | grep -m1 -E "^[[:space:]]*${key}[[:space:]]*=")" || return 1
   value="${line#*=}"
   # trim leading whitespace
   value="${value#"${value%%[![:space:]]*}"}"

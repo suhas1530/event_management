@@ -5,6 +5,7 @@
 @theme inline {
   --font-sans: var(--font-inter);
   --font-serif: var(--font-cormorant);
+  --font-display: var(--font-space);
   --font-mono: var(--font-mono);
 
   /* Colors */
@@ -48,6 +49,20 @@
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover-border: var(--popover-border);
+
+  /* Immersive homepage palette (master spec) */
+  --color-ink-950: var(--ink-950);
+  --color-ink-900: var(--ink-900);
+  --color-ink-800: var(--ink-800);
+  --color-ink-700: var(--ink-700);
+  --color-hairline: var(--hairline);
+  --color-fg-dim: var(--fg-dim);
+  --color-fg-mute: var(--fg-mute);
+  --color-violet: var(--violet);
+  --color-violet-light: var(--violet-light);
+  --color-violet-pale: var(--violet-pale);
+  --color-champagne: var(--champagne);
+  --color-champagne-light: var(--champagne-light);
 
   /* Radius */
   --radius-none: 0;
@@ -163,6 +178,20 @@
   --popover: #141416;
   --popover-foreground: #f4f1ec;
   --popover-border: rgba(255, 255, 255, 0.12);
+
+  /* Immersive homepage palette (master spec) */
+  --ink-950: #08090d;
+  --ink-900: #10121a;
+  --ink-800: #151823;
+  --ink-700: #1b1f2d;
+  --hairline: #292d3b;
+  --fg-dim: #a1a1b5;
+  --fg-mute: #71758a;
+  --violet: #8b5cf6;
+  --violet-light: #a78bfa;
+  --violet-pale: #c4b5fd;
+  --champagne: #f0b86e;
+  --champagne-light: #f8d9a4;
 }
 
 * {
@@ -491,6 +520,44 @@ input::placeholder {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(215, 185, 139, 0.2);
+}
+
+/* ── Immersive homepage helpers (master spec) ─────────────────────────── */
+
+/* Glass surface over the 3D hero */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Primary CTA gradient */
+.gradient-cta {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+}
+
+/* Luxury champagne gradient text (used sparingly) */
+.text-gradient-champagne {
+  background: linear-gradient(135deg, #f0b86e 0%, #f8d9a4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Hero ambient glow */
+.hero-glow {
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.22) 0%, rgba(8, 9, 13, 0) 70%);
+}
+
+/* "How it works" steps: dimmed until the scroll story activates them */
+[data-step] {
+  opacity: 0.45;
+  transition: opacity 400ms ease-out;
+}
+
+[data-step][data-active='true'] {
+  opacity: 1;
 }
 
 /* Gradient text */

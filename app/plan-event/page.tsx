@@ -121,6 +121,13 @@ export default function PlanEventPage() {
     const initialType = params.get('type')?.toUpperCase()
     const hasInitialType = !!initialType && EVENT_TYPES.some(item => item.value === initialType)
     if (hasInitialType) setForm(current => ({ ...current, eventType: initialType! }))
+    // Hero booking panel hand-off: pre-fill date and guest count when provided.
+    const initialDate = params.get('date')
+    const initialGuests = params.get('guests')
+    const hasInitialDate = !!initialDate && /^\d{4}-\d{2}-\d{2}$/.test(initialDate)
+    const hasInitialGuests = !!initialGuests && /^\d{1,5}$/.test(initialGuests)
+    if (hasInitialDate) setForm(current => ({ ...current, eventDate: initialDate! }))
+    if (hasInitialGuests) setForm(current => ({ ...current, guestCount: initialGuests! }))
     const id = params.get('id')
     if (id) {
       setDraftId(id)
@@ -129,7 +136,7 @@ export default function PlanEventPage() {
         const saved = request.requirements as Partial<EventForm>
         setForm({ ...emptyForm, ...saved, eventType: request.eventType, eventDate: request.eventDate?.slice(0, 10) ?? '', guestCount: request.guestCount?.toString() ?? '', city: request.city ?? '', budgetLabel: request.budgetLabel ?? '' })
       }).catch(() => setError('We could not load this draft.'))
-    } else if (!hasInitialType) {
+    } else if (!hasInitialType && !hasInitialDate && !hasInitialGuests) {
       const localContent = localStorage.getItem(DRAFT_CONTENT_KEY)
       if (localContent) {
         try { setForm({ ...emptyForm, ...JSON.parse(localContent) as Partial<EventForm> }) } catch { localStorage.removeItem(DRAFT_CONTENT_KEY) }

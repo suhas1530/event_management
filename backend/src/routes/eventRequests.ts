@@ -7,12 +7,79 @@ import prisma from '../utils/database';
 
 const router = Router();
 const paramsSchema = z.object({ id: z.string().regex(/^[0-9a-fA-F]{24}$/) });
-const eventRequestStatusSchema = z.enum([
+
+/** Mirrors the 24-status vocabulary in Prisma schema. */
+const EVENT_REQUEST_STATUSES = [
   'REQUIREMENT_SUBMITTED', 'UNDER_REVIEW', 'EVENT_MANAGER_ASSIGNED', 'REQUIREMENT_DISCUSSION',
   'PROPOSAL_PREPARING', 'PROPOSAL_SENT', 'CUSTOMER_REVIEWING', 'CHANGES_REQUESTED',
   'PROPOSAL_APPROVED', 'ADVANCE_PAYMENT_PENDING', 'ADVANCE_PAYMENT_RECEIVED', 'EVENT_CONFIRMED',
   'PLANNING_IN_PROGRESS', 'EVENT_PREPARATION', 'EVENT_DAY', 'EVENT_COMPLETED', 'FINAL_PAYMENT', 'COMPLETED',
-]);
+] as const;
+
+const EVENT_REQUEST_VALID_TRANSITIONS: Record<string, string[]> = {
+  'REQUIREMENT_SUBMITTED': ['UNDER_REVIEW'],
+  'UNDER_REVIEW': ['EVENT_MANAGER_ASSIGNED', 'REQUIREMENT_DISCUSSION'],
+  'EVENT_MANAGER_ASSIGNED': ['REQUIREMENT_DISCUSSION', 'PROPOSAL_PREPARING'],
+  'REQUIREMENT_DISCUSSION': ['PROPOSAL_PREPARING'],
+  'PROPOSAL_PREPARING': ['PROPOSAL_SENT'],
+  'PROPOSAL_SENT': ['CUSTOMER_REVIEWING'],
+  'CUSTOMER_REVIEWING': ['CHANGES_REQUESTED', 'PROPOSAL_APPROVED'],
+  'CHANGES_REQUESTED': ['PROPOSAL_SENT', 'CUSTOMER_REVIEWING'],
+  'PROPOSAL_APPROVED': ['ADVANCE_PAYMENT_PENDING'],
+  'ADVANCE_PAYMENT_PENDING': ['ADVANCE_PAYMENT_RECEIVED'],
+  'ADVANCE_PAYMENT_RECEIVED': ['EVENT_CONFIRMED'],
+  'EVENT_CONFIRMED': ['PLANNING_IN_PROGRESS'],
+  'PLANNING_IN_PROGRESS': ['EVENT_PREPARATION'],
+  'EVENT_PREPARATION': ['EVENT_DAY'],
+  'EVENT_DAY': ['EVENT_COMPLETED', 'FINAL_PAYMENT'],
+  'EVENT_COMPLETED': ['FINAL_PAYMENT'],
+  'FINAL_PAYMENT': [],
+};
+
+function isValidTransition(from: string, to: string): boolean {
+  const allowed = EVENT_REQUEST_VALID_TRANSITIONS[from];
+  return allowed ? allowed.includes(to) : false;
+}
+
+/** Ensures newStatus is a valid transition from current status. */
+function validateStatusTransition(
+  currentStatus: string,
+  newStatus: string,
+): string | null {
+  if (!isValidTransition(currentStatus, newStatus)) {
+    return `Invalid status transition from "${currentStatus}" to "${newStatus}". ` +
+      `Allowed transitions from "${currentStatus}": ${EVENT_REQUEST_VALID_TRANSITIONS[currentStatus] || 'none'}`;
+  }
+  return null;
+}
+
+/** Ensures discount doesn't exceed subtotal + tax. */
+function validateDiscount(subtotal: number, taxAmount: number, discountAmount: number): string | null {
+  if (discountAmount > subtotal + taxAmount) {
+    return `Discount (₹${discountAmount}) exceeds subtotal + tax (₹${subtotal + taxAmount})`;
+  }
+  return null;
+}
+
+/** Ensures advance payment doesn't exceed total. */
+function validateAdvancePayment(paidAmount: number, totalAmount: number): string | null {
+  if (paidAmount > totalAmount) {
+    return `Advance payment (₹${paidAmount}) exceeds total amount (₹${totalAmount})`;
+  }
+  return null;
+}
+
+/** Ensure event date is in the future. */
+function validateEventDate(eventDate: string | null): string | null {
+  if (eventDate) {
+    const date = new Date(eventDate);
+    if (date.getTime() < Date.now()) {
+      return 'Event date must be in the future';
+    }
+  }
+  return null;
+}
+
 const requestSchema = z.object({
   eventType: z.string().min(1).max(80),
   eventDate: z.string().datetime().optional().nullable(),
@@ -27,8 +94,9 @@ function validateRequestConstraints(req: import('express').Request, _res: import
   if (JSON.stringify(req.body.requirements).length > 50_000) {
     return next(new ValidationError('Requirements must be 50 KB or less'));
   }
-  if (req.body.eventDate && new Date(req.body.eventDate).getTime() < Date.now()) {
-    return next(new ValidationError('Event date must be in the future'));
+  if (req.body.eventDate) {
+    const err = validateEventDate(req.body.eventDate);
+    if (err) return next(new ValidationError(err));
   }
   next();
 }
@@ -39,7 +107,7 @@ function createRequestNumber() {
   return `EVT-REQ-${year}-${suffix}`;
 }
 
-router.post('/', authMiddleware, validateBody(requestSchema.extend({ status: z.enum(['DRAFT', 'REQUIREMENT_SUBMITTED']).default('DRAFT') })), validateRequestConstraints, asyncHandler(async (req, res) => {
+router.post('/', authMiddleware, validateBody(requestSchema.extend({ status: z.enum(EVENT_REQUEST_STATUSES) })), validateRequestConstraints, asyncHandler(async (req, res) => {
   const data = req.body;
   const eventRequest = await prisma.eventRequest.create({
     data: {
@@ -102,6 +170,9 @@ router.post('/:id/proposals/:proposalId/approve', authMiddleware, validateParams
   if (eventRequest.customerId !== req.user!.id) throw new AuthorizationError();
   const proposal = await prisma.eventProposal.findFirst({ where: { id: req.params.proposalId, requestId: eventRequest.id } });
   if (!proposal || proposal.status !== 'SENT') throw new NotFoundError('Available proposal not found');
+  // Validate status transition
+  const transitionErr = validateStatusTransition(eventRequest.status, 'PROPOSAL_APPROVED');
+  if (transitionErr) throw new ValidationError(transitionErr);
   const updatedProposal = await prisma.eventProposal.update({ where: { id: proposal.id }, data: { status: 'APPROVED' } });
   await prisma.eventRequest.update({ where: { id: eventRequest.id }, data: { status: 'ADVANCE_PAYMENT_PENDING' } });
   res.json(updatedProposal);
@@ -145,8 +216,8 @@ router.patch('/:id', authMiddleware, validateParams(paramsSchema), validateBody(
 router.post('/:id/submit', authMiddleware, validateParams(paramsSchema), asyncHandler(async (req, res) => {
   const existing = await prisma.eventRequest.findUnique({ where: { id: req.params.id } });
   if (!existing) throw new NotFoundError('Event request not found');
-  if (existing.customerId !== req.user!.id) throw new AuthorizationError();
-  if (existing.status !== 'DRAFT') throw new AuthorizationError('This event request has already been submitted');
+  if (existing.customerId !== req.user!.id) throw new AuthorizationError('This event request has already been submitted');
+  if (existing.status !== 'DRAFT') throw new AuthorizationError('Only DRAFT requests can be submitted');
 
   const eventRequest = await prisma.eventRequest.update({
     where: { id: existing.id },
@@ -155,12 +226,17 @@ router.post('/:id/submit', authMiddleware, validateParams(paramsSchema), asyncHa
   res.json(eventRequest);
 }));
 
-router.patch('/:id/status', authMiddleware, requireRole('ADMIN', 'SUPER_ADMIN', 'EVENT_MANAGER'), validateParams(paramsSchema), validateBody(z.object({ status: eventRequestStatusSchema })), asyncHandler(async (req, res) => {
-  const eventRequest = await prisma.eventRequest.update({
+router.patch('/:id/status', authMiddleware, requireRole('ADMIN', 'SUPER_ADMIN', 'EVENT_MANAGER'), validateParams(paramsSchema), validateBody(z.object({ status: z.enum(EVENT_REQUEST_STATUSES) })), asyncHandler(async (req, res) => {
+  const eventRequest = await prisma.eventRequest.findUnique({ where: { id: req.params.id } });
+  if (!eventRequest) throw new NotFoundError('Event request not found');
+  // Validate status transition
+  const transitionErr = validateStatusTransition(eventRequest.status, req.body.status);
+  if (transitionErr) throw new ValidationError(transitionErr);
+  const updatedRequest = await prisma.eventRequest.update({
     where: { id: req.params.id },
     data: { status: req.body.status },
   });
-  res.json(eventRequest);
+  res.json(updatedRequest);
 }));
 
 export default router;

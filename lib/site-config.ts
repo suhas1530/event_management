@@ -115,13 +115,11 @@ export const footerColumns: { title: string; links: FooterLink[] }[] = [
 /* ------------------------------------------------------------------ */
 
 export const navLinks: FooterLink[] = [
-  { label: 'Home', href: '/' },
+  { label: 'Explore', href: '/#experiences' },
   { label: 'Services', href: '/services' },
-  { label: 'Technicians', href: '/book/technician' },
-  { label: 'Events', href: '/plan-event' },
+  { label: 'Venues', href: '/#venue' },
   { label: 'How It Works', href: '/#how' },
   { label: 'About', href: '/about' },
-  { label: 'Contact', href: '/contact' },
 ]
 
 /** Footer bottom-bar links. */

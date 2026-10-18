@@ -256,11 +256,11 @@ export default function Navbar({ transparentAtTop = false }: NavbarProps) {
                   Log in
                 </Link>
                 <Link
-                  href="/book/technician"
+                  href="/plan-event"
                   className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-[0.8125rem] font-semibold text-primary-foreground transition-all duration-200 ease-out hover:-translate-y-px hover:bg-primary-hover hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b0b0d]"
                 >
-                  <Wrench className="size-3.5" aria-hidden="true" />
-                  Book a Service
+                  <Sparkles className="size-3.5" aria-hidden="true" />
+                  Plan Your Event
                 </Link>
               </>
             )}
@@ -375,11 +375,11 @@ export default function Navbar({ transparentAtTop = false }: NavbarProps) {
                 ) : (
                   <div className="space-y-2.5">
                     <Link
-                      href="/book/technician"
+                      href="/plan-event"
                       className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors duration-200 hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
-                      <Wrench className="size-4" aria-hidden="true" />
-                      Book a Service
+                      <Sparkles className="size-4" aria-hidden="true" />
+                      Plan Your Event
                     </Link>
                     <Link
                       href="/login"
