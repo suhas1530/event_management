@@ -34,7 +34,7 @@ const STATUS_COLOR: Record<string, string> = {
   SERVICE_COMPLETED: 'text-green-400 bg-green-500/15',
   PAYMENT_COMPLETED: 'text-green-400 bg-green-500/15',
   REVIEW_SUBMITTED: 'text-green-300 bg-green-500/10',
-  CANCELLED: 'text-white/30 bg-white/5',
+  CANCELLED: 'text-muted-foreground/80 bg-muted/60',
   REJECTED: 'text-red-400 bg-red-500/10',
 }
 const CAT_OPTS = ['', 'PLUMBING', 'ELECTRICAL', 'AC_SERVICE', 'APPLIANCE_REPAIR', 'CARPENTRY', 'PAINTING', 'CLEANING', 'CCTV_INSTALLATION', 'COMPUTER_REPAIR', 'PEST_CONTROL', 'OTHER']
@@ -49,7 +49,7 @@ function fmtDate(s: string) {
 }
 
 function Sk({ className = '' }: { className?: string }) {
-  return <div className={`animate-pulse bg-white/8 ${className}`} />
+  return <div className={`animate-pulse bg-muted/60 ${className}`} />
 }
 
 export default function AdminTechniciansPage() {
@@ -107,27 +107,27 @@ export default function AdminTechniciansPage() {
       {/* Header */}
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.3em] text-[#d7b98b]">Operations</p>
-          <h1 className="mt-1 font-serif text-4xl text-white">Technician Bookings</h1>
-          <p className="mt-1 text-xs text-white/30">{total} total</p>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-gold-text">Operations</p>
+          <h1 className="mt-1 font-serif text-4xl text-foreground">Technician Bookings</h1>
+          <p className="mt-1 text-xs text-muted-foreground/80">{total} total</p>
         </div>
       </div>
 
       {/* Stats */}
       <div className="mb-8 grid gap-4 grid-cols-2 lg:grid-cols-5">
         {!stats ? (
-          Array.from({ length: 5 }).map((_, i) => <Sk key={i} className="h-20 border border-white/10" />)
+          Array.from({ length: 5 }).map((_, i) => <Sk key={i} className="h-20 border border-border" />)
         ) : [
-          { label: 'Total', value: stats.total, icon: Wrench, color: 'text-white' },
+          { label: 'Total', value: stats.total, icon: Wrench, color: 'text-foreground' },
           { label: 'Pending', value: stats.pending, icon: Clock, color: 'text-yellow-300' },
           { label: 'Confirmed', value: stats.confirmed, icon: CheckCircle2, color: 'text-blue-300' },
           { label: 'Completed', value: stats.completed, icon: CheckCircle2, color: 'text-green-400' },
-          { label: 'Revenue', value: fmt(stats.revenue), icon: IndianRupee, color: 'text-[#d7b98b]' },
+          { label: 'Revenue', value: fmt(stats.revenue), icon: IndianRupee, color: 'text-gold-text' },
         ].map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="border border-white/10 bg-[#111114] p-5">
+          <div key={label} className="border border-border bg-card p-5">
             <Icon className={`mb-2 size-4 ${color}`} />
             <p className={`text-2xl font-light ${color}`}>{value}</p>
-            <p className="text-[10px] uppercase tracking-[0.15em] text-white/35">{label}</p>
+            <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/80">{label}</p>
           </div>
         ))}
       </div>
@@ -135,24 +135,24 @@ export default function AdminTechniciansPage() {
       {/* Toolbar */}
       <div className="mb-5 flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-white/30" aria-hidden="true" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/80" aria-hidden="true" />
           <input
             aria-label="Search technicians"
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search by ID, customer, city…"
-            className="w-full border border-white/15 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-white/25 focus:border-[#d7b98b] focus:outline-none"
+            className="w-full border border-border bg-muted/60 py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground/80 focus:border-[#d5ae79] focus:outline-none"
           />
         </div>
         <label htmlFor="tech-status" className="sr-only">Filter by technician status</label>
         <select id="tech-status" value={status} onChange={e => { setStatus(e.target.value); setPage(1) }}
-          className="border border-white/15 bg-[#111114] px-4 py-2.5 text-sm text-white focus:border-[#d7b98b] focus:outline-none">
-          {STATUS_OPTS.map(s => <option key={s} value={s} className="bg-[#111114]">{(STATUS_LABEL[s] ?? s) || 'All Status'}</option>)}
+          className="border border-border bg-card px-4 py-2.5 text-sm text-foreground focus:border-[#d5ae79] focus:outline-none">
+          {STATUS_OPTS.map(s => <option key={s} value={s} className="bg-card">{(STATUS_LABEL[s] ?? s) || 'All Status'}</option>)}
         </select>
         <label htmlFor="tech-category" className="sr-only">Filter by category</label>
         <select id="tech-category" value={category} onChange={e => { setCategory(e.target.value); setPage(1) }}
-          className="border border-white/15 bg-[#111114] px-4 py-2.5 text-sm text-white focus:border-[#d7b98b] focus:outline-none">
-          {CAT_OPTS.map(c => <option key={c} value={c} className="bg-[#111114]">{c ? c.replace(/_/g, ' ') : 'All Categories'}</option>)}
+          className="border border-border bg-card px-4 py-2.5 text-sm text-foreground focus:border-[#d5ae79] focus:outline-none">
+          {CAT_OPTS.map(c => <option key={c} value={c} className="bg-card">{c ? c.replace(/_/g, ' ') : 'All Categories'}</option>)}
         </select>
       </div>
 
@@ -160,7 +160,7 @@ export default function AdminTechniciansPage() {
       <div className="mb-5 flex flex-wrap gap-2">
         {['', 'PENDING', 'TECHNICIAN_ASSIGNED', 'SERVICE_STARTED', 'SERVICE_COMPLETED', 'CANCELLED'].map(s => (
           <button type="button" key={s} onClick={() => { setStatus(s); setPage(1) }}
-            className={`px-3 py-1.5 text-[10px] uppercase tracking-[0.12em] transition ${status === s ? 'bg-[#d7b98b] text-[#1c1915]' : 'border border-white/12 text-white/40 hover:border-[#d7b98b]/40 hover:text-[#d7b98b]'}`}>
+            className={`px-3 py-1.5 text-[10px] uppercase tracking-[0.12em] transition ${status === s ? 'bg-[#d5ae79] text-[#17151d]' : 'border border-border text-muted-foreground hover:border-[#d5ae79]/40 hover:text-gold-text'}`}>
             {STATUS_LABEL[s] || 'All'}
           </button>
         ))}
@@ -168,15 +168,15 @@ export default function AdminTechniciansPage() {
 
       {/* Table */}
       {loading ? (
-        <div className="flex justify-center py-20"><Loader2 className="size-8 animate-spin text-[#d7b98b]" /></div>
+        <div className="flex justify-center py-20"><Loader2 className="size-8 animate-spin text-gold-text" /></div>
       ) : filtered.length === 0 ? (
-        <div className="py-20 text-center text-sm text-white/30">No bookings found</div>
+        <div className="py-20 text-center text-sm text-muted-foreground/80">No bookings found</div>
       ) : (
         <>
-          <div className="overflow-x-auto border border-white/10 bg-[#111114]">
+          <div className="overflow-x-auto border border-border bg-card">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/8 text-[10px] uppercase tracking-[0.15em] text-white/30">
+                <tr className="border-b border-border-subtle text-[10px] uppercase tracking-[0.15em] text-muted-foreground/80">
                   <th className="px-5 py-3 text-left">Booking ID</th>
                   <th className="px-5 py-3 text-left">Customer</th>
                   <th className="px-5 py-3 text-left">Service</th>
@@ -191,31 +191,31 @@ export default function AdminTechniciansPage() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {filtered.map(b => (
-                  <tr key={b.id} className="transition hover:bg-white/3">
-                    <td className="px-5 py-3.5 font-mono text-xs text-white/50">{b.bookingNumber}</td>
+                  <tr key={b.id} className="transition hover:bg-muted/60">
+                    <td className="px-5 py-3.5 font-mono text-xs text-muted-foreground">{b.bookingNumber}</td>
                     <td className="px-5 py-3.5">
-                      <p className="text-white/80">{b.customer?.name ?? '—'}</p>
-                      <p className="text-xs text-white/35">{b.customer?.phone ?? b.customer?.email}</p>
+                      <p className="text-foreground/90">{b.customer?.name ?? '—'}</p>
+                      <p className="text-xs text-muted-foreground/80">{b.customer?.phone ?? b.customer?.email}</p>
                     </td>
                     <td className="px-5 py-3.5">
-                      <p className="text-white/70">{b.service?.name ?? '—'}</p>
-                      <p className="text-xs text-white/30">{b.category.replace(/_/g, ' ')}</p>
+                      <p className="text-foreground/90">{b.service?.name ?? '—'}</p>
+                      <p className="text-xs text-muted-foreground/80">{b.category.replace(/_/g, ' ')}</p>
                     </td>
                     <td className="px-5 py-3.5">
                       {b.technician ? (
-                        <p className="text-white/70">{b.technician.name}</p>
+                        <p className="text-foreground/90">{b.technician.name}</p>
                       ) : (
-                        <span className="text-xs text-white/30">Unassigned</span>
+                        <span className="text-xs text-muted-foreground/80">Unassigned</span>
                       )}
                     </td>
-                    <td className="px-5 py-3.5 text-white/50">
+                    <td className="px-5 py-3.5 text-muted-foreground">
                       <p>{fmtDate(b.scheduledDate)}</p>
-                      <p className="text-xs text-white/30">{b.timeSlotStart}–{b.timeSlotEnd}</p>
+                      <p className="text-xs text-muted-foreground/80">{b.timeSlotStart}–{b.timeSlotEnd}</p>
                     </td>
-                    <td className="px-5 py-3.5 text-white/40">{b.addressCity}</td>
-                    <td className="px-5 py-3.5 text-right text-white/60">{fmt(b.totalAmount)}</td>
+                    <td className="px-5 py-3.5 text-muted-foreground">{b.addressCity}</td>
+                    <td className="px-5 py-3.5 text-right text-muted-foreground">{fmt(b.totalAmount)}</td>
                     <td className="px-5 py-3.5">
-                      <span className={`px-2 py-0.5 text-[9px] uppercase tracking-[0.1em] ${STATUS_COLOR[b.status] ?? 'text-white/30 bg-white/5'}`}>
+                      <span className={`px-2 py-0.5 text-[9px] uppercase tracking-[0.1em] ${STATUS_COLOR[b.status] ?? 'text-muted-foreground/80 bg-muted/60'}`}>
                         {STATUS_LABEL[b.status] ?? b.status}
                       </span>
                     </td>
@@ -223,15 +223,15 @@ export default function AdminTechniciansPage() {
                       <select
                         defaultValue=""
                         onChange={e => { if (e.target.value) handleStatusUpdate(b.id, e.target.value) }}
-                        className="border border-white/15 bg-[#0b0b0d] px-2 py-1 text-xs text-white/60 focus:border-[#d7b98b] focus:outline-none">
+                        className="border border-border bg-background px-2 py-1 text-xs text-muted-foreground focus:border-[#d5ae79] focus:outline-none">
                         <option value="" disabled>Change status</option>
                         {STATUS_OPTS.filter(s => s && s !== b.status).map(s => (
-                          <option key={s} value={s} className="bg-[#111114]">{STATUS_LABEL[s]}</option>
+                          <option key={s} value={s} className="bg-card">{STATUS_LABEL[s]}</option>
                         ))}
                       </select>
                     </td>
                     <td className="px-3 py-3.5">
-                      <Link href={`/admin/technicians/${b.id}`} className="text-[#d7b98b] hover:text-[#e8cfa0]">
+                      <Link href={`/admin/technicians/${b.id}`} className="text-gold-text hover:text-[#e8cfa9]">
                         <ArrowRight className="size-4" />
                       </Link>
                     </td>
@@ -244,12 +244,12 @@ export default function AdminTechniciansPage() {
           {totalPages > 1 && (
             <div className="mt-5 flex items-center justify-center gap-3">
               <button type="button" disabled={page === 1} onClick={() => setPage(p => p - 1)}
-                className="border border-white/15 px-4 py-2 text-xs text-white/50 disabled:opacity-30 hover:border-[#d7b98b]">
+                className="border border-border px-4 py-2 text-xs text-muted-foreground disabled:opacity-30 hover:border-[#d5ae79]">
                 ← Prev
               </button>
-              <span className="text-xs text-white/30">Page {page} of {totalPages}</span>
+              <span className="text-xs text-muted-foreground/80">Page {page} of {totalPages}</span>
               <button type="button" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}
-                className="border border-white/15 px-4 py-2 text-xs text-white/50 disabled:opacity-30 hover:border-[#d7b98b]">
+                className="border border-border px-4 py-2 text-xs text-muted-foreground disabled:opacity-30 hover:border-[#d5ae79]">
                 Next →
               </button>
             </div>

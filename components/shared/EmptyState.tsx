@@ -33,13 +33,13 @@ export default function EmptyState({
   return (
     <div className={cn('flex flex-col items-center justify-center px-6 py-16 text-center sm:py-20', className)}>
       {Icon && (
-        <span className="mb-5 grid size-14 place-items-center rounded-2xl border border-white/8 bg-white/[0.03]">
+        <span className="mb-5 grid size-14 place-items-center rounded-2xl border border-border-subtle bg-muted/50">
           <Icon className="size-6 text-primary/60" aria-hidden="true" />
         </span>
       )}
-      <h3 className="text-balance text-base font-medium text-white/85">{title}</h3>
+      <h3 className="text-balance text-base font-medium text-foreground/90">{title}</h3>
       {description && (
-        <p className="mt-2 max-w-sm text-pretty text-sm leading-6 text-white/40">{description}</p>
+        <p className="mt-2 max-w-sm text-pretty text-sm leading-6 text-muted-foreground">{description}</p>
       )}
 
       {(action || secondaryAction || onAction) && (
@@ -64,7 +64,7 @@ export default function EmptyState({
           {secondaryAction && (
             <Link
               href={secondaryAction.href}
-              className="inline-flex items-center justify-center rounded-lg border border-white/12 px-5 py-2.5 text-sm font-medium text-white/70 transition-colors duration-200 hover:border-white/25 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex items-center justify-center rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-foreground/90 transition-colors duration-200 h hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {secondaryAction.label}
             </Link>

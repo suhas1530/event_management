@@ -1,22 +1,24 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import HeroOverlay from '@/components/three/HeroOverlay'
 import HeroBookingPanel from '@/components/home/HeroBookingPanel'
 import SceneFallback from '@/components/three/SceneFallback'
 import { usePrefersReducedMotion, useQualityTier, useWebGLAvailable } from '@/lib/motion'
+import type { WorldZone } from '@/components/three/HeptomeWorld'
 
 gsap.registerPlugin(ScrollTrigger)
 
 /**
- * The 3D scene ships as its own client chunk (never SSR'd) and is only
- * requested when WebGL is available and the visitor allows motion. Everyone
- * else gets the static SceneFallback — the page keeps its full design.
+ * The living-world scene ships as its own client chunk (never SSR'd) and is only
+ * requested when WebGL is available and the visitor allows motion. Everyone else
+ * gets the static SceneFallback — the page keeps its full design and both
+ * booking journeys stay reachable.
  */
-const EventScene = dynamic(() => import('@/components/three/EventScene'), {
+const HeptomeWorld = dynamic(() => import('@/components/three/HeptomeWorld'), {
   ssr: false,
   loading: () => <SceneFallback />,
 })
@@ -30,6 +32,19 @@ export default function HeroSection() {
   const webgl = useWebGLAvailable()
   const tier = useQualityTier()
   const showScene = webgl === true && !reduced
+
+  /**
+   * `auto` lets the scroll story move the camera between the celebration hall
+   * and the home wing. As soon as the visitor picks a wing, the camera stays
+   * there — an explicit choice always wins over ambient motion.
+   */
+  const [zone, setZone] = useState<WorldZone | 'auto'>('auto')
+  const [activeZone, setActiveZone] = useState<WorldZone>('celebration')
+
+  const selectZone = useCallback((next: WorldZone) => {
+    setZone(next)
+    setActiveZone(next)
+  }, [])
 
   /* Intro reveal + scroll-linked camera + overlay exit. */
   useEffect(() => {
@@ -68,43 +83,50 @@ export default function HeroSection() {
     return () => ctx.revert()
   }, [reduced])
 
-  const scrollToExperiences = useCallback(() => {
-    const target = document.getElementById('experiences')
-    target?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' })
-  }, [reduced])
-
   return (
     <section
       ref={sectionRef}
       id="hero"
       className="relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-ink-950"
     >
-      {/* 3D scene (or static fallback) */}
+      {/* The Heptome living world (or static fallback) */}
       <div className="absolute inset-0">
         {showScene ? (
-          <EventScene
+          <HeptomeWorld
+            zone={zone}
             scrollProgress={scrollProgress}
             interactive={tier === 'high'}
             quality={tier}
-            onSculptureSelect={scrollToExperiences}
+            onZoneSettled={next => {
+              // Only follow the scene while the visitor has not chosen a wing.
+              if (zone === 'auto') setActiveZone(next)
+            }}
+            onZoneSelect={selectZone}
           />
         ) : (
           <SceneFallback />
         )}
       </div>
 
-      {/* Readability vignette */}
+      {/* Readability vignette — kept clear through the middle so both wings show */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(8,9,13,0.55)_0%,rgba(8,9,13,0.12)_38%,rgba(8,9,13,0.55)_78%,#08090d_100%)]"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(15,13,20,0.6)_0%,rgba(15,13,20,0.1)_38%,rgba(15,13,20,0.5)_78%,#0f0d14_100%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 left-0 w-[62%] bg-[linear-gradient(90deg,rgba(15,13,20,0.72)_0%,rgba(15,13,20,0.25)_55%,rgba(15,13,20,0)_100%)]"
       />
 
       {/* Copy + floating booking panel */}
       <div ref={overlayRef} className="relative z-10 flex flex-1 items-center">
         <div className="pointer-events-none mx-auto grid w-full max-w-[1380px] items-center gap-12 px-5 pb-28 pt-32 sm:px-10 lg:grid-cols-[minmax(0,1fr)_400px] lg:pb-32 lg:pt-36">
-          <HeroOverlay />
+          <HeroOverlay zone={activeZone} onZoneChange={selectZone} />
           <div data-hero-reveal className="pointer-events-auto w-full justify-self-end">
-            <HeroBookingPanel />
+            <HeroBookingPanel
+              mode={activeZone}
+              onModeChange={mode => selectZone(mode)}
+            />
           </div>
         </div>
       </div>

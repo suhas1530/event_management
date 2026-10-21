@@ -162,18 +162,18 @@ export default function TechnicianDashboardPage() {
             { label: 'Jobs completed', value: stats.completed, icon: CheckCircle2, tone: 'text-emerald-300' },
             { label: 'Awaiting payout', value: money(stats.pendingPayout), icon: IndianRupee, tone: 'text-amber-300' },
           ].map(({ label, value, icon: Icon, tone }) => (
-            <div key={label} className="rounded-2xl border border-white/8 bg-white/[0.02] p-5">
+            <div key={label} className="rounded-2xl border border-border-subtle bg-muted/50 p-5">
               <div className="flex items-center gap-2.5">
                 <Icon className={cn('size-4', tone)} aria-hidden="true" />
-                <p className="text-label text-white/40">{label}</p>
+                <p className="text-label text-muted-foreground">{label}</p>
               </div>
-              <p className="mt-3 font-serif text-2xl text-white tabular-nums">{value}</p>
+              <p className="mt-3 font-serif text-2xl text-foreground tabular-nums">{value}</p>
             </div>
           ))}
         </div>
 
         {/* Tabs */}
-        <div className="mt-10 flex items-center gap-2 border-b border-white/8" role="tablist" aria-label="Job status">
+        <div className="mt-10 flex items-center gap-2 border-b border-border-subtle" role="tablist" aria-label="Job status">
           {([
             { key: 'upcoming' as const, label: 'Upcoming & active' },
             { key: 'finished' as const, label: 'Completed & closed' },
@@ -188,7 +188,7 @@ export default function TechnicianDashboardPage() {
                 '-mb-px border-b-2 px-4 py-3 text-sm font-medium transition-colors duration-200',
                 tab === t.key
                   ? 'border-primary text-primary'
-                  : 'border-transparent text-white/45 hover:text-white'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
               )}
             >
               {t.label}
@@ -200,7 +200,7 @@ export default function TechnicianDashboardPage() {
           {loading ? (
             <ul className="space-y-4" role="list" aria-label="Loading jobs">
               {Array.from({ length: 3 }).map((_, i) => (
-                <li key={i} className="rounded-2xl border border-white/8 bg-white/[0.02] p-6">
+                <li key={i} className="rounded-2xl border border-border-subtle bg-muted/50 p-6">
                   <div className="space-y-3">
                     <Skeleton className="h-4 w-40" />
                     <Skeleton className="h-5 w-3/4" />
@@ -216,7 +216,7 @@ export default function TechnicianDashboardPage() {
               onRetry={() => void load()}
             />
           ) : visible.length === 0 ? (
-            <div className="rounded-2xl border border-white/8 bg-white/[0.02]">
+            <div className="rounded-2xl border border-border-subtle bg-muted/50">
               <EmptyState
                 icon={tab === 'upcoming' ? CalendarClock : CheckCircle2}
                 title={tab === 'upcoming' ? 'No active jobs' : 'Nothing completed yet'}
@@ -232,46 +232,46 @@ export default function TechnicianDashboardPage() {
               {visible.map(job => {
                 const actions = TRANSITIONS[job.status?.toUpperCase?.() ?? ''] ?? []
                 return (
-                  <li key={job.id} className="rounded-2xl border border-white/8 bg-white/[0.02] p-6">
+                  <li key={job.id} className="rounded-2xl border border-border-subtle bg-muted/50 p-6">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-3">
-                          <h2 className="text-[0.9375rem] font-medium text-white/90">
+                          <h2 className="text-[0.9375rem] font-medium text-foreground/90">
                             {job.service?.name ?? job.category.replaceAll('_', ' ').toLowerCase()}
                           </h2>
                           <StatusBadge status={job.status} size="sm" />
                         </div>
-                        <p className="mt-1 text-xs text-white/30">{job.bookingNumber}</p>
+                        <p className="mt-1 text-xs text-muted-foreground/80">{job.bookingNumber}</p>
 
                         {job.serviceDescription && (
-                          <p className="mt-3 text-pretty text-sm leading-6 text-white/55">
+                          <p className="mt-3 text-pretty text-sm leading-6 text-muted-foreground">
                             {job.serviceDescription}
                           </p>
                         )}
 
-                        <ul className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-white/45">
+                        <ul className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
                           <li className="flex items-center gap-1.5">
-                            <CalendarClock className="size-3.5 text-white/25" aria-hidden="true" />
+                            <CalendarClock className="size-3.5 text-muted-foreground/80" aria-hidden="true" />
                             {formatSlot(job.scheduledDate, job.timeSlotStart, job.timeSlotEnd)}
                           </li>
                           <li className="flex items-center gap-1.5">
-                            <MapPin className="size-3.5 text-white/25" aria-hidden="true" />
+                            <MapPin className="size-3.5 text-muted-foreground/80" aria-hidden="true" />
                             {job.addressLabel || job.addressCity}
                           </li>
                           {job.customer?.phone && (
                             <li className="flex items-center gap-1.5">
-                              <Phone className="size-3.5 text-white/25" aria-hidden="true" />
+                              <Phone className="size-3.5 text-muted-foreground/80" aria-hidden="true" />
                               {job.customer.phone}
                             </li>
                           )}
-                          <li className="flex items-center gap-1.5 font-medium text-white/60">
-                            <IndianRupee className="size-3.5 text-white/25" aria-hidden="true" />
+                          <li className="flex items-center gap-1.5 font-medium text-muted-foreground">
+                            <IndianRupee className="size-3.5 text-muted-foreground/80" aria-hidden="true" />
                             {money(job.totalAmount)}
                           </li>
                         </ul>
 
                         {/* Full address — needed on the day, so not truncated away. */}
-                        <p className="mt-2.5 text-xs leading-5 text-white/35">
+                        <p className="mt-2.5 text-xs leading-5 text-muted-foreground/80">
                           {job.addressLine1}
                           {job.addressLine2 ? `, ${job.addressLine2}` : ''}, {job.addressCity}
                           {job.addressState ? `, ${job.addressState}` : ''} — {job.addressPincode}
@@ -290,12 +290,12 @@ export default function TechnicianDashboardPage() {
 
                     {/* Next action */}
                     {actions.length > 0 && (
-                      <div className="mt-5 border-t border-white/8 pt-5">
+                      <div className="mt-5 border-t border-border-subtle pt-5">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                          <p className="flex items-start gap-2 text-sm text-white/50">
+                          <p className="flex items-start gap-2 text-sm text-muted-foreground">
                             <TrendingUp className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
                             <span>
-                              Next step: <span className="text-white/80">{actions[0].label.toLowerCase()}</span>
+                              Next step: <span className="text-foreground/90">{actions[0].label.toLowerCase()}</span>
                             </span>
                           </p>
                           <button
@@ -316,10 +316,10 @@ export default function TechnicianDashboardPage() {
                     )}
 
                     {job.customerNotes && (
-                      <p className="mt-4 flex items-start gap-2 rounded-xl border border-white/8 bg-white/[0.02] p-3.5 text-xs leading-5 text-white/45">
+                      <p className="mt-4 flex items-start gap-2 rounded-xl border border-border-subtle bg-muted/50 p-3.5 text-xs leading-5 text-muted-foreground">
                         <AlertCircle className="mt-0.5 size-3.5 shrink-0 text-primary/70" aria-hidden="true" />
                         <span>
-                          <span className="text-white/65">Customer note:</span> {job.customerNotes}
+                          <span className="text-foreground/90">Customer note:</span> {job.customerNotes}
                         </span>
                       </p>
                     )}
@@ -330,12 +330,12 @@ export default function TechnicianDashboardPage() {
           )}
         </div>
 
-        <div className="mt-12 rounded-2xl border border-white/8 bg-white/[0.02] p-6">
-          <h2 className="flex items-center gap-2.5 text-base font-medium text-white/90">
+        <div className="mt-12 rounded-2xl border border-border-subtle bg-muted/50 p-6">
+          <h2 className="flex items-center gap-2.5 text-base font-medium text-foreground/90">
             <Star className="size-[18px] text-primary" aria-hidden="true" />
             Your work, your profile
           </h2>
-          <p className="mt-2 text-sm leading-6 text-white/45">
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
             Customers see your rating, completed job count and service areas when they book. Keeping your
             profile current is the single best way to receive more work.
           </p>

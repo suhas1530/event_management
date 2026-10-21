@@ -37,8 +37,30 @@ const SERVICE_GROUPS: Record<string, string[]> = {
 }
 const VENUE_TYPES = ['Home', 'Apartment', 'Hotel', 'Banquet Hall', 'Convention Centre', 'Restaurant', 'Outdoor', 'Resort', 'Office', 'Community Hall', 'Other']
 const STEP_LABELS = ['Event type', 'Date & guests', 'Location', 'Budget', 'Services', 'Details', 'References', 'Review']
-const DRAFT_KEY = 'avan_event_request_draft'
-const DRAFT_CONTENT_KEY = 'avan_event_request_content'
+const DRAFT_KEY = 'heptome_event_request_draft'
+const DRAFT_CONTENT_KEY = 'heptome_event_request_content'
+/** Legacy avān keys — read once so drafts saved before the rebrand still open. */
+const LEGACY_DRAFT_KEY = 'avan_event_request_draft'
+const LEGACY_DRAFT_CONTENT_KEY = 'avan_event_request_content'
+
+/**
+ * Read a localStorage value under its Heptome key, falling back to the legacy
+ * avān key and migrating it across on first read so nothing is lost when the
+ * keys are renamed.
+ */
+function readMigrated(key: string, legacyKey: string): string | null {
+  try {
+    const current = localStorage.getItem(key)
+    if (current) return current
+    const legacy = localStorage.getItem(legacyKey)
+    if (!legacy) return null
+    localStorage.setItem(key, legacy)
+    localStorage.removeItem(legacyKey)
+    return legacy
+  } catch {
+    return null
+  }
+}
 
 type EventForm = {
   eventType: string
@@ -92,16 +114,16 @@ const emptyForm: EventForm = {
   corporateEventType: '', avRequirements: [], branding: [], additionalRequirements: '', referenceImages: [],
 }
 
-const fieldClass = 'w-full border border-white/15 bg-[#111114] px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-[#d7b98b]'
-const labelClass = 'mb-2 block text-xs font-medium text-white/70'
+const fieldClass = 'w-full border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/80 outline-none transition focus:border-[#d5ae79]'
+const labelClass = 'mb-2 block text-xs font-medium text-foreground/90'
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return <label className="block"><span className={labelClass}>{label}</span>{children}</label>
 }
 
 function Choice({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) {
-  return <button type="button" onClick={onClick} className={`min-h-12 border px-4 py-3 text-left text-sm transition ${selected ? 'border-[#d7b98b] bg-[#d7b98b]/10 text-[#f4d6a4]' : 'border-white/12 bg-white/2.5 text-white/65 hover:border-white/30'}`}>
-    <span className="flex items-center justify-between gap-3">{label}{selected && <Check className="size-4 shrink-0 text-[#d7b98b]" />}</span>
+  return <button type="button" onClick={onClick} aria-pressed={selected} className={`min-h-12 border px-4 py-3 text-left text-sm transition ${selected ? 'border-[#d5ae79] bg-[#d5ae79]/10 text-[#e8cfa9]' : 'border-white/12 bg-white/2.5 text-white/65 hover:border-white/30'}`}>
+    <span className="flex items-center justify-between gap-3">{label}{selected && <Check className="size-4 shrink-0 text-gold-text" />}</span>
   </button>
 }
 
@@ -114,6 +136,8 @@ export default function PlanEventPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [savedMessage, setSavedMessage] = useState('')
+  /** Service group the customer arrived asking about (`?service=`), highlighted in step 5. */
+  const [focusGroup, setFocusGroup] = useState('')
   const eventMeta = EVENT_TYPES.find(item => item.value === form.eventType)
 
   useEffect(() => {
@@ -128,6 +152,29 @@ export default function PlanEventPage() {
     const hasInitialGuests = !!initialGuests && /^\d{1,5}$/.test(initialGuests)
     if (hasInitialDate) setForm(current => ({ ...current, eventDate: initialDate! }))
     if (hasInitialGuests) setForm(current => ({ ...current, guestCount: initialGuests! }))
+
+    /*
+     * Service hand-off from the homepage: `?service=` is a SERVICE_GROUPS key.
+     * We jump to the services step rather than pre-ticking options, because a
+     * group is a category ("Catering"), not a choice ("Vegetarian") — ticking on
+     * the customer's behalf would put words in their brief. The group they asked
+     * about is outlined and announced instead.
+     */
+    const initialService = params.get('service')
+    const hasInitialService = !!initialService && Object.hasOwn(SERVICE_GROUPS, initialService)
+    if (hasInitialService) {
+      setFocusGroup(initialService!)
+      setStep(4)
+    }
+
+    // Venue hand-off from /venues: the customer already shortlisted a venue.
+    const initialVenueName = params.get('venueName')
+    const initialVenueCity = params.get('venueCity')
+    if (initialVenueName) {
+      setForm(current => ({ ...current, venueStatus: 'have', venueName: initialVenueName }))
+    }
+    if (initialVenueCity) setForm(current => ({ ...current, city: initialVenueCity }))
+
     const id = params.get('id')
     if (id) {
       setDraftId(id)
@@ -136,12 +183,14 @@ export default function PlanEventPage() {
         const saved = request.requirements as Partial<EventForm>
         setForm({ ...emptyForm, ...saved, eventType: request.eventType, eventDate: request.eventDate?.slice(0, 10) ?? '', guestCount: request.guestCount?.toString() ?? '', city: request.city ?? '', budgetLabel: request.budgetLabel ?? '' })
       }).catch(() => setError('We could not load this draft.'))
-    } else if (!hasInitialType && !hasInitialDate && !hasInitialGuests) {
-      const localContent = localStorage.getItem(DRAFT_CONTENT_KEY)
+    } else if (
+      !hasInitialType && !hasInitialDate && !hasInitialGuests && !hasInitialService && !initialVenueName
+    ) {
+      const localContent = readMigrated(DRAFT_CONTENT_KEY, LEGACY_DRAFT_CONTENT_KEY)
       if (localContent) {
         try { setForm({ ...emptyForm, ...JSON.parse(localContent) as Partial<EventForm> }) } catch { localStorage.removeItem(DRAFT_CONTENT_KEY) }
       }
-      const savedId = localStorage.getItem(DRAFT_KEY)
+      const savedId = readMigrated(DRAFT_KEY, LEGACY_DRAFT_KEY)
       if (savedId && isAuthenticated) {
         eventRequestsApi.byId(savedId).then(request => {
           if (!['DRAFT', 'REQUIREMENT_SUBMITTED', 'UNDER_REVIEW'].includes(request.status)) return
@@ -189,7 +238,9 @@ export default function PlanEventPage() {
       : await eventRequestsApi.create({ ...payload, status: 'DRAFT' })
     setDraftId(record.id)
     localStorage.setItem(DRAFT_KEY, record.id)
+    localStorage.removeItem(LEGACY_DRAFT_KEY)
     localStorage.removeItem(DRAFT_CONTENT_KEY)
+    localStorage.removeItem(LEGACY_DRAFT_CONTENT_KEY)
     return record
   }
 
@@ -225,6 +276,9 @@ export default function PlanEventPage() {
       }
       const submitted = await eventRequestsApi.submit(record.id)
       localStorage.removeItem(DRAFT_KEY)
+      localStorage.removeItem(LEGACY_DRAFT_KEY)
+      localStorage.removeItem(DRAFT_CONTENT_KEY)
+      localStorage.removeItem(LEGACY_DRAFT_CONTENT_KEY)
       router.push(`/event-request-submitted?id=${encodeURIComponent(submitted.id)}`)
     } catch (err) {
       setError((err as { error?: string })?.error ?? 'Your event request could not be submitted. Please try again.')
@@ -267,42 +321,42 @@ export default function PlanEventPage() {
 
   return (
     <SiteShell>
-      <div className="pb-28 text-[#f4f1ec]">
+      <div className="pb-28 text-foreground">
       <div className="mx-auto max-w-5xl px-5 pb-10 pt-8 lg:px-8 lg:pt-12">
-        <Link href="/" className="mb-8 inline-flex items-center gap-2 text-xs text-white/40 transition-colors duration-200 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><ArrowLeft className="size-3.5" aria-hidden="true" /> Home</Link>
+        <Link href="/" className="mb-8 inline-flex items-center gap-2 text-xs text-muted-foreground transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><ArrowLeft className="size-3.5" aria-hidden="true" /> Home</Link>
         <div className="mb-8 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div>
-            <p className="mb-3 flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-[#d7b98b]"><Sparkles className="size-3.5" /> Customized event planning</p>
-            <h1 className="font-serif text-4xl text-white sm:text-5xl">{eventMeta?.intro ?? 'What are you planning?'}</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/50">Tell us what matters to you. An event planner will review your requirements and prepare a custom proposal.</p>
+            <p className="mb-3 flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-gold-text"><Sparkles className="size-3.5" /> Customized event planning</p>
+            <h1 className="font-serif text-4xl text-foreground sm:text-5xl">{eventMeta?.intro ?? 'What are you planning?'}</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">Tell us what matters to you. An event planner will review your requirements and prepare a custom proposal.</p>
           </div>
-          <button type="button" onClick={saveDraft} disabled={submitting} className="inline-flex shrink-0 items-center justify-center gap-2 border border-white/20 px-4 py-3 text-xs text-white/70 hover:border-[#d7b98b] hover:text-[#d7b98b] disabled:opacity-50">
+          <button type="button" onClick={saveDraft} disabled={submitting} className="inline-flex shrink-0 items-center justify-center gap-2 border border-border px-4 py-3 text-xs text-foreground/90 hover:border-[#d5ae79] hover:text-gold-text disabled:opacity-50">
             {submitting ? <Loader2 className="size-4 animate-spin" /> : null} Save draft
           </button>
         </div>
 
-        <div className="mb-8 border-b border-white/10 pb-5">
-          <div className="mb-3 flex items-center justify-between text-xs"><span className="text-white/70">Step {step + 1} of {STEP_LABELS.length}</span><span className="text-[#d7b98b]">{STEP_LABELS[step]}</span></div>
+        <div className="mb-8 border-b border-border pb-5">
+          <div className="mb-3 flex items-center justify-between text-xs"><span className="text-foreground/90">Step {step + 1} of {STEP_LABELS.length}</span><span className="text-gold-text">{STEP_LABELS[step]}</span></div>
           <div className="grid grid-cols-8 gap-1.5" aria-label="Event request progress">
-            {STEP_LABELS.map((label, index) => <div key={label} className={`h-1 ${index <= step ? 'bg-[#d7b98b]' : 'bg-white/10'}`} />)}
+            {STEP_LABELS.map((label, index) => <div key={label} className={`h-1 ${index <= step ? 'bg-[#d5ae79]' : 'bg-white/10'}`} />)}
           </div>
-          <div className="mt-3 hidden grid-cols-8 gap-1.5 sm:grid">{STEP_LABELS.map((label, index) => <span key={label} className={`text-[10px] ${index === step ? 'text-[#d7b98b]' : 'text-white/30'}`}>{label}</span>)}</div>
+          <div className="mt-3 hidden grid-cols-8 gap-1.5 sm:grid">{STEP_LABELS.map((label, index) => <span key={label} className={`text-[10px] ${index === step ? 'text-gold-text' : 'text-muted-foreground/80'}`}>{label}</span>)}</div>
         </div>
 
         <section className="min-h-97.5">
           {step === 0 && <div>
-            <h2 className="font-serif text-3xl text-white">What type of event are you planning?</h2>
-            <p className="mt-2 text-sm text-white/45">Choose one to get started. You can share the rest as you go.</p>
+            <h2 className="font-serif text-3xl text-foreground">What type of event are you planning?</h2>
+            <p className="mt-2 text-sm text-muted-foreground">Choose one to get started. You can share the rest as you go.</p>
             <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {EVENT_TYPES.map(item => <button key={item.value} type="button" onClick={() => chooseType(item.value)} className={`min-h-28 border p-4 text-left transition ${form.eventType === item.value ? 'border-[#d7b98b] bg-[#d7b98b]/10' : 'border-white/10 bg-[#111114] hover:border-white/30'}`}>
-                <span className="text-2xl" aria-hidden="true">{item.icon}</span><span className="mt-3 block text-sm text-white">{item.label}</span>
+              {EVENT_TYPES.map(item => <button key={item.value} type="button" aria-pressed={form.eventType === item.value} onClick={() => chooseType(item.value)} className={`min-h-28 border p-4 text-left transition ${form.eventType === item.value ? 'border-[#d5ae79] bg-[#d5ae79]/10' : 'border-white/10 bg-card hover:border-white/30'}`}>
+                <span className="text-2xl" aria-hidden="true">{item.icon}</span><span className="mt-3 block text-sm text-foreground">{item.label}</span>
               </button>)}
             </div>
           </div>}
 
           {step === 1 && <div>
-            <h2 className="font-serif text-3xl text-white">Tell us about your event</h2>
-            <p className="mt-2 text-sm text-white/45">A few timing and guest details help us make a useful plan.</p>
+            <h2 className="font-serif text-3xl text-foreground">Tell us about your event</h2>
+            <p className="mt-2 text-sm text-muted-foreground">A few timing and guest details help us make a useful plan.</p>
             <div className="mt-7 grid gap-5 sm:grid-cols-2">
               <Field label="Is your event date confirmed?"><div className="grid grid-cols-2 gap-2"><Choice label="Yes, confirmed" selected={form.dateConfirmed === 'yes'} onClick={() => setField('dateConfirmed', 'yes')} /><Choice label="No, flexible" selected={form.dateConfirmed === 'no'} onClick={() => setField('dateConfirmed', 'no')} /></div></Field>
               <Field label={form.dateConfirmed === 'yes' ? 'Event date' : 'Preferred date'}><input className={fieldClass} type="date" min={new Date().toISOString().slice(0, 10)} value={form.eventDate} onChange={event => setField('eventDate', event.target.value)} /></Field>
@@ -314,8 +368,8 @@ export default function PlanEventPage() {
           </div>}
 
           {step === 2 && <div>
-            <h2 className="font-serif text-3xl text-white">Where will it happen?</h2>
-            <p className="mt-2 text-sm text-white/45">It is completely fine if you have not found a venue yet.</p>
+            <h2 className="font-serif text-3xl text-foreground">Where will it happen?</h2>
+            <p className="mt-2 text-sm text-muted-foreground">It is completely fine if you have not found a venue yet.</p>
             <div className="mt-7 grid gap-3 sm:grid-cols-3">
               {[['have', 'I already have a venue'], ['help', 'Help me find a venue'], ['undecided', 'Venue not decided yet']].map(([value, label]) => <Choice key={value} label={label} selected={form.venueStatus === value} onClick={() => setField('venueStatus', value)} />)}
             </div>
@@ -337,8 +391,8 @@ export default function PlanEventPage() {
           </div>}
 
           {step === 3 && <div>
-            <h2 className="font-serif text-3xl text-white">What is your approximate budget?</h2>
-            <p className="mt-2 text-sm text-white/45">This helps us tailor a practical proposal. You can skip this if you are not sure.</p>
+            <h2 className="font-serif text-3xl text-foreground">What is your approximate budget?</h2>
+            <p className="mt-2 text-sm text-muted-foreground">This helps us tailor a practical proposal. You can skip this if you are not sure.</p>
             <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {BUDGETS.map(option => <Choice key={option} label={option} selected={form.budgetLabel === option} onClick={() => setBudget(form.budgetLabel === option ? '' : option)} />)}
             </div>
@@ -346,11 +400,17 @@ export default function PlanEventPage() {
           </div>}
 
           {step === 4 && <div>
-            <h2 className="font-serif text-3xl text-white">What do you need for your event?</h2>
-            <p className="mt-2 text-sm text-white/45">Select everything you would like us to consider. Nothing is locked in yet.</p>
+            <h2 className="font-serif text-3xl text-foreground">What do you need for your event?</h2>
+            <p className="mt-2 text-sm text-muted-foreground">Select everything you would like us to consider. Nothing is locked in yet.</p>
+            {focusGroup && (
+              <p className="mt-5 border border-[#d5ae79]/30 bg-[#d5ae79]/[0.06] px-4 py-3 text-sm leading-6 text-white/75">
+                You arrived asking about <strong className="font-semibold text-[#e8cfa9]">{focusGroup}</strong> —
+                it is outlined below. Tick everything you need; you can add more from other groups too.
+              </p>
+            )}
             <div className="mt-6 grid gap-x-8 gap-y-6 lg:grid-cols-2">
-              {Object.entries(SERVICE_GROUPS).map(([group, options]) => <div key={group}>
-                <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-[#d7b98b]">{group}</h3>
+              {Object.entries(SERVICE_GROUPS).map(([group, options]) => <div key={group} className={focusGroup === group ? 'border border-[#d5ae79]/45 bg-[#d5ae79]/[0.04] p-4' : undefined}>
+                <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-gold-text">{group}</h3>
                 <div className="grid grid-cols-2 gap-2">{options.map(option => <Choice key={option} label={option} selected={services.includes(option)} onClick={() => toggleValue('services', option)} />)}</div>
               </div>)}
             </div>
@@ -358,8 +418,8 @@ export default function PlanEventPage() {
           </div>}
 
           {step === 5 && <div>
-            <h2 className="font-serif text-3xl text-white">A few details to make it yours</h2>
-            <p className="mt-2 text-sm text-white/45">We only show questions relevant to {eventMeta?.label?.toLowerCase() ?? 'your event'}.</p>
+            <h2 className="font-serif text-3xl text-foreground">A few details to make it yours</h2>
+            <p className="mt-2 text-sm text-muted-foreground">We only show questions relevant to {eventMeta?.label?.toLowerCase() ?? 'your event'}.</p>
             <div className="mt-7 grid gap-5 sm:grid-cols-2">
               {form.eventType === 'BIRTHDAY' && <>
                 <Field label="Birthday person's name"><input className={fieldClass} value={form.birthdayName} onChange={event => setField('birthdayName', event.target.value)} /></Field>
@@ -392,19 +452,19 @@ export default function PlanEventPage() {
           </div>}
 
           {step === 6 && <div>
-            <h2 className="font-serif text-3xl text-white">Share inspiration, if you have it</h2>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-white/45">Add up to five reference images. They are attached to your private request for the planning team to review.</p>
-            <label className="mt-7 flex min-h-40 cursor-pointer flex-col items-center justify-center border border-dashed border-white/20 bg-white/2 text-center transition hover:border-[#d7b98b]/70">
-              <Upload className="mb-3 size-6 text-[#d7b98b]" /><span className="text-sm text-white">Upload inspiration images</span><span className="mt-1 text-xs text-white/35">JPG, PNG, WebP or GIF · up to 500 KB each</span>
+            <h2 className="font-serif text-3xl text-foreground">Share inspiration, if you have it</h2>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">Add up to five reference images. They are attached to your private request for the planning team to review.</p>
+            <label className="mt-7 flex min-h-40 cursor-pointer flex-col items-center justify-center border border-dashed border-border bg-muted/60 text-center transition hover:border-[#d5ae79]/70">
+              <Upload className="mb-3 size-6 text-gold-text" /><span className="text-sm text-foreground">Upload inspiration images</span><span className="mt-1 text-xs text-muted-foreground/80">JPG, PNG, WebP or GIF · up to 500 KB each</span>
               <input type="file" accept="image/*" multiple className="sr-only" onChange={addReferences} />
             </label>
             {form.referenceImages.length > 0 && <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">{form.referenceImages.map((image, index) => <div key={`${index}-${image.slice(-24)}`} className="relative aspect-square overflow-hidden border border-white/15"><img src={image} alt={`Event inspiration ${index + 1}`} className="h-full w-full object-cover" /><button type="button" aria-label="Remove image" onClick={() => setField('referenceImages', form.referenceImages.filter((_, item) => item !== index))} className="absolute right-2 top-2 flex size-7 items-center justify-center bg-black/75 text-white"><X className="size-4" /></button></div>)}</div>}
           </div>}
 
           {step === 7 && <div>
-            <h2 className="font-serif text-3xl text-white">Review your event requirements</h2>
-            <p className="mt-2 text-sm text-white/45">Your request is not a confirmed booking. Our planning team will review it and prepare a customized proposal.</p>
-            <div className="mt-7 divide-y divide-white/10 border-y border-white/10">
+            <h2 className="font-serif text-3xl text-foreground">Review your event requirements</h2>
+            <p className="mt-2 text-sm text-muted-foreground">Your request is not a confirmed booking. Our planning team will review it and prepare a customized proposal.</p>
+            <div className="mt-7 divide-y divide-white/10 border-y border-border">
               <SummaryRow title="Event" value={eventMeta?.label ?? 'Choose an event'} onEdit={() => setStep(0)} />
               <SummaryRow title="Date" value={`${currency(form.eventDate)}${form.dateConfirmed === 'no' ? ' · Flexible' : ''}${form.alternativeDate ? ` · Alternate ${currency(form.alternativeDate)}` : ''}`} onEdit={() => setStep(1)} />
               <SummaryRow title="Guests" value={form.guestCount ? `${form.guestCount} guests` : 'Not specified'} onEdit={() => setStep(1)} />
@@ -415,7 +475,7 @@ export default function PlanEventPage() {
               <SummaryRow title="Event details" value={form.additionalRequirements || form.theme || form.weddingBride || form.companyName || 'No additional notes'} onEdit={() => setStep(5)} />
               <SummaryRow title="References" value={`${form.referenceImages.length} image${form.referenceImages.length === 1 ? '' : 's'}`} onEdit={() => setStep(6)} />
             </div>
-            <div className="mt-6 flex gap-3 border border-[#d7b98b]/25 bg-[#d7b98b]/6 p-4"><CheckCircle2 className="mt-0.5 size-5 shrink-0 text-[#d7b98b]" /><p className="text-sm leading-6 text-white/70">After you submit, our event planning team will review your requirements and contact you with a customized proposal. No payment is due now.</p></div>
+            <div className="mt-6 flex gap-3 border border-[#d5ae79]/25 bg-[#d5ae79]/6 p-4"><CheckCircle2 className="mt-0.5 size-5 shrink-0 text-[#d5ae79]" /><p className="text-sm leading-6 text-white/70">After you submit, our event planning team will review your requirements and contact you with a customized proposal. No payment is due now.</p></div>
           </div>}
         </section>
 
@@ -424,11 +484,11 @@ export default function PlanEventPage() {
 
         {/* Sticky flow controls. Deliberately not a <footer> — it is the wizard's
             action bar, and the real page footer is rendered by SiteShell. */}
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#0b0b0d]/95 px-5 py-3 backdrop-blur-md">
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-5 py-3 backdrop-blur-md">
           <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 lg:px-8">
-            {step > 0 ? <button type="button" onClick={back} className="flex min-h-12 items-center gap-2 border border-white/20 px-5 text-sm text-white/70 transition-colors duration-200 hover:border-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><ArrowLeft className="size-4" aria-hidden="true" /> Back</button> : <span className="text-xs text-white/35">No package selection required</span>}
+            {step > 0 ? <button type="button" onClick={back} className="flex min-h-12 items-center gap-2 border border-border px-5 text-sm text-foreground/90 transition-colors duration-200 h focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><ArrowLeft className="size-4" aria-hidden="true" /> Back</button> : <span className="text-xs text-muted-foreground/80">No package selection required</span>}
             <div className="flex items-center gap-3">
-              {step < 7 ? <button type="button" onClick={next} className="flex min-h-12 items-center gap-2 bg-[#d7b98b] px-6 text-sm font-medium text-[#17130e] transition hover:bg-[#e8cfa0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Continue <ArrowRight className="size-4" aria-hidden="true" /></button> : <button type="button" disabled={submitting} onClick={submitRequest} className="flex min-h-12 items-center gap-2 bg-[#d7b98b] px-6 text-sm font-medium text-[#17130e] transition hover:bg-[#e8cfa0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50">{submitting ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <CheckCircle2 className="size-4" aria-hidden="true" />} Submit event request</button>}
+              {step < 7 ? <button type="button" onClick={next} className="flex min-h-12 items-center gap-2 bg-[#d5ae79] px-6 text-sm font-medium text-[#17151d] transition hover:bg-[#e8cfa9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Continue <ArrowRight className="size-4" aria-hidden="true" /></button> : <button type="button" disabled={submitting} onClick={submitRequest} className="flex min-h-12 items-center gap-2 bg-[#d5ae79] px-6 text-sm font-medium text-[#17151d] transition hover:bg-[#e8cfa9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50">{submitting ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <CheckCircle2 className="size-4" aria-hidden="true" />} Submit event request</button>}
             </div>
           </div>
         </div>
@@ -439,5 +499,5 @@ export default function PlanEventPage() {
 }
 
 function SummaryRow({ title, value, onEdit }: { title: string; value: string; onEdit: () => void }) {
-  return <div className="flex items-start justify-between gap-4 py-4"><div className="min-w-0"><p className="text-[10px] uppercase tracking-[0.15em] text-white/35">{title}</p><p className="mt-1 wrap-break-word text-sm text-white/80">{value}</p></div><button type="button" onClick={onEdit} className="shrink-0 text-xs text-[#d7b98b] hover:underline">Edit</button></div>
+  return <div className="flex items-start justify-between gap-4 py-4"><div className="min-w-0"><p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/80">{title}</p><p className="mt-1 wrap-break-word text-sm text-foreground/90">{value}</p></div><button type="button" onClick={onEdit} className="shrink-0 text-xs text-gold-text hover:underline">Edit</button></div>
 }

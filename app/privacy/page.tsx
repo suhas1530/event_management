@@ -4,7 +4,7 @@ import LegalPage from '@/components/layout/LegalPage'
 export const metadata: Metadata = {
   title: 'Privacy Policy',
   description:
-    'How avān. collects, uses, stores and protects your personal data — account details, bookings, event requirements and payment records.',
+    'How Heptome collects, uses, stores and protects your personal data — account details, bookings, event requirements and payment records.',
 }
 
 export default function PrivacyPage() {
@@ -13,7 +13,7 @@ export default function PrivacyPage() {
       eyebrow="Legal"
       title="Privacy Policy"
       updated="2026-01-15"
-      intro="This policy explains what personal data avān. collects, why we collect it, how long we keep it, and the choices available to you. We collect only what we need to deliver a booking you have asked for."
+      intro="This policy explains what personal data Heptome collects, why we collect it, how long we keep it, and the choices available to you. We collect only what we need to deliver a booking you have asked for."
       sections={[
         {
           heading: 'Information we collect',

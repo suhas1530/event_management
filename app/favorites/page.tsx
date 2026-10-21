@@ -101,7 +101,7 @@ export default function FavoritesPage() {
           {loading ? (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="overflow-hidden rounded-2xl border border-white/8 bg-white/[0.02]">
+                <div key={i} className="overflow-hidden rounded-2xl border border-border-subtle bg-muted/50">
                   <Skeleton className="aspect-[16/10] w-full rounded-none" />
                   <div className="space-y-2 p-5">
                     <Skeleton className="h-4 w-3/4" />
@@ -117,7 +117,7 @@ export default function FavoritesPage() {
               onRetry={() => void load()}
             />
           ) : items.length === 0 ? (
-            <div className="rounded-2xl border border-white/8 bg-white/[0.02]">
+            <div className="rounded-2xl border border-border-subtle bg-muted/50">
               <EmptyState
                 icon={Heart}
                 title="No favorites yet"
@@ -133,12 +133,12 @@ export default function FavoritesPage() {
                 const title = event?.title ?? 'Saved item'
                 return (
                   <li key={item.id} className="group relative">
-                    <article className="h-full overflow-hidden rounded-2xl border border-white/8 bg-white/[0.02] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-primary/30">
+                    <article className="h-full overflow-hidden rounded-2xl border border-border-subtle bg-muted/50 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-primary/30">
                       <Link
                         href={event ? `/events/${event.slug}` : '/events'}
                         className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       >
-                        <div className="relative aspect-[16/10] overflow-hidden bg-white/[0.04]">
+                        <div className="relative aspect-[16/10] overflow-hidden bg-muted/50">
                           {event?.heroImages?.[0] ? (
                             // eslint-disable-next-line @next/next/no-img-element -- remote, user-supplied event imagery cannot be optimised ahead of time
                             <img
@@ -149,7 +149,7 @@ export default function FavoritesPage() {
                             />
                           ) : (
                             <span className="grid size-full place-items-center">
-                              <Sparkles className="size-6 text-white/15" aria-hidden="true" />
+                              <Sparkles className="size-6 text-muted-foreground/80" aria-hidden="true" />
                             </span>
                           )}
                         </div>
@@ -158,12 +158,12 @@ export default function FavoritesPage() {
                           <p className="text-[0.6875rem] uppercase tracking-[0.15em] text-primary">
                             {event?.category?.name ?? event?.type ?? 'Event'}
                           </p>
-                          <h2 className="mt-1.5 line-clamp-2 text-[0.9375rem] font-medium text-white/90">
+                          <h2 className="mt-1.5 line-clamp-2 text-[0.9375rem] font-medium text-foreground/90">
                             {title}
                           </h2>
                           {event?.city && (
-                            <p className="mt-2 flex items-center gap-1.5 text-xs text-white/40">
-                              <MapPin className="size-3.5 text-white/25" aria-hidden="true" />
+                            <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <MapPin className="size-3.5 text-muted-foreground/80" aria-hidden="true" />
                               {event.city}
                             </p>
                           )}

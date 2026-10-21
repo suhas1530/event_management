@@ -22,12 +22,12 @@ const TYPE_META: Record<string, { label: string; className: string }> = {
   PAYMENT: { label: 'Payment', className: 'text-amber-300 bg-amber-500/12 ring-amber-500/25' },
   PROPOSAL: { label: 'Proposal', className: 'text-primary bg-primary/12 ring-primary/25' },
   EVENT_REQUEST: { label: 'Event request', className: 'text-primary bg-primary/12 ring-primary/25' },
-  REVIEW: { label: 'Review', className: 'text-white/60 bg-white/6 ring-white/12' },
-  SYSTEM: { label: 'System', className: 'text-white/60 bg-white/6 ring-white/12' },
+  REVIEW: { label: 'Review', className: 'text-muted-foreground bg-muted/60 ring-white/12' },
+  SYSTEM: { label: 'System', className: 'text-muted-foreground bg-muted/60 ring-white/12' },
 }
 
 function metaFor(type: string) {
-  return TYPE_META[type?.toUpperCase?.()] ?? { label: 'Notice', className: 'text-white/60 bg-white/6 ring-white/12' }
+  return TYPE_META[type?.toUpperCase?.()] ?? { label: 'Notice', className: 'text-muted-foreground bg-muted/60 ring-white/12' }
 }
 
 /**
@@ -173,7 +173,7 @@ export default function NotificationsPage() {
           {loading ? (
             <ul className="space-y-3" role="list" aria-label="Loading notifications">
               {Array.from({ length: 5 }).map((_, i) => (
-                <li key={i} className="rounded-2xl border border-white/8 bg-white/[0.02] p-5">
+                <li key={i} className="rounded-2xl border border-border-subtle bg-muted/50 p-5">
                   <div className="flex gap-4">
                     <Skeleton className="size-9 shrink-0 rounded-xl" />
                     <div className="flex-1 space-y-2">
@@ -192,7 +192,7 @@ export default function NotificationsPage() {
               onRetry={() => void load()}
             />
           ) : items.length === 0 ? (
-            <div className="rounded-2xl border border-white/8 bg-white/[0.02]">
+            <div className="rounded-2xl border border-border-subtle bg-muted/50">
               <EmptyState
                 icon={Bell}
                 title="No notifications yet"
@@ -219,15 +219,15 @@ export default function NotificationsPage() {
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-[0.9375rem] font-medium text-white/90">{item.title}</p>
+                        <p className="text-[0.9375rem] font-medium text-foreground/90">{item.title}</p>
                         {!item.isRead && (
                           <span className="size-1.5 rounded-full bg-primary" aria-label="Unread" />
                         )}
                       </div>
                       {item.message && (
-                        <p className="mt-1 text-pretty text-sm leading-6 text-white/45">{item.message}</p>
+                        <p className="mt-1 text-pretty text-sm leading-6 text-muted-foreground">{item.message}</p>
                       )}
-                      <p className="mt-1.5 text-xs text-white/30">
+                      <p className="mt-1.5 text-xs text-muted-foreground/80">
                         {meta.label} · {relativeTime(item.createdAt)}
                       </p>
                     </div>
@@ -237,7 +237,7 @@ export default function NotificationsPage() {
                 const shared = cn(
                   'flex w-full gap-4 rounded-2xl border p-5 text-left transition-all duration-200 ease-out',
                   item.isRead
-                    ? 'border-white/8 bg-white/[0.02] hover:border-white/14'
+                    ? 'border-border-subtle bg-muted/50 hover:border-border'
                     : 'border-primary/25 bg-primary/[0.05] hover:border-primary/40'
                 )
 

@@ -26,11 +26,11 @@ export default function SearchParamsBoundary({ children, fallback }: SearchParam
         fallback ?? (
           <div className="mx-auto w-full max-w-7xl px-5 py-16 lg:px-10" role="status">
             <span className="sr-only">Loading…</span>
-            <div className="h-4 w-24 animate-pulse rounded bg-white/8" />
-            <div className="mt-4 h-12 w-2/3 animate-pulse rounded bg-white/8" />
+            <div className="h-4 w-24 animate-pulse rounded bg-muted/60" />
+            <div className="mt-4 h-12 w-2/3 animate-pulse rounded bg-muted/60" />
             <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-52 animate-pulse rounded-2xl border border-white/8 bg-white/[0.02]" />
+                <div key={i} className="h-52 animate-pulse rounded-2xl border border-border-subtle bg-muted/50" />
               ))}
             </div>
           </div>

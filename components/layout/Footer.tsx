@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion, useReducedMotion } from 'framer-motion'
-import { Mail, Phone, MessageCircle, MapPin, Wrench, ArrowUpRight } from 'lucide-react'
+import { Mail, Phone, MessageCircle, MapPin, ArrowUpRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   siteConfig,
@@ -12,6 +12,7 @@ import {
   SOCIAL_ORDER,
   type SocialKey,
 } from '@/lib/site-config'
+import Logo from '@/components/brand/Logo'
 import { SOCIAL_ICONS } from '@/components/brand/SocialIcons'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/Accordion'
 import { Separator } from '@/components/ui/Separator'
@@ -33,7 +34,7 @@ function SocialRow({ className }: { className?: string }) {
           return (
             <li key={key}>
               <span
-                className="flex size-10 cursor-default items-center justify-center rounded-lg border border-white/8 bg-white/[0.03] text-white/35"
+                className="flex size-10 cursor-default items-center justify-center rounded-lg border border-border-subtle bg-muted/50 text-muted-foreground/80"
                 title={`${label} — coming soon`}
                 aria-label={`${label} (coming soon)`}
               >
@@ -50,7 +51,7 @@ function SocialRow({ className }: { className?: string }) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`${label} (opens in a new tab)`}
-              className="flex size-10 items-center justify-center rounded-lg border border-white/8 bg-white/[0.03] text-white/55 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex size-10 items-center justify-center rounded-lg border border-border-subtle bg-muted/50 text-muted-foreground transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <Icon className="size-[18px]" />
             </a>
@@ -76,11 +77,14 @@ export default function Footer() {
   })
 
   return (
-    <footer className="relative mt-auto overflow-hidden border-t border-white/10 bg-[#08080a]" role="contentinfo">
-      {/* Ambient brand glow */}
+    <footer className="relative mt-auto overflow-hidden border-t border-border bg-card" role="contentinfo">
+      {/* Ambient brand glow — purple (brand) meeting champagne (celebrations) */}
       <div
         className="pointer-events-none absolute inset-x-0 -top-40 h-80 opacity-60"
-        style={{ background: 'radial-gradient(60% 100% at 50% 100%, rgba(215,185,139,0.10), transparent 70%)' }}
+        style={{
+          background:
+            'radial-gradient(50% 100% at 35% 100%, rgba(109,54,216,0.16), transparent 70%), radial-gradient(45% 100% at 70% 100%, rgba(213,174,121,0.10), transparent 70%)',
+        }}
         aria-hidden="true"
       />
 
@@ -89,24 +93,13 @@ export default function Footer() {
         <div className="grid gap-12 py-16 sm:py-20 lg:grid-cols-12 lg:gap-10">
           {/* Brand area */}
           <motion.div className="lg:col-span-4" {...reveal()}>
-            <Link
-              href="/"
-              className="group inline-flex items-center gap-3 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-[#08080a]"
-              aria-label={`${siteConfig.name} — home`}
-            >
-              <span className="flex size-10 items-center justify-center rounded-xl bg-primary transition-transform duration-300 ease-out group-hover:scale-105">
-                <Wrench className="size-5 text-primary-foreground" aria-hidden="true" />
-              </span>
-              <span className="font-serif text-2xl leading-none tracking-tight text-white">
-                avān<span className="text-primary">.</span>
-              </span>
-            </Link>
+            <Logo size="md" tone="dark" />
 
-            <p className="mt-6 max-w-sm text-[0.9375rem] leading-7 text-white/45">
+            <p className="mt-6 max-w-sm text-[0.9375rem] leading-7 text-muted-foreground">
               {siteConfig.description}
             </p>
 
-            <ul className="mt-7 space-y-3 text-sm text-white/45" role="list">
+            <ul className="mt-7 space-y-3 text-sm text-muted-foreground" role="list">
               <li className="flex items-center gap-3">
                 <Mail className="size-4 shrink-0 text-primary/70" aria-hidden="true" />
                 <a
@@ -136,9 +129,13 @@ export default function Footer() {
                   WhatsApp
                 </a>
               </li>
-              <li className="flex items-center gap-3">
-                <MapPin className="size-4 shrink-0 text-primary/70" aria-hidden="true" />
-                <span>Pan-India · On-site service</span>
+              <li className="flex items-start gap-3">
+                <MapPin className="mt-0.5 size-4 shrink-0 text-primary/70" aria-hidden="true" />
+                <span>
+                  Doorstep home services in {siteConfig.coverage.city}
+                  <br />
+                  Event partners across India
+                </span>
               </li>
             </ul>
           </motion.div>
@@ -147,13 +144,13 @@ export default function Footer() {
           <div className="hidden lg:col-span-8 lg:grid lg:grid-cols-4 lg:gap-10">
             {footerColumns.map((column, i) => (
               <motion.nav key={column.title} aria-label={column.title} {...reveal(0.08 * (i + 1))}>
-                <h2 className="text-label text-white/85">{column.title}</h2>
+                <h2 className="text-label text-foreground/90">{column.title}</h2>
                 <ul className="mt-5 space-y-3.5" role="list">
                   {column.links.map(link => (
                     <li key={link.href + link.label}>
                       <Link
                         href={link.href}
-                        className="group inline-flex items-center gap-1 rounded text-[0.9375rem] text-white/45 transition-colors duration-200 ease-out hover:text-primary focus-visible:outline-none focus-visible:text-primary"
+                        className="group inline-flex items-center gap-1 rounded text-[0.9375rem] text-muted-foreground transition-colors duration-200 ease-out hover:text-primary focus-visible:outline-none focus-visible:text-primary"
                       >
                         {link.label}
                         <ArrowUpRight
@@ -169,8 +166,8 @@ export default function Footer() {
 
             {/* Follow Us */}
             <motion.nav aria-label="Follow Us" {...reveal(0.08 * (footerColumns.length + 1))}>
-              <h2 className="text-label text-white/85">Follow Us</h2>
-              <p className="mt-5 max-w-[15rem] text-[0.9375rem] leading-6 text-white/40">
+              <h2 className="text-label text-foreground/90">Follow Us</h2>
+              <p className="mt-5 max-w-[15rem] text-[0.9375rem] leading-6 text-muted-foreground">
                 Occasional updates on new services, design ideas and offers.
               </p>
               <SocialRow className="mt-5" />
@@ -179,7 +176,7 @@ export default function Footer() {
 
           {/* Mobile: accordion navigation */}
           <div className="lg:hidden">
-            <Accordion className="border-t border-white/8">
+            <Accordion className="border-t border-border-subtle">
               {footerColumns.map(column => (
                 <AccordionItem key={column.title} value={column.title}>
                   <AccordionTrigger>{column.title}</AccordionTrigger>
@@ -189,7 +186,7 @@ export default function Footer() {
                         <li key={link.href + link.label}>
                           <Link
                             href={link.href}
-                            className="block rounded py-2 text-[0.9375rem] text-white/50 transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:text-primary"
+                            className="block rounded py-2 text-[0.9375rem] text-muted-foreground transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:text-primary"
                           >
                             {link.label}
                           </Link>
@@ -204,7 +201,7 @@ export default function Footer() {
               <AccordionItem value="Follow Us">
                 <AccordionTrigger>Follow Us</AccordionTrigger>
                 <AccordionContent>
-                  <p className="text-[0.9375rem] leading-6 text-white/40">
+                  <p className="text-[0.9375rem] leading-6 text-muted-foreground">
                     Occasional updates on new services, design ideas and offers.
                   </p>
                   <SocialRow className="mt-4" />
@@ -216,7 +213,7 @@ export default function Footer() {
 
         {/* ── Divider ────────────────────────────────────────────────────── */}
         <motion.div
-          className="h-px w-full origin-left bg-gradient-to-r from-transparent via-white/12 to-transparent"
+          className="h-px w-full origin-left bg-gradient-to-r from-transparent via-border to-transparent"
           initial={reduceMotion ? false : { scaleX: 0, opacity: 0 }}
           whileInView={{ scaleX: 1, opacity: 1 }}
           viewport={{ once: true }}
@@ -228,16 +225,16 @@ export default function Footer() {
         <div className="flex flex-col gap-8 py-9 lg:flex-row lg:items-center lg:justify-between">
           {/* Copyright + legal */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
-            <p className="text-[0.8125rem] text-white/35">
-              © {new Date().getFullYear()} {siteConfig.legalName} All rights reserved.
+            <p className="text-[0.8125rem] text-muted-foreground/80">
+              © {new Date().getFullYear()} {siteConfig.legalName}. All rights reserved.
             </p>
-            <Separator orientation="vertical" className="hidden h-4 bg-white/10 sm:block" />
+            <Separator orientation="vertical" className="hidden h-4 bg-muted sm:block" />
             <ul className="flex flex-wrap items-center gap-x-5 gap-y-2" role="list">
               {legalLinks.map(link => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="rounded text-[0.8125rem] text-white/35 transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:text-primary"
+                    className="rounded text-[0.8125rem] text-muted-foreground/80 transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:text-primary"
                   >
                     {link.label}
                   </Link>
@@ -248,7 +245,7 @@ export default function Footer() {
 
           {/* Developer credit */}
           <motion.div
-            className="text-[0.8125rem] text-white/40"
+            className="text-[0.8125rem] text-muted-foreground"
             initial={reduceMotion ? false : { opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-40px' }}
@@ -259,7 +256,7 @@ export default function Footer() {
               href="https://softixtech.in"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-white/65 transition-colors hover:text-primary focus-visible:outline-none focus-visible:text-primary"
+              className="text-foreground/90 transition-colors hover:text-primary focus-visible:outline-none focus-visible:text-primary"
             >
               softixtech.in
             </a>

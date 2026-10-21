@@ -42,6 +42,10 @@
   --color-info-foreground: var(--info-foreground);
   --color-info-muted: var(--info-muted);
 
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-gold-text: var(--gold-text);
+
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-card-border: var(--card-border);
@@ -49,6 +53,15 @@
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover-border: var(--popover-border);
+
+  /* Heptome brand palette (master spec §3) */
+  --color-hept-charcoal: var(--hept-charcoal);
+  --color-hept-ivory: var(--hept-ivory);
+  --color-hept-purple: var(--hept-purple);
+  --color-hept-lavender: var(--hept-lavender);
+  --color-hept-gold: var(--hept-gold);
+  --color-hept-grey: var(--hept-grey);
+  --color-hept-line: var(--hept-line);
 
   /* Immersive homepage palette (master spec) */
   --color-ink-950: var(--ink-950);
@@ -81,8 +94,9 @@
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
   --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
-  --shadow-glow: 0 0 20px -5px rgb(215 185 139 / 0.4);
-  --shadow-glow-lg: 0 0 40px -10px rgb(215 185 139 / 0.5);
+  --shadow-glow: 0 0 20px -5px rgb(213 174 121 / 0.4);
+  --shadow-glow-lg: 0 0 40px -10px rgb(213 174 121 / 0.5);
+  --shadow-glow-purple: 0 0 30px -8px rgb(109 54 216 / 0.55);
 
   /* Transitions */
   --transition-fast: 150ms ease-out;
@@ -127,28 +141,128 @@
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* Core Colors */
-  --background: #0b0b0d;
-  --foreground: #f4f1ec;
-  --border: rgba(255, 255, 255, 0.12);
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --ring: #d7b98b;
-  --input: rgba(255, 255, 255, 0.16);
-  --muted: #19191c;
-  --muted-foreground: rgba(244, 241, 236, 0.6);
+  /* Core colors — light canvas #FAF9F6, ink #22212A */
+  --background: #faf9f6;
+  --foreground: #22212a;
+  --border: #e9e5ee;
+  --border-subtle: #f1edf5;
+  --ring: #6d36d8;
+  --input: #ffffff;
+  --muted: #f2efea;
+  --muted-foreground: #73717b;
 
-  /* Primary - Gold/Champagne */
-  --primary: #d7b98b;
-  --primary-foreground: #1c1915;
-  --primary-hover: #e8cfa0;
-  --primary-muted: rgba(215, 185, 139, 0.12);
+  /* Primary — Heptome premium purple (brand + every primary action) */
+  --primary: #6d36d8;
+  --primary-foreground: #ffffff;
+  --primary-hover: #5c28c0;
+  --primary-muted: rgba(109, 54, 216, 0.1);
+
+  /* Accent — accent for text/rings on the themed canvas */
+  --accent: #6d36d8;
+  --accent-foreground: #ffffff;
+
+  /* Gold that stays readable when used as TEXT in each theme
+     (champagne #D5AE79 fills stay literal in both themes). */
+  --gold-text: #8a6134;
 
   /* Secondary */
-  --secondary: #1a1a1d;
-  --secondary-foreground: #f4f1ec;
-  --secondary-hover: #242428;
+  --secondary: #ffffff;
+  --secondary-foreground: #22212a;
+  --secondary-hover: #f4f1f6;
+
+  /* Destructive */
+  --destructive: #dc2626;
+  --destructive-foreground: #fef2f2;
+
+  /* Success */
+  --success: #16a34a;
+  --success-foreground: #ffffff;
+  --success-muted: rgba(22, 163, 74, 0.12);
+
+  /* Warning */
+  --warning: #b45309;
+  --warning-foreground: #ffffff;
+  --warning-muted: rgba(245, 158, 11, 0.15);
+
+  /* Info */
+  --info: #2563eb;
+  --info-foreground: #ffffff;
+  --info-muted: rgba(59, 130, 246, 0.12);
+
+  /* Card */
+  --card: #ffffff;
+  --card-foreground: #22212a;
+  --card-border: #e9e5ee;
+
+  /* Popover */
+  --popover: #ffffff;
+  --popover-foreground: #22212a;
+  --popover-border: #e9e5ee;
+
+  /* Heptome brand palette (master spec §3) — theme-aware ink/surfaces,
+     static brand hues. */
+  --hept-charcoal: #22212a;
+  --hept-ivory: #faf8f4;
+  --hept-purple: #6d36d8;
+  --hept-lavender: #eee6ff;
+  --hept-gold: #d5ae79;
+  --hept-grey: #73717b;
+  --hept-line: #eae6ef;
+  --on-lavender: #4c1d95;
+
+  /* Immersive homepage palette (master spec).
+     Deliberately STATIC: the 3D hero and the other cinematic event zones stay
+     dark in both themes, like a photo inside an article. */
+  --ink-950: #08090d;
+  --ink-900: #10121a;
+  --ink-800: #151823;
+  --ink-700: #1b1f2d;
+  --hairline: #292d3b;
+  --fg-dim: #a1a1b5;
+  --fg-mute: #8f89a0;
+  --violet: #8b5cf6;
+  --violet-light: #a78bfa;
+  --violet-pale: #c4b5fd;
+  --champagne: #d5ae79;
+  --champagne-light: #e8cfa9;
+
+  /* Translucent chrome (glass) per theme */
+  --glass: rgba(255, 255, 255, 0.82);
+}
+
+/* Dark theme — the cinematic shell, re-pointed to the product dark palette.
+   Only .immersive palettes remain static. */
+.dark {
+  color-scheme: dark;
+
+  /* Core Colors — #100F14 canvas, #F7F5FA text, #37313F borders */
+  --background: #100f14;
+  --foreground: #f7f5fa;
+  --border: #37313f;
+  --border-subtle: #2a2531;
+  --ring: #a78bfa;
+  --input: #37313f;
+  --muted: #1b1922;
+  --muted-foreground: #b7b1c2;
+
+  /* Primary — Heptome premium purple (brand + every primary action) */
+  --primary: #6d36d8;
+  --primary-foreground: #ffffff;
+  --primary-hover: #7e4ae8;
+  --primary-muted: rgba(109, 54, 216, 0.14);
+
+  /* Accent */
+  --accent: #a78bfa;
+  --accent-foreground: #17151d;
+
+  --gold-text: #d5ae79;
+
+  /* Secondary — elevated surface #24212D */
+  --secondary: #24212d;
+  --secondary-foreground: #f7f5fa;
+  --secondary-hover: #2c2836;
 
   /* Destructive */
   --destructive: #ef4444;
@@ -156,12 +270,12 @@
 
   /* Success */
   --success: #22c55e;
-  --success-foreground: #0b0b0d;
+  --success-foreground: #100f14;
   --success-muted: rgba(34, 197, 94, 0.12);
 
   /* Warning */
   --warning: #f59e0b;
-  --warning-foreground: #1c1915;
+  --warning-foreground: #17151d;
   --warning-muted: rgba(245, 158, 11, 0.12);
 
   /* Info */
@@ -169,29 +283,73 @@
   --info-foreground: #fefefe;
   --info-muted: rgba(59, 130, 246, 0.12);
 
-  /* Card */
-  --card: #111114;
-  --card-foreground: #f4f1ec;
-  --card-border: rgba(255, 255, 255, 0.08);
+  /* Card — #1B1922 surfaces on the #100F14 canvas */
+  --card: #1b1922;
+  --card-foreground: #f7f5fa;
+  --card-border: #37313f;
 
-  /* Popover */
-  --popover: #141416;
-  --popover-foreground: #f4f1ec;
-  --popover-border: rgba(255, 255, 255, 0.12);
+  /* Popover — the elevated layer */
+  --popover: #24212d;
+  --popover-foreground: #f7f5fa;
+  --popover-border: #37313f;
 
-  /* Immersive homepage palette (master spec) */
-  --ink-950: #08090d;
-  --ink-900: #10121a;
-  --ink-800: #151823;
-  --ink-700: #1b1f2d;
-  --hairline: #292d3b;
-  --fg-dim: #a1a1b5;
-  --fg-mute: #71758a;
-  --violet: #8b5cf6;
-  --violet-light: #a78bfa;
-  --violet-pale: #c4b5fd;
-  --champagne: #f0b86e;
-  --champagne-light: #f8d9a4;
+  /* Heptome brand palette (master spec §3) */
+  --hept-charcoal: #f7f5fa;
+  --hept-ivory: #1b1922;
+  --hept-purple: #6d36d8;
+  --hept-lavender: #2a2438;
+  --hept-gold: #d5ae79;
+  --hept-grey: #b7b1c2;
+  --hept-line: #37313f;
+  --on-lavender: #c4b5fd;
+
+  /* Translucent chrome (glass) per theme */
+  --glass: rgba(16, 15, 20, 0.82);
+}
+
+/* Immersive zones — statically dark bands (home, catalogue heroes, partner
+   recruitment). Theme tokens are re-pointed locally, so token-based text,
+   cards and form fields stay legible on the dark canvas in BOTH themes. */
+.immersive {
+  color-scheme: dark;
+
+  --background: #08090d;
+  --foreground: #f7f5fa;
+  --border: #37313f;
+  --border-subtle: #2a2531;
+  --ring: #a78bfa;
+  --input: #37313f;
+  --muted: #1b1922;
+  --muted-foreground: #b7b1c2;
+
+  --primary: #6d36d8;
+  --primary-foreground: #ffffff;
+  --primary-hover: #7e4ae8;
+  --primary-muted: rgba(109, 54, 216, 0.14);
+
+  --accent: #a78bfa;
+  --accent-foreground: #17151d;
+  --gold-text: #d5ae79;
+
+  --secondary: #24212d;
+  --secondary-foreground: #f7f5fa;
+  --secondary-hover: #2c2836;
+
+  --card: #1b1922;
+  --card-foreground: #f7f5fa;
+  --card-border: #37313f;
+  --popover: #24212d;
+  --popover-foreground: #f7f5fa;
+  --popover-border: #37313f;
+
+  --hept-charcoal: #f7f5fa;
+  --hept-ivory: #1b1922;
+  --hept-lavender: #2a2438;
+  --hept-grey: #b7b1c2;
+  --hept-line: #37313f;
+  --on-lavender: #c4b5fd;
+
+  --glass: rgba(16, 15, 20, 0.82);
 }
 
 * {
@@ -502,7 +660,7 @@ input::placeholder {
 
 /* Glass morphism */
 .glass {
-  background: rgba(17, 17, 20, 0.8);
+  background: var(--glass);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border);
@@ -516,10 +674,10 @@ input::placeholder {
 }
 
 .glass-primary {
-  background: rgba(215, 185, 139, 0.1);
+  background: rgba(213, 174, 121, 0.1);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(215, 185, 139, 0.2);
+  border: 1px solid rgba(213, 174, 121, 0.2);
 }
 
 /* ── Immersive homepage helpers (master spec) ─────────────────────────── */
@@ -532,9 +690,62 @@ input::placeholder {
   -webkit-backdrop-filter: blur(14px);
 }
 
-/* Primary CTA gradient */
+/* Primary CTA gradient — Heptome purple */
 .gradient-cta {
-  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  background: linear-gradient(135deg, #7e4ae8 0%, #52219f 100%);
+}
+
+/* ── Heptome surfaces ─────────────────────────────────────────────────────
+   The home-services experience is deliberately light and clean while the
+   event experience stays cinematic. Both read from the same palette, so the
+   product keeps one identity with visual variety (master spec §3). */
+
+/* Warm canvas for home-service discovery and booking — theme-aware, so the
+   ivory canvas in light theme becomes a deep warm charcoal in dark theme and
+   the same components stay branded in both. */
+.surface-ivory {
+  background: var(--hept-ivory);
+  color: var(--hept-charcoal);
+}
+
+/* Muted text on the canvas. */
+.surface-ivory-muted {
+  color: var(--muted-foreground);
+}
+
+/* Panel card on the canvas. */
+.panel-ivory {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  transition: border-color 200ms ease-out, box-shadow 240ms ease-out, transform 240ms ease-out;
+}
+
+.panel-ivory:hover {
+  border-color: rgba(109, 54, 216, 0.4);
+  box-shadow: 0 18px 42px -26px rgba(23, 21, 29, 0.45);
+}
+
+/* Lavender chip on the canvas. */
+.chip-lavender {
+  background: var(--hept-lavender);
+  color: var(--on-lavender);
+}
+
+/* Purple CTA used on light surfaces and in the header. */
+.btn-heptome {
+  background: var(--hept-purple);
+  color: #ffffff;
+  transition: background-color 200ms ease-out, transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+
+.btn-heptome:hover {
+  background: #7e4ae8;
+}
+
+/* Focus ring that stays visible on ivory. */
+.focus-ring-ivory:focus-visible {
+  outline: 2px solid var(--hept-purple);
+  outline-offset: 2px;
 }
 
 /* Luxury champagne gradient text (used sparingly) */
@@ -569,7 +780,7 @@ input::placeholder {
 }
 
 .gradient-text-primary {
-  background: linear-gradient(135deg, var(--primary) 0%, #e8cfa0 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, #e8cfa9 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -987,12 +1198,19 @@ input::placeholder {
   }
 }
 
-/* High contrast mode */
+/* High contrast mode — strengthen the divider/text tokens per theme instead of
+   forcing white borders (which vanished on the light canvas). */
 @media (prefers-contrast: high) {
   :root {
-    --border: rgba(255, 255, 255, 0.3);
-    --border-subtle: rgba(255, 255, 255, 0.15);
-    --muted-foreground: rgba(244, 241, 236, 0.8);
+    --border: rgba(34, 33, 42, 0.45);
+    --border-subtle: rgba(34, 33, 42, 0.25);
+    --muted-foreground: #4b4954;
+  }
+
+  .dark {
+    --border: rgba(247, 245, 250, 0.35);
+    --border-subtle: rgba(247, 245, 250, 0.18);
+    --muted-foreground: #cfc9d9;
   }
 }
 

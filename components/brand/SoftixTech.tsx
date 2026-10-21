@@ -32,7 +32,7 @@ function Monogram({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        'relative grid place-items-center overflow-hidden rounded-lg bg-white/15 ring-1 ring-inset ring-white/15 shadow-[0_10px_24px_rgba(12,32,76,0.18)]',
+        'relative grid place-items-center overflow-hidden rounded-lg bg-muted ring-1 ring-inset ring-white/15 shadow-[0_10px_24px_rgba(12,32,76,0.18)]',
         className
       )}
       aria-hidden="true"

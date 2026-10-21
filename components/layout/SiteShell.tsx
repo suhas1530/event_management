@@ -29,7 +29,7 @@ export default function SiteShell({
   className,
 }: SiteShellProps) {
   return (
-    <div className="flex min-h-screen flex-col bg-[#0b0b0d] text-[#f4f1ec]">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
       <Navbar transparentAtTop={transparentHeader} />
 
       {/* Offset for the fixed header (h-16 / sm:h-[72px]). Pages with a

@@ -48,8 +48,8 @@ export default function BookingsPage() {
       <div className="mx-auto max-w-5xl px-5 py-10 lg:px-10">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.3em] text-[#d7b98b]">Your events</p>
-            <h1 className="mt-1 font-serif text-4xl text-white">Bookings</h1>
+            <p className="text-[10px] uppercase tracking-[0.3em] text-gold-text">Your events</p>
+            <h1 className="mt-1 font-serif text-4xl text-foreground">Bookings</h1>
           </div>
           <Link href="/events" className={buttonClass('primary', 'md')}>
             Browse events
@@ -70,8 +70,8 @@ export default function BookingsPage() {
                 className={cn(
                   'min-h-11 px-4 py-2 text-[10px] uppercase tracking-[0.15em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   active
-                    ? 'bg-[#d7b98b] text-[#1c1915]'
-                    : 'border border-white/15 text-white/50 hover:border-[#d7b98b] hover:text-[#d7b98b]'
+                    ? 'bg-[#d5ae79] text-[#17151d]'
+                    : 'border border-border text-muted-foreground hover:border-[#d5ae79] hover:text-gold-text'
                 )}
               >
                 {s ? labelFor(s) : 'All'}
@@ -83,7 +83,7 @@ export default function BookingsPage() {
         {loading ? (
           <div className="flex justify-center py-20" role="status">
             <span className="sr-only">Loading your bookings…</span>
-            <Loader2 className="size-8 animate-spin text-[#d7b98b]" aria-hidden="true" />
+            <Loader2 className="size-8 animate-spin text-gold-text" aria-hidden="true" />
           </div>
         ) : bookings.length === 0 ? (
           <EmptyState
@@ -99,15 +99,15 @@ export default function BookingsPage() {
           />
         ) : (
           <>
-            <ul className="divide-y divide-white/8 border border-white/10" role="list">
+            <ul className="divide-y divide-white/8 border border-border" role="list">
               {bookings.map(b => (
                 <li key={b.id}>
                   <Link
                     href={`/bookings/${b.id}`}
-                    className="group flex items-center gap-4 px-5 py-5 transition-colors duration-200 hover:bg-white/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                    className="group flex items-center gap-4 px-5 py-5 transition-colors duration-200 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                   >
                     {/* Event image */}
-                    <div className="size-14 flex-shrink-0 overflow-hidden bg-white/8">
+                    <div className="size-14 flex-shrink-0 overflow-hidden bg-muted/60">
                       {b.event?.heroImages?.[0] ? (
                         // eslint-disable-next-line @next/next/no-img-element -- remote, user-supplied event imagery
                         <img
@@ -118,13 +118,13 @@ export default function BookingsPage() {
                         />
                       ) : (
                         <div className="flex size-full items-center justify-center">
-                          <CalendarDays className="size-5 text-white/20" aria-hidden="true" />
+                          <CalendarDays className="size-5 text-muted-foreground/80" aria-hidden="true" />
                         </div>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm text-white">{b.event?.title ?? 'Event'}</p>
-                      <p className="mt-0.5 text-xs text-white/40">
+                      <p className="truncate text-sm text-foreground">{b.event?.title ?? 'Event'}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
                         {b.bookingNumber} ·{' '}
                         {new Date(b.eventDate).toLocaleDateString('en-IN', {
                           day: 'numeric',
@@ -133,18 +133,18 @@ export default function BookingsPage() {
                         })}
                         {b.venue && ` · ${b.venue.name}`}
                       </p>
-                      <p className="mt-0.5 text-xs text-white/30">{b.guestCount} guests</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground/80">{b.guestCount} guests</p>
                     </div>
                     <div className="flex flex-shrink-0 flex-col items-end gap-2">
                       <StatusBadge status={b.status} size="sm" />
                       {b.totalAmount > 0 && (
-                        <span className="text-xs text-white/40">
+                        <span className="text-xs text-muted-foreground">
                           ₹{b.totalAmount.toLocaleString('en-IN')}
                         </span>
                       )}
                     </div>
                     <ArrowRight
-                      className="size-4 flex-shrink-0 text-white/20 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-[#d7b98b]"
+                      className="size-4 flex-shrink-0 text-muted-foreground/80 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-gold-text"
                       aria-hidden="true"
                     />
                   </Link>
@@ -159,18 +159,18 @@ export default function BookingsPage() {
                   type="button"
                   disabled={page === 1}
                   onClick={() => setPage(p => p - 1)}
-                  className="min-h-11 border border-white/15 px-4 py-2 text-xs text-white/60 transition-colors duration-200 hover:border-[#d7b98b] hover:text-[#d7b98b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-30 disabled:hover:border-white/15 disabled:hover:text-white/60"
+                  className="min-h-11 border border-border px-4 py-2 text-xs text-muted-foreground transition-colors duration-200 hover:border-[#d5ae79] hover:text-gold-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-30 disabled:hover:border-border disabled:hover:text-muted-foreground"
                 >
                   <ArrowLeft className="size-3.5" aria-hidden="true" /> Prev
                 </button>
-                <span className="text-xs text-white/40" aria-live="polite">
+                <span className="text-xs text-muted-foreground" aria-live="polite">
                   Page {page} of {totalPages}
                 </span>
                 <button
                   type="button"
                   disabled={page === totalPages}
                   onClick={() => setPage(p => p + 1)}
-                  className="min-h-11 border border-white/15 px-4 py-2 text-xs text-white/60 transition-colors duration-200 hover:border-[#d7b98b] hover:text-[#d7b98b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-30 disabled:hover:border-white/15 disabled:hover:text-white/60"
+                  className="min-h-11 border border-border px-4 py-2 text-xs text-muted-foreground transition-colors duration-200 hover:border-[#d5ae79] hover:text-gold-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-30 disabled:hover:border-border disabled:hover:text-muted-foreground"
                 >
                   Next <ArrowRight className="size-3.5" aria-hidden="true" />
                 </button>

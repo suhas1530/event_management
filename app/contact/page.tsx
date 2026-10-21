@@ -5,7 +5,7 @@ import ContactForm from './ContactForm'
 export const metadata: Metadata = {
   title: 'Contact',
   description:
-    'Talk to the avān. team about home services, event planning, billing or partnerships. We reply within one business day.',
+    'Talk to the Heptome team about home services, event planning, billing or partnerships. We reply within one business day.',
 }
 
 export default function ContactPage() {

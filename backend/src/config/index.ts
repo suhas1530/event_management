@@ -23,7 +23,12 @@ export const config = {
   // Rate Limiting
   rateLimit: {
     windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 100,
+    /**
+     * Requests allowed per window and IP. Kept at 100 in production; the value
+     * is env-overridable so automated suites (which load dozens of pages from
+     * one IP) can raise it instead of failing on 429s.
+     */
+    maxRequests: parseInt(process.env.RATE_LIMIT_MAX || '100', 10),
   },
 
   // File Upload

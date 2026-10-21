@@ -144,7 +144,7 @@ export default function EventRequestsPage() {
           <div className="mt-9 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative sm:max-w-xs sm:flex-1">
               <Search
-                className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-white/30"
+                className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/80"
                 aria-hidden="true"
               />
               <label htmlFor="request-search" className="sr-only">
@@ -156,12 +156,12 @@ export default function EventRequestsPage() {
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="Search by event, city or reference"
-                className="w-full rounded-lg border border-white/12 bg-white/[0.03] py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-white/25 transition-colors duration-200 focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/25"
+                className="w-full rounded-lg border border-border bg-muted/50 py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground/80 transition-colors duration-200 focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/25"
               />
             </div>
 
             <div className="flex items-center gap-2" role="group" aria-label="Filter requests">
-              <Filter className="size-4 shrink-0 text-white/25" aria-hidden="true" />
+              <Filter className="size-4 shrink-0 text-muted-foreground/80" aria-hidden="true" />
               {FILTERS.map(f => {
                 const active = filter === f.key
                 const count = f.key === 'all' ? requests.length : counts[f.key]
@@ -175,11 +175,11 @@ export default function EventRequestsPage() {
                       'rounded-lg px-3 py-1.5 text-[0.8125rem] font-medium transition-colors duration-200',
                       active
                         ? 'bg-primary/12 text-primary ring-1 ring-inset ring-primary/30'
-                        : 'text-white/45 hover:bg-white/5 hover:text-white'
+                        : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
                     )}
                   >
                     {f.label}
-                    <span className="ml-1.5 text-white/30">{count}</span>
+                    <span className="ml-1.5 text-muted-foreground/80">{count}</span>
                   </button>
                 )
               })}
@@ -191,7 +191,7 @@ export default function EventRequestsPage() {
           {loading ? (
             <ul className="space-y-3" role="list" aria-label="Loading event requests">
               {Array.from({ length: 4 }).map((_, i) => (
-                <li key={i} className="rounded-2xl border border-white/8 bg-white/[0.02] p-6">
+                <li key={i} className="rounded-2xl border border-border-subtle bg-muted/50 p-6">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex-1 space-y-2">
                       <Skeleton className="h-5 w-52" />
@@ -209,7 +209,7 @@ export default function EventRequestsPage() {
               onRetry={() => void load()}
             />
           ) : requests.length === 0 ? (
-            <div className="rounded-2xl border border-white/8 bg-white/[0.02]">
+            <div className="rounded-2xl border border-border-subtle bg-muted/50">
               <EmptyState
                 icon={Sparkles}
                 title="No event requests yet"
@@ -219,7 +219,7 @@ export default function EventRequestsPage() {
               />
             </div>
           ) : visible.length === 0 ? (
-            <div className="rounded-2xl border border-white/8 bg-white/[0.02]">
+            <div className="rounded-2xl border border-border-subtle bg-muted/50">
               <EmptyState
                 icon={Search}
                 title="Nothing matches those filters"
@@ -238,21 +238,21 @@ export default function EventRequestsPage() {
                   <li key={request.id}>
                     <Link
                       href={`/event-requests/${request.id}`}
-                      className="group flex flex-col gap-4 rounded-2xl border border-white/8 bg-white/[0.02] p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/30 hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between"
+                      className="group flex flex-col gap-4 rounded-2xl border border-border-subtle bg-muted/50 p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/30 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-3">
-                          <h2 className="truncate text-[0.9375rem] font-medium text-white/90">
+                          <h2 className="truncate text-[0.9375rem] font-medium text-foreground/90">
                             {request.eventType}
                           </h2>
                           <StatusBadge status={request.status} size="sm" />
                         </div>
-                        <p className="mt-1 text-xs text-white/30">{request.requestNumber}</p>
+                        <p className="mt-1 text-xs text-muted-foreground/80">{request.requestNumber}</p>
 
-                        <ul className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-white/45">
+                        <ul className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-muted-foreground">
                           {request.eventDate && (
                             <li className="flex items-center gap-1.5">
-                              <CalendarDays className="size-3.5 text-white/25" aria-hidden="true" />
+                              <CalendarDays className="size-3.5 text-muted-foreground/80" aria-hidden="true" />
                               <span>
                                 {new Date(request.eventDate).toLocaleDateString('en-IN', {
                                   day: 'numeric',
@@ -265,13 +265,13 @@ export default function EventRequestsPage() {
                           )}
                           {request.guestCount ? (
                             <li className="flex items-center gap-1.5">
-                              <Users className="size-3.5 text-white/25" aria-hidden="true" />
+                              <Users className="size-3.5 text-muted-foreground/80" aria-hidden="true" />
                               {request.guestCount} guests
                             </li>
                           ) : null}
                           {request.city && (
                             <li className="flex items-center gap-1.5">
-                              <MapPin className="size-3.5 text-white/25" aria-hidden="true" />
+                              <MapPin className="size-3.5 text-muted-foreground/80" aria-hidden="true" />
                               {request.city}
                             </li>
                           )}
@@ -280,7 +280,7 @@ export default function EventRequestsPage() {
                       </div>
 
                       <ArrowRight
-                        className="size-4 shrink-0 self-start text-white/20 transition-colors duration-200 group-hover:translate-x-0.5 group-hover:text-primary sm:self-auto"
+                        className="size-4 shrink-0 self-start text-muted-foreground/80 transition-colors duration-200 group-hover:translate-x-0.5 group-hover:text-primary sm:self-auto"
                         aria-hidden="true"
                       />
                     </Link>

@@ -15,7 +15,8 @@ interface PlatformCounts {
  * These figures are read from the real API rather than hard-coded, so the
  * landing page can never advertise a number the database does not support.
  * Anything we cannot source from the backend is deliberately stated as a
- * promise rather than a number.
+ * promise rather than a number — including the last cell, which is a
+ * commitment and not a statistic.
  */
 export default function PlatformStats() {
   const [counts, setCounts] = useState<PlatformCounts | null>(null)
@@ -44,28 +45,28 @@ export default function PlatformStats() {
   }, [])
 
   const items = [
-    { value: counts?.technicians, label: 'Technicians on the platform' },
+    { value: counts?.technicians, label: 'Home professionals listed' },
     { value: counts?.events, label: 'Event ideas to explore' },
-    { value: counts?.categories, label: 'Service categories' },
+    { value: counts?.categories, label: 'Event categories' },
     // Not a statistic — a commitment. Included so the strip keeps a fourth cell
     // without inventing a number we cannot verify.
     { value: null, label: 'Price agreed before anyone starts' },
   ]
 
   return (
-    <section className="border-y border-white/8 bg-[#111114]" aria-label="Platform at a glance">
+    <section className="border-b border-hairline/60 bg-ink-900/50" aria-label="Platform at a glance">
       <div className="mx-auto max-w-7xl">
         <dl className="grid grid-cols-2 divide-x divide-white/8 lg:grid-cols-4">
           {items.map(item => (
             <div key={item.label} className="px-6 py-8 text-center sm:px-8">
-              <dd className="font-serif text-3xl text-[#d7b98b] tabular-nums lg:text-4xl">
+              <dd className="font-display text-3xl text-champagne tabular-nums lg:text-4xl">
                 {item.value === undefined || item.value === null ? (
                   <CommitmentMark />
                 ) : (
                   item.value.toLocaleString('en-IN')
                 )}
               </dd>
-              <dt className="mt-2 text-[11px] uppercase tracking-[0.2em] text-white/40">{item.label}</dt>
+              <dt className="mt-2 text-[11px] uppercase tracking-[0.2em] text-fg-mute">{item.label}</dt>
             </div>
           ))}
         </dl>
@@ -81,7 +82,7 @@ function CommitmentMark() {
       fill="none"
       stroke="currentColor"
       strokeWidth={1.5}
-      className="mx-auto size-8 text-[#d7b98b]"
+      className="mx-auto size-8 text-champagne"
       aria-hidden="true"
     >
       <circle cx="12" cy="12" r="9" />

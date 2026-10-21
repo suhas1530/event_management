@@ -1,25 +1,87 @@
 'use client'
 
-import { HOME_STEPS } from '@/lib/home-content'
+import { useState } from 'react'
+import { CalendarHeart, Wrench } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { EVENT_STEPS, HOME_STEPS, type HomeStep } from '@/lib/home-content'
+
+type Journey = 'events' | 'home'
+
+const JOURNEYS: { id: Journey; label: string; steps: HomeStep[]; blurb: string }[] = [
+  {
+    id: 'events',
+    label: 'Planning an event',
+    steps: EVENT_STEPS,
+    blurb:
+      'Enquiry first, never a forced instant booking: you approve the venues, services and pricing before anything is confirmed.',
+  },
+  {
+    id: 'home',
+    label: 'Booking a home service',
+    steps: HOME_STEPS,
+    blurb:
+      'Slot-based and priced up front: the service, your address and a two-hour window are agreed before a professional is assigned.',
+  },
+]
 
 /**
- * Four-step planning timeline. A vertical line on mobile and horizontal line
- * on desktop fill as the section scrolls (scrubbed), and each step brightens
- * when it becomes the active one — driven by `useHomeAnimations`.
+ * How it works — both journeys, one section.
+ *
+ * The two verticals run genuinely different processes (a quoted event enquiry
+ * versus a slot booking), so they get separate timelines behind a switcher
+ * instead of one blended list that would describe neither honestly. The active
+ * timeline drives the same scroll-scrubbed progress line as before
+ * (`data-progress-line` / `data-step` are consumed by `useHomeAnimations`).
  */
 export default function HowItWorks() {
+  const [journey, setJourney] = useState<Journey>('events')
+  const active = JOURNEYS.find(item => item.id === journey) ?? JOURNEYS[0]
+  const steps = active.steps
+
   return (
-    <section id="how" className="scroll-mt-20 border-t border-hairline/60 bg-ink-900/40 px-5 py-24 sm:px-10 lg:py-32">
+    <section
+      id="how"
+      className="scroll-mt-20 border-y border-hairline/60 bg-ink-900/40 px-5 py-24 sm:px-10 lg:py-32"
+    >
       <div className="mx-auto max-w-[1380px]">
-        <div data-reveal className="mb-16 max-w-2xl">
-          <p className="mb-4 text-[10px] uppercase tracking-[0.3em] text-violet-pale">How it works</p>
-          <h2 className="font-display text-[clamp(2rem,4.5vw,3.25rem)] font-semibold tracking-[-0.02em] text-slate-50">
-            Four steps from idea to standing ovation.
-          </h2>
+        <div data-reveal className="mb-12 flex flex-wrap items-end justify-between gap-6">
+          <div className="max-w-2xl">
+            <p className="mb-4 text-[10px] uppercase tracking-[0.3em] text-violet-pale">How it works</p>
+            <h2 className="font-display text-[clamp(2rem,4.5vw,3.25rem)] font-semibold tracking-[-0.02em] text-slate-50">
+              Two journeys, both this simple.
+            </h2>
+            <p className="mt-5 text-sm leading-7 text-fg-dim">{active.blurb}</p>
+          </div>
+
+          <div
+            role="group"
+            aria-label="Choose a journey"
+            className="inline-flex border border-border bg-muted/50 p-1"
+          >
+            {JOURNEYS.map(item => {
+              const Icon = item.id === 'events' ? CalendarHeart : Wrench
+              const selected = item.id === journey
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setJourney(item.id)}
+                  aria-pressed={selected}
+                  className={cn(
+                    'inline-flex min-h-11 items-center gap-2 px-4 py-2 text-xs font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-pale',
+                    selected ? 'bg-hept-purple text-white' : 'text-white/60 hover:text-white',
+                  )}
+                >
+                  <Icon className="size-3.5" aria-hidden="true" />
+                  {item.label}
+                </button>
+              )
+            })}
+          </div>
         </div>
 
-        <div className="relative">
-          {/* Track lines */}
+        {/* `key` restarts the reveal/progress measurements when the timeline swaps. */}
+        <div key={journey} className="relative">
           <span aria-hidden="true" className="absolute left-[5px] top-1 h-[calc(100%-0.5rem)] w-px bg-hairline lg:hidden" />
           <span
             aria-hidden="true"
@@ -34,7 +96,7 @@ export default function HowItWorks() {
           />
 
           <ol className="grid gap-10 lg:grid-cols-4 lg:gap-8">
-            {HOME_STEPS.map(step => (
+            {steps.map(step => (
               <li key={step.step} data-step="false" className="relative pl-8 lg:pl-0 lg:pt-10">
                 <span
                   aria-hidden="true"

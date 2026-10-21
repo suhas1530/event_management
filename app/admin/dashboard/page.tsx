@@ -14,9 +14,9 @@ const STATUS_COLORS: Record<string, string> = {
   PENDING_REVIEW: 'text-yellow-300 bg-yellow-500/10',
   QUOTED: 'text-purple-300 bg-purple-500/10',
   PAYMENT_PENDING: 'text-red-300 bg-red-500/10',
-  CONFIRMED: 'text-[#d7b98b] bg-[#d7b98b]/10',
+  CONFIRMED: 'text-[#d5ae79] bg-[#d5ae79]/10',
   COMPLETED: 'text-green-400 bg-green-500/15',
-  CANCELLED: 'text-white/30 bg-white/5',
+  CANCELLED: 'text-muted-foreground/80 bg-muted/60',
 }
 const STATUS_LABELS: Record<string, string> = {
   REQUESTED: 'Requested', PENDING_REVIEW: 'Under Review', QUOTED: 'Quoted',
@@ -35,7 +35,7 @@ function fmtDate(s: string) {
 }
 
 function Sk({ className = '' }: { className?: string }) {
-  return <div className={`animate-pulse bg-white/8 ${className}`} />
+  return <div className={`animate-pulse bg-muted/60 ${className}`} />
 }
 
 export default function AdminDashboard() {
@@ -59,7 +59,7 @@ export default function AdminDashboard() {
   }, [])
 
   if (loading) return (
-    <div className="flex items-center justify-center py-24"><Loader2 className="size-8 animate-spin text-[#d7b98b]" /></div>
+    <div className="flex items-center justify-center py-24"><Loader2 className="size-8 animate-spin text-gold-text" /></div>
   )
   if (error) return (
     <div className="py-20 text-center"><p className="text-red-400">{error}</p></div>
@@ -70,8 +70,8 @@ export default function AdminDashboard() {
   return (
     <div>
       <div className="mb-8">
-        <p className="text-[10px] uppercase tracking-[0.3em] text-[#d7b98b]">Operations</p>
-        <h1 className="mt-1 font-serif text-4xl text-white">Dashboard</h1>
+        <p className="text-[10px] uppercase tracking-[0.3em] text-gold-text">Operations</p>
+        <h1 className="mt-1 font-serif text-4xl text-foreground">Dashboard</h1>
       </div>
 
       {/* KPI grid */}
@@ -82,13 +82,13 @@ export default function AdminDashboard() {
           { label: 'Customers', value: stats?.customers.total ?? 0, sub: `+${stats?.customers.newThisMonth ?? 0} this month`, icon: Users },
           { label: 'Upcoming Events', value: stats?.upcomingEvents ?? 0, sub: 'Confirmed', icon: CheckCircle2 },
         ].map(({ label, value, sub, icon: Icon, accent }) => (
-          <div key={label} className="border border-white/10 bg-[#111114] p-5">
+          <div key={label} className="border border-border bg-card p-5">
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-white/40">{label}</p>
-              <Icon className={`size-4 ${accent ? 'text-[#d7b98b]' : 'text-white/20'}`} />
+              <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
+              <Icon className={`size-4 ${accent ? 'text-gold-text' : 'text-muted-foreground/80'}`} />
             </div>
-            <p className={`text-3xl font-light ${accent ? 'text-[#d7b98b]' : 'text-white'}`}>{value}</p>
-            <p className="mt-1 text-xs text-white/30">{sub}</p>
+            <p className={`text-3xl font-light ${accent ? 'text-gold-text' : 'text-foreground'}`}>{value}</p>
+            <p className="mt-1 text-xs text-muted-foreground/80">{sub}</p>
           </div>
         ))}
       </div>
@@ -97,64 +97,64 @@ export default function AdminDashboard() {
       <div className="mb-8 grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
         {[
           { label: 'Requested', value: stats?.bookings.pending ?? 0, color: 'text-blue-300' },
-          { label: 'Confirmed', value: stats?.bookings.confirmed ?? 0, color: 'text-[#d7b98b]' },
+          { label: 'Confirmed', value: stats?.bookings.confirmed ?? 0, color: 'text-gold-text' },
           { label: 'Completed', value: stats?.bookings.completed ?? 0, color: 'text-green-400' },
-          { label: 'Cancelled', value: stats?.bookings.cancelled ?? 0, color: 'text-white/30' },
+          { label: 'Cancelled', value: stats?.bookings.cancelled ?? 0, color: 'text-muted-foreground/80' },
           { label: 'AI Designs', value: stats?.aiDesigns ?? 0, color: 'text-purple-300' },
-          { label: 'This Month', value: fmt(stats?.revenue.thisMonth ?? 0), color: 'text-[#d7b98b]' },
+          { label: 'This Month', value: fmt(stats?.revenue.thisMonth ?? 0), color: 'text-gold-text' },
         ].map(({ label, value, color }) => (
-          <div key={label} className="border border-white/8 p-4 text-center">
+          <div key={label} className="border border-border-subtle p-4 text-center">
             <p className={`text-2xl font-light ${color}`}>{value}</p>
-            <p className="mt-1 text-[9px] uppercase tracking-[0.15em] text-white/30">{label}</p>
+            <p className="mt-1 text-[9px] uppercase tracking-[0.15em] text-muted-foreground/80">{label}</p>
           </div>
         ))}
       </div>
 
       <div className="grid gap-8 lg:grid-cols-5">
         {/* Revenue chart */}
-        <div className="border border-white/10 bg-[#111114] p-5 lg:col-span-3">
+        <div className="border border-border bg-card p-5 lg:col-span-3">
           <div className="mb-5 flex items-center justify-between">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Revenue — last 30 days</p>
-            <p className="text-sm text-[#d7b98b]">{fmt(stats?.revenue.thisMonth ?? 0)}</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Revenue — last 30 days</p>
+            <p className="text-sm text-gold-text">{fmt(stats?.revenue.thisMonth ?? 0)}</p>
           </div>
           {revenue.length > 0 ? (
             <div className="flex items-end gap-1" style={{ height: 120 }}>
               {revenue.slice(-20).map((r, i) => (
                 <div key={i} className="group relative flex-1">
                   <div
-                    className="w-full bg-[#d7b98b]/40 transition-all hover:bg-[#d7b98b]"
+                    className="w-full bg-[#d5ae79]/40 transition-all hover:bg-[#d5ae79]"
                     style={{ height: `${Math.max(4, (r.amount / maxRevenue) * 120)}px` }}
                   />
-                  <div className="absolute bottom-full left-1/2 mb-1 hidden -translate-x-1/2 whitespace-nowrap bg-[#0b0b0d] px-2 py-1 text-[9px] text-white group-hover:block">
+                  <div className="absolute bottom-full left-1/2 mb-1 hidden -translate-x-1/2 whitespace-nowrap bg-background px-2 py-1 text-[9px] text-foreground group-hover:block">
                     {fmt(r.amount)}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="py-10 text-center text-xs text-white/30">No revenue data yet</p>
+            <p className="py-10 text-center text-xs text-muted-foreground/80">No revenue data yet</p>
           )}
         </div>
 
         {/* Booking status pills */}
-        <div className="border border-white/10 bg-[#111114] p-5 lg:col-span-2">
-          <p className="mb-5 text-[10px] uppercase tracking-[0.2em] text-white/40">Booking status</p>
+        <div className="border border-border bg-card p-5 lg:col-span-2">
+          <p className="mb-5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Booking status</p>
           <div className="space-y-3">
             {[
               { label: 'Pending review', count: stats?.bookings.pending ?? 0, color: 'bg-yellow-500' },
-              { label: 'Confirmed', count: stats?.bookings.confirmed ?? 0, color: 'bg-[#d7b98b]' },
+              { label: 'Confirmed', count: stats?.bookings.confirmed ?? 0, color: 'bg-[#d5ae79]' },
               { label: 'Completed', count: stats?.bookings.completed ?? 0, color: 'bg-green-500' },
-              { label: 'Cancelled', count: stats?.bookings.cancelled ?? 0, color: 'bg-white/20' },
+              { label: 'Cancelled', count: stats?.bookings.cancelled ?? 0, color: '' },
             ].map(({ label, count, color }) => {
               const total = stats?.bookings.total || 1
               const pct = Math.round((count / total) * 100)
               return (
                 <div key={label}>
                   <div className="mb-1 flex justify-between text-xs">
-                    <span className="text-white/50">{label}</span>
-                    <span className="text-white/40">{count} ({pct}%)</span>
+                    <span className="text-muted-foreground">{label}</span>
+                    <span className="text-muted-foreground">{count} ({pct}%)</span>
                   </div>
-                  <div className="h-1.5 bg-white/8">
+                  <div className="h-1.5 bg-muted/60">
                     <div className={`h-full ${color} transition-all`} style={{ width: `${pct}%` }} />
                   </div>
                 </div>
@@ -165,21 +165,21 @@ export default function AdminDashboard() {
       </div>
 
       {/* Recent bookings table */}
-      <div className="mt-8 border border-white/10 bg-[#111114]">
-        <div className="flex items-center justify-between border-b border-white/8 px-5 py-4">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Recent bookings</p>
-          <Link href="/admin/bookings" className="text-[10px] uppercase tracking-[0.15em] text-[#d7b98b] hover:underline">
+      <div className="mt-8 border border-border bg-card">
+        <div className="flex items-center justify-between border-b border-border-subtle px-5 py-4">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Recent bookings</p>
+          <Link href="/admin/bookings" className="text-[10px] uppercase tracking-[0.15em] text-gold-text hover:underline">
             View all →
           </Link>
         </div>
 
         {recentBookings.length === 0 ? (
-          <p className="py-10 text-center text-xs text-white/30">No bookings yet</p>
+          <p className="py-10 text-center text-xs text-muted-foreground/80">No bookings yet</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/8 text-[10px] uppercase tracking-[0.15em] text-white/30">
+                <tr className="border-b border-border-subtle text-[10px] uppercase tracking-[0.15em] text-muted-foreground/80">
                   <th className="px-5 py-3 text-left">Booking ID</th>
                   <th className="px-5 py-3 text-left">Customer</th>
                   <th className="px-5 py-3 text-left">Event</th>
@@ -191,19 +191,19 @@ export default function AdminDashboard() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {recentBookings.map(b => (
-                  <tr key={b.id} className="transition hover:bg-white/3">
-                    <td className="px-5 py-3.5 font-mono text-xs text-white/50">{b.bookingNumber}</td>
-                    <td className="px-5 py-3.5 text-white/80">{b.user?.name ?? '—'}</td>
-                    <td className="px-5 py-3.5 text-white/60">{b.event?.title ?? '—'}</td>
-                    <td className="px-5 py-3.5 text-white/40">{fmtDate(b.eventDate)}</td>
-                    <td className="px-5 py-3.5 text-right text-white/60">{b.totalAmount > 0 ? fmt(b.totalAmount) : '—'}</td>
+                  <tr key={b.id} className="transition hover:bg-muted/60">
+                    <td className="px-5 py-3.5 font-mono text-xs text-muted-foreground">{b.bookingNumber}</td>
+                    <td className="px-5 py-3.5 text-foreground/90">{b.user?.name ?? '—'}</td>
+                    <td className="px-5 py-3.5 text-muted-foreground">{b.event?.title ?? '—'}</td>
+                    <td className="px-5 py-3.5 text-muted-foreground">{fmtDate(b.eventDate)}</td>
+                    <td className="px-5 py-3.5 text-right text-muted-foreground">{b.totalAmount > 0 ? fmt(b.totalAmount) : '—'}</td>
                     <td className="px-5 py-3.5">
-                      <span className={`px-2 py-1 text-[9px] uppercase tracking-[0.1em] ${STATUS_COLORS[b.status] ?? 'text-white/30 bg-white/5'}`}>
+                      <span className={`px-2 py-1 text-[9px] uppercase tracking-[0.1em] ${STATUS_COLORS[b.status] ?? 'text-muted-foreground/80 bg-muted/60'}`}>
                         {STATUS_LABELS[b.status] ?? b.status}
                       </span>
                     </td>
                     <td className="px-3 py-3.5">
-                      <Link href={`/admin/bookings/${b.id}`} className="text-[#d7b98b] hover:underline">
+                      <Link href={`/admin/bookings/${b.id}`} className="text-gold-text hover:underline">
                         <ArrowRight className="size-4" />
                       </Link>
                     </td>

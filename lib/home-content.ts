@@ -1,73 +1,62 @@
 /**
- * Content model for the immersive homepage.
+ * Content model for the Heptome homepage.
  *
- * Category `type` values must match the plan-event wizard's EVENT_TYPES so the
- * hero booking panel and category cards can pre-select a valid event type.
+ * The homepage tells one story with two halves: event discovery (cinematic,
+ * champagne-lit) and home services (clean, ivory, purple). Category values used
+ * for hand-off (`type`) must match the plan-event wizard's EVENT_TYPES, and home
+ * categories come straight from `lib/catalog.ts` so a card can never advertise a
+ * service the booking flow does not offer.
+ *
+ * No prices, ratings or job counts live here: every number a customer sees is
+ * either read from the API or labelled as unverified ("pricing on request").
  */
 
 export interface HomeCategory {
   name: string
-  /** plan-event event type pre-selected from this card. */
+  /** Event type used to filter the events catalogue. */
   type: string
   img: string
   blurb: string
 }
 
+/** Event categories — each links to the live catalogue filtered by type. */
 export const HOME_CATEGORIES: HomeCategory[] = [
   {
-    name: 'Weddings',
+    name: 'Weddings & Engagements',
     type: 'WEDDING',
     img: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1200&q=80',
     blurb: 'Ceremony to reception, flawlessly orchestrated',
   },
   {
-    name: 'Corporate Events',
+    name: 'Corporate Events & Conferences',
     type: 'CORPORATE',
     img: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=1200&q=80',
-    blurb: 'Summits, offsites and award nights',
+    blurb: 'Summits, offsites, product launches and award nights',
   },
   {
-    name: 'Birthdays',
+    name: 'Birthdays & Private Parties',
     type: 'BIRTHDAY',
     img: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=1200&q=80',
     blurb: 'Milestones turned into memories',
   },
   {
-    name: 'Concerts',
+    name: 'Concerts & Live Events',
     type: 'OTHER',
     img: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=1200&q=80',
     blurb: 'Stages, sound and unforgettable nights',
   },
   {
-    name: 'College Festivals',
-    type: 'COLLEGE_EVENT',
+    name: 'Cultural Celebrations',
+    type: 'HOUSEWARMING',
     img: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=1200&q=80',
-    blurb: 'Campus energy, professionally produced',
+    blurb: 'Housewarmings, naming ceremonies and festivals',
   },
   {
-    name: 'Product Launches',
-    type: 'PRODUCT_LAUNCH',
+    name: 'Venues & Banquet Halls',
+    type: 'CONFERENCE',
     img: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80',
-    blurb: 'Reveals that land with impact',
+    blurb: 'Halls, resorts and outdoor spaces, matched to your guest list',
   },
-]
-
-export interface HomeService {
-  name: string
-  description: string
-  /** lucide-react icon name, resolved in the component. */
-  icon: 'MapPin' | 'Flower2' | 'Utensils' | 'Camera' | 'Lightbulb' | 'Music' | 'Users' | 'Briefcase'
-}
-
-export const HOME_SERVICES: HomeService[] = [
-  { name: 'Venue Selection', description: 'Handpicked venues matched to your guest list, city and budget.', icon: 'MapPin' },
-  { name: 'Stage & Decoration', description: 'Floral, theme and stage design built around your story.', icon: 'Flower2' },
-  { name: 'Catering', description: 'Menus from trusted kitchens, across cuisines and diets.', icon: 'Utensils' },
-  { name: 'Photography & Videography', description: 'Candid, cinematic coverage that lasts beyond the day.', icon: 'Camera' },
-  { name: 'Lighting & Sound', description: 'Ambience, stage lighting and concert-grade audio.', icon: 'Lightbulb' },
-  { name: 'Entertainment', description: 'DJs, live bands, performers and hosts who read the room.', icon: 'Music' },
-  { name: 'Guest Management', description: 'Invites, RSVPs, seating and on-ground hospitality.', icon: 'Users' },
-  { name: 'Corporate Production', description: 'End-to-end delivery for launches, summits and offsites.', icon: 'Briefcase' },
 ]
 
 export interface HomeStep {
@@ -76,11 +65,20 @@ export interface HomeStep {
   description: string
 }
 
+/** Event planning journey (inquiry-first: no forced instant booking). */
+export const EVENT_STEPS: HomeStep[] = [
+  { step: '01', title: 'Tell us the occasion', description: 'Event type, date and guest count — a minute of your time.' },
+  { step: '02', title: 'Explore venues and services', description: 'Compare real venues, catering, décor and production options.' },
+  { step: '03', title: 'Review your proposal', description: 'Approve the plan and pricing, or ask for changes.' },
+  { step: '04', title: 'Celebrate, we handle the day', description: 'Track every milestone from your dashboard.' },
+]
+
+/** Doorstep service journey (slot-based, priced from the live catalog). */
 export const HOME_STEPS: HomeStep[] = [
-  { step: '01', title: 'Discover your event options', description: 'Tell us the occasion, date and guest count. Explore venues and services that fit.' },
-  { step: '02', title: 'Customise your event', description: 'Shape the theme, décor, menu and entertainment with your dedicated planner.' },
-  { step: '03', title: 'Confirm your booking', description: 'Approve the proposal, review transparent pricing and lock your date.' },
-  { step: '04', title: 'Track and enjoy your event', description: 'Follow every milestone from your dashboard while we handle the day.' },
+  { step: '01', title: 'Choose the service', description: 'Cleaning, repair, appliance or personal care.' },
+  { step: '02', title: 'Share your address', description: 'We confirm coverage for your pincode before you book.' },
+  { step: '03', title: 'Pick a slot', description: 'Choose a date and a two-hour window that suits you.' },
+  { step: '04', title: 'Verified professional arrives', description: 'Track the job and pay after the work is done.' },
 ]
 
 export interface FeaturedFallback {
@@ -89,20 +87,22 @@ export interface FeaturedFallback {
   img: string
   date: string
   location: string
-  price: number
+  /** Deliberately null: a showcase card must never invent a price. */
+  price: null
 }
 
 /**
- * Curated showcase used only when the live featured-events API returns
- * nothing (e.g. a fresh database) or the API is unreachable.
+ * Curated showcase used only when the live featured-events API returns nothing
+ * (e.g. a fresh database) or the API is unreachable. Cards carry no price, so
+ * the section can never advertise a number the catalogue does not support.
  */
 export const FEATURED_FALLBACK: FeaturedFallback[] = [
-  { id: 'wedding', title: 'Royal Wedding Production', img: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1400&q=80', date: 'Available year-round', location: 'Udaipur · Jaipur · Goa', price: 450000 },
-  { id: 'corporate', title: 'Annual Summit & Awards', img: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1000&q=80', date: 'Weekday packages', location: 'Bengaluru · Mumbai', price: 250000 },
-  { id: 'birthday', title: 'Luxe Birthday Soirée', img: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=1000&q=80', date: 'Weekends', location: 'Your city', price: 95000 },
-  { id: 'concert', title: 'Live Music Night', img: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=1000&q=80', date: 'Seasonal', location: 'Pan-India', price: 350000 },
-  { id: 'launch', title: 'Product Reveal Experience', img: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1000&q=80', date: 'By schedule', location: 'Hyderabad · Pune', price: 275000 },
-  { id: 'college', title: 'Campus Festival Takeover', img: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=1000&q=80', date: 'Fest season', location: 'Campuses nationwide', price: 125000 },
+  { id: 'wedding', title: 'Wedding Production', img: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1400&q=80', date: 'Available year-round', location: 'Udaipur · Jaipur · Goa', price: null },
+  { id: 'corporate', title: 'Annual Summit & Awards', img: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1000&q=80', date: 'Weekday packages', location: 'Bengaluru · Mumbai', price: null },
+  { id: 'birthday', title: 'Birthday Soirée', img: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=1000&q=80', date: 'Weekends', location: 'Your city', price: null },
+  { id: 'concert', title: 'Live Music Night', img: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=1000&q=80', date: 'Seasonal', location: 'Pan-India', price: null },
+  { id: 'launch', title: 'Product Reveal Experience', img: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1000&q=80', date: 'By schedule', location: 'Hyderabad · Pune', price: null },
+  { id: 'college', title: 'Campus Festival Takeover', img: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=1000&q=80', date: 'Fest season', location: 'Campuses nationwide', price: null },
 ]
 
 export interface HomeEventTypeOption {
@@ -113,19 +113,12 @@ export interface HomeEventTypeOption {
 /** Options shown in the hero booking panel (values are plan-event types). */
 export const HOME_EVENT_TYPES: HomeEventTypeOption[] = [
   { value: 'WEDDING', label: 'Wedding' },
+  { value: 'ENGAGEMENT', label: 'Engagement' },
   { value: 'CORPORATE', label: 'Corporate event' },
-  { value: 'BIRTHDAY', label: 'Birthday' },
   { value: 'CONFERENCE', label: 'Conference' },
+  { value: 'BIRTHDAY', label: 'Birthday' },
+  { value: 'ANNIVERSARY', label: 'Anniversary' },
   { value: 'PRODUCT_LAUNCH', label: 'Product launch' },
   { value: 'COLLEGE_EVENT', label: 'College festival' },
-  { value: 'ANNIVERSARY', label: 'Anniversary' },
   { value: 'OTHER', label: 'Something else' },
 ]
-
-/** Slim home-services strip (keeps the technician side one tap away). */
-export const HOME_TECH_LINKS = [
-  { label: 'Plumber', category: 'PLUMBING' },
-  { label: 'Electrician', category: 'ELECTRICAL' },
-  { label: 'AC Service', category: 'AC_SERVICE' },
-  { label: 'Deep Cleaning', category: 'CLEANING' },
-] as const

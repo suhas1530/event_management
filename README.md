@@ -1,6 +1,10 @@
-# avān. — Service Booking & Event Management Platform
+# Heptome — Events & Home Services Platform
 
-A full-stack platform combining **home technician booking** (like Urban Company) and **luxury event planning** with AI design, real-time tracking, and a complete admin operations panel.
+Heptome is one product with two verticals: **celebrations** (weddings, corporate events, birthdays, concerts) and **home services** (cleaning, repairs, salon, installation). *Celebrate every moment. Care for every corner.*
+
+A full-stack platform combining **home-service booking** (slot-based, like Urban Company) and **event planning** (inquiry → quote) with AI design, tracking, and a complete admin operations panel.
+
+> **Rebrand & verification:** the platform was renamed from its previous brand to Heptome, and the home page now uses a two-zone 3D "living world" (celebration hall + modern home). What changed, what was tested and what is still blocked is recorded in [`docs/heptome-migration.md`](docs/heptome-migration.md). Test evidence at the time of writing (21 Oct 2026): `npm run build` ✅, `npx tsc --noEmit` ✅, `npm test` 59/59 ✅, Playwright `E2E_CHANNEL=chrome` 62/62 ✅, production theme sweep 64/64 ✅.
 
 ---
 
@@ -17,7 +21,7 @@ A full-stack platform combining **home technician booking** (like Urban Company)
 
 | Route | Status | Description |
 |-------|--------|-------------|
-| `/` | ✅ Complete | Landing with both products, search, testimonials, stats |
+| `/` | ✅ Complete | Living-world hero + two discovery paths, live events/venues, home-services showcase |
 | `/services` | ✅ Complete | All services directory (home + event), searchable |
 | `/book/technician` | ✅ Complete | 9-step booking flow with validation & auth |
 | `/events` | ✅ Complete | Event marketplace with filters |
@@ -25,7 +29,7 @@ A full-stack platform combining **home technician booking** (like Urban Company)
 | `/ai-event-designer` | ✅ Complete | AI design studio with refinement |
 | `/login` | ✅ Complete | Multi-role login with smart redirect |
 | `/register` | ✅ Complete | Full validation & password strength |
-| `/dashboard` | ✅ Complete | Customer dashboard — 6 tabs, both booking types |
+| `/dashboard` | ✅ Complete | Customer dashboard — My Events / My Home Services tabs |
 | `/dashboard/booking/[id]` | ✅ Complete | Tech booking detail with timeline & review |
 | `/bookings/[id]` | ✅ Complete | Event booking detail with quotes/messages |
 | **Admin Portal** | ✅ Complete | Full featured admin panel |
@@ -120,7 +124,7 @@ A full-stack platform combining **home technician booking** (like Urban Company)
 - [ ] Monitoring & logging
 - [ ] Rate limiting
 - [ ] API documentation (Swagger)
-- [ ] Automated testing suite
+- [x] Automated testing suite — Vitest unit tests + Playwright browser tests
 
 ---
 
@@ -194,7 +198,34 @@ npm run dev               # → http://localhost:3000
 
 ---
 
+## Testing
+
+```bash
+# Unit tests (Vitest)
+npm test
+npx tsc --noEmit
+
+# Browser tests (Playwright) — backend and frontend must be running
+# The bundled Chromium download may be unavailable; use the installed Chrome.
+E2E_CHANNEL=chrome npx playwright test
+
+# Production build
+npm run build
+```
+
+E2E talks to the live API at `http://localhost:5000`; start the backend with a
+test-only raised rate limit so the data-dependent cases are exercised instead
+of skipped: `RATE_LIMIT_MAX=10000 npm run dev` (PowerShell:
+`$env:RATE_LIMIT_MAX='10000'; npm run dev`). The suite covers auth, discovery,
+both booking wizards, brand regression, theme persistence and the admin sign-in
+flow. See [`docs/heptome-migration.md`](docs/heptome-migration.md) for the
+current evidence and the gaps that require seed data.
+
+---
+
 ## Demo Accounts
+
+These accounts are seeded by the backend and still use the legacy `@avan.events` domain, which the frontend rebrand intentionally left unchanged (see the migration report).
 
 | Role | Email | Password | Redirects to |
 |------|-------|----------|-------------|
@@ -207,19 +238,24 @@ npm run dev               # → http://localhost:3000
 
 ## Complete Journey Tests
 
-### Test 1 — Customer books a technician
+### Test 1 — Customer requests a home service
 ```
-/ → Book a Technician
-→ Select: Plumbing
-→ Select: Tap Repair
-→ Enter address (any Mumbai address, pincode 400001)
+/ → Book a Home Service
+→ Select category: Cleaning & Pest Control
+→ Select a service from the live catalogue
+→ Address + pincode in Bengaluru (560034 is covered; other cities are refused)
 → Select: Today, 2:00–4:00 PM slot
-→ Assign any technician
+→ Any technician
 → Describe problem: "Tap is dripping"
-→ Review pricing (₹497 estimate)
-→ Select: Cash on Service
-→ Confirm → Booking ID: TECH-2026-XXXXXX
+→ Review pricing (₹99 visit charge + the service's live estimate + 18% GST)
+→ Select: Cash on Service → Submit
+→ Status: "Slot requested — awaiting confirmation" until an admin confirms
 ```
+
+> **Live database caveat:** the seed script creates no `TechnicianService` rows, so
+> every bookable category currently shows "no bookable services listed yet — ask the
+> team" and a real booking cannot be completed. Prices are never hard-coded on the
+> client; they are read from that catalogue. See the migration report.
 
 ### Test 2 — Admin assigns + advances technician booking
 ```

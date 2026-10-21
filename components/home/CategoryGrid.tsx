@@ -22,7 +22,7 @@ export default function CategoryGrid() {
           </div>
           <Link
             href="/events"
-            className="group inline-flex items-center gap-2 text-sm font-medium text-fg-dim transition-colors hover:text-white"
+            className="group inline-flex items-center gap-2 text-sm font-medium text-fg-dim transition-colors hover:text-foreground"
           >
             Browse all experiences
             <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
@@ -35,7 +35,7 @@ export default function CategoryGrid() {
               key={category.name}
               data-reveal-item
               href={`/plan-event?type=${category.type}`}
-              className="group relative block aspect-[4/3] overflow-hidden border border-white/8 transition-colors duration-500 hover:border-violet/50 sm:aspect-[4/5]"
+              className="group relative block aspect-[4/3] overflow-hidden border border-border-subtle transition-colors duration-500 hover:border-violet/50 sm:aspect-[4/5]"
             >
               <Image
                 src={category.img}

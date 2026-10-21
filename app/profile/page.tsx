@@ -33,7 +33,7 @@ const ROLE_LABEL: Record<string, string> = {
 }
 
 const inputClass =
-  'mt-2 w-full rounded-lg border bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder:text-white/25 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/25'
+  'mt-2 w-full rounded-lg border bg-muted/50 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/80 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/25'
 
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading: authLoading, refreshUser, logout } = useAuth()
@@ -141,7 +141,7 @@ export default function ProfilePage() {
         <PageHeader eyebrow="Your account" title="Profile" description="Keep your contact details current so we can reach you about bookings." />
 
         {/* Identity card */}
-        <div className="mt-10 flex flex-col gap-6 rounded-2xl border border-white/8 bg-white/[0.02] p-6 sm:flex-row sm:items-center sm:p-7">
+        <div className="mt-10 flex flex-col gap-6 rounded-2xl border border-border-subtle bg-muted/50 p-6 sm:flex-row sm:items-center sm:p-7">
           <div className="relative shrink-0">
             {user.avatar ? (
               // eslint-disable-next-line @next/next/no-img-element -- user-supplied avatar URL, cannot be optimised ahead of time
@@ -155,14 +155,14 @@ export default function ProfilePage() {
                 {initials || <UserIcon className="size-7" aria-hidden="true" />}
               </span>
             )}
-            <span className="absolute -bottom-1 -right-1 grid size-8 place-items-center rounded-lg border border-white/10 bg-[#141417] text-white/50" title="Profile photo">
+            <span className="absolute -bottom-1 -right-1 grid size-8 place-items-center rounded-lg border border-border bg-popover text-muted-foreground" title="Profile photo">
               <Camera className="size-4" aria-hidden="true" />
             </span>
           </div>
 
           <div className="min-w-0 flex-1">
-            <h2 className="truncate text-xl font-medium text-white/90">{user.name}</h2>
-            <p className="truncate text-sm text-white/45">{user.email}</p>
+            <h2 className="truncate text-xl font-medium text-foreground/90">{user.name}</h2>
+            <p className="truncate text-sm text-muted-foreground">{user.email}</p>
             <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary/12 px-3 py-1 text-[0.6875rem] font-medium uppercase tracking-[0.12em] text-primary ring-1 ring-inset ring-primary/25">
               <BadgeCheck className="size-3.5" aria-hidden="true" />
               {ROLE_LABEL[user.role] ?? user.role}
@@ -172,7 +172,7 @@ export default function ProfilePage() {
           <button
             type="button"
             onClick={() => void logout()}
-            className="inline-flex items-center justify-center gap-2 self-start rounded-lg border border-white/12 px-4 py-2.5 text-sm font-medium text-white/70 transition-colors duration-200 hover:border-destructive/40 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive sm:self-auto"
+            className="inline-flex items-center justify-center gap-2 self-start rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground/90 transition-colors duration-200 hover:border-destructive/40 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive sm:self-auto"
           >
             <LogOut className="size-4" aria-hidden="true" />
             Sign out
@@ -181,16 +181,16 @@ export default function ProfilePage() {
 
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           {/* Personal details */}
-          <section className="rounded-2xl border border-white/8 bg-white/[0.02] p-6 sm:p-7">
-            <h2 className="flex items-center gap-2.5 text-base font-medium text-white/90">
+          <section className="rounded-2xl border border-border-subtle bg-muted/50 p-6 sm:p-7">
+            <h2 className="flex items-center gap-2.5 text-base font-medium text-foreground/90">
               <UserIcon className="size-[18px] text-primary" aria-hidden="true" />
               Personal details
             </h2>
-            <p className="mt-1.5 text-sm text-white/40">Used on your bookings and invoices.</p>
+            <p className="mt-1.5 text-sm text-muted-foreground">Used on your bookings and invoices.</p>
 
             <form onSubmit={saveProfile} className="mt-6 space-y-5" noValidate>
               <div>
-                <label htmlFor="name" className="text-label text-white/45">
+                <label htmlFor="name" className="text-label text-muted-foreground">
                   Full name
                 </label>
                 <input
@@ -200,13 +200,13 @@ export default function ProfilePage() {
                   autoComplete="name"
                   aria-invalid={profileErrors.name ? 'true' : undefined}
                   aria-describedby={profileErrors.name ? 'name-error' : undefined}
-                  className={cn(inputClass, profileErrors.name ? 'border-red-400/60' : 'border-white/12 focus:border-primary/60')}
+                  className={cn(inputClass, profileErrors.name ? 'border-red-400/60' : 'border-border focus:border-primary/60')}
                 />
                 {profileErrors.name && <FieldError id="name-error">{profileErrors.name}</FieldError>}
               </div>
 
               <div>
-                <label htmlFor="email" className="text-label text-white/45">
+                <label htmlFor="email" className="text-label text-muted-foreground">
                   Email address
                 </label>
                 <input
@@ -214,13 +214,13 @@ export default function ProfilePage() {
                   value={user.email}
                   disabled
                   readOnly
-                  className={cn(inputClass, 'cursor-not-allowed border-white/8 text-white/40')}
+                  className={cn(inputClass, 'cursor-not-allowed border-border-subtle text-muted-foreground')}
                 />
-                <p className="mt-1.5 text-xs text-white/30">Email cannot be changed.</p>
+                <p className="mt-1.5 text-xs text-muted-foreground/80">Email cannot be changed.</p>
               </div>
 
               <div>
-                <label htmlFor="phone" className="text-label text-white/45">
+                <label htmlFor="phone" className="text-label text-muted-foreground">
                   Phone number
                 </label>
                 <input
@@ -232,7 +232,7 @@ export default function ProfilePage() {
                   placeholder="+91 98765 43210"
                   aria-invalid={profileErrors.phone ? 'true' : undefined}
                   aria-describedby={profileErrors.phone ? 'phone-error' : undefined}
-                  className={cn(inputClass, profileErrors.phone ? 'border-red-400/60' : 'border-white/12 focus:border-primary/60')}
+                  className={cn(inputClass, profileErrors.phone ? 'border-red-400/60' : 'border-border focus:border-primary/60')}
                 />
                 {profileErrors.phone && <FieldError id="phone-error">{profileErrors.phone}</FieldError>}
               </div>
@@ -245,12 +245,12 @@ export default function ProfilePage() {
           </section>
 
           {/* Security */}
-          <section className="rounded-2xl border border-white/8 bg-white/[0.02] p-6 sm:p-7">
-            <h2 className="flex items-center gap-2.5 text-base font-medium text-white/90">
+          <section className="rounded-2xl border border-border-subtle bg-muted/50 p-6 sm:p-7">
+            <h2 className="flex items-center gap-2.5 text-base font-medium text-foreground/90">
               <KeyRound className="size-[18px] text-primary" aria-hidden="true" />
               Password &amp; security
             </h2>
-            <p className="mt-1.5 text-sm text-white/40">Choose a password you do not use anywhere else.</p>
+            <p className="mt-1.5 text-sm text-muted-foreground">Choose a password you do not use anywhere else.</p>
 
             <form onSubmit={savePassword} className="mt-6 space-y-5" noValidate>
               <PasswordField
@@ -286,8 +286,8 @@ export default function ProfilePage() {
         </div>
 
         {/* Shortcuts */}
-        <section className="mt-6 rounded-2xl border border-white/8 bg-white/[0.02] p-6 sm:p-7">
-          <h2 className="flex items-center gap-2.5 text-base font-medium text-white/90">
+        <section className="mt-6 rounded-2xl border border-border-subtle bg-muted/50 p-6 sm:p-7">
+          <h2 className="flex items-center gap-2.5 text-base font-medium text-foreground/90">
             <ShieldCheck className="size-[18px] text-primary" aria-hidden="true" />
             Your activity
           </h2>
@@ -300,7 +300,7 @@ export default function ProfilePage() {
               <Link
                 key={href}
                 href={href}
-                className="group flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3.5 text-sm text-white/70 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/35 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="group flex items-center gap-3 rounded-xl border border-border bg-muted/50 px-4 py-3.5 text-sm text-foreground/90 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/35 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <Icon className="size-4 shrink-0 text-primary" aria-hidden="true" />
                 {label}
@@ -339,7 +339,7 @@ function PasswordField({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="text-label text-white/45">
+      <label htmlFor={id} className="text-label text-muted-foreground">
         {label}
       </label>
       <input
@@ -350,7 +350,7 @@ function PasswordField({
         autoComplete={autoComplete}
         aria-invalid={error ? 'true' : undefined}
         aria-describedby={error ? `${id}-error` : undefined}
-        className={cn(inputClass, error ? 'border-red-400/60' : 'border-white/12 focus:border-primary/60')}
+        className={cn(inputClass, error ? 'border-red-400/60' : 'border-border focus:border-primary/60')}
       />
       {error && <FieldError id={`${id}-error`}>{error}</FieldError>}
     </div>

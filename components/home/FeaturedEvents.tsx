@@ -76,8 +76,11 @@ export default function FeaturedEvents() {
         <div data-reveal className="mb-14 max-w-2xl">
           <p className="mb-4 text-[10px] uppercase tracking-[0.3em] text-champagne">Featured experiences</p>
           <h2 className="font-display text-[clamp(2rem,4.5vw,3.25rem)] font-semibold tracking-[-0.02em] text-slate-50">
-            Productions our clients still talk about.
+            Featured experiences.
           </h2>
+          <p className="mt-5 text-sm leading-7 text-fg-dim">
+            Read from the live catalogue — prices appear only where the catalogue carries one.
+          </p>
         </div>
 
         {cards === null ? (
@@ -93,7 +96,7 @@ export default function FeaturedEvents() {
                 key={card.key}
                 data-reveal-item
                 href={card.href}
-                className={`group relative block overflow-hidden border border-white/8 transition-colors duration-500 hover:border-violet/50 ${
+                className={`group relative block overflow-hidden border border-border-subtle transition-colors duration-500 hover:border-violet/50 ${
                   index === 0 ? 'min-h-[420px] sm:col-span-2 lg:row-span-2 lg:min-h-0' : 'min-h-[260px]'
                 }`}
               >

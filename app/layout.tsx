@@ -3,6 +3,8 @@ import type { Metadata, Viewport } from 'next'
 import { Cormorant_Garamond, Inter, Space_Grotesk } from 'next/font/google'
 import Providers from './providers'
 import './globals.css'
+import { brand } from '@/lib/brand'
+import { siteConfig } from '@/lib/site-config'
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
@@ -21,29 +23,53 @@ const spaceGrotesk = Space_Grotesk({
 })
 
 export const metadata: Metadata = {
-  title: { default: 'avān. — Your moment, perfectly designed.', template: '%s | avān.' },
-  description: 'Premium event planning for the moments that matter. Discover, design and celebrate with avān.',
-  keywords: ['event planning', 'wedding planner', 'birthday party', 'corporate events', 'event management India'],
+  metadataBase: new URL(siteConfig.url),
+  title: { default: `${brand.name} — ${brand.headline}`, template: `%s | ${brand.name}` },
+  description: brand.description,
+  applicationName: brand.name,
+  keywords: [
+    'event planning',
+    'wedding planner',
+    'corporate events',
+    'venue booking',
+    'home services',
+    'home cleaning',
+    'AC repair',
+    'plumbing',
+    'electrician',
+    'Bengaluru',
+  ],
   openGraph: {
     type: 'website',
-    locale: 'en_IN',
-    url: process.env.NEXT_PUBLIC_APP_URL ?? 'https://avan.events',
-    siteName: 'avān.',
-    title: 'avān. — Your moment, perfectly designed.',
-    description: 'Premium event planning for the moments that matter.',
+    locale: siteConfig.locale,
+    url: siteConfig.url,
+    siteName: brand.name,
+    title: `${brand.name} — ${brand.headline}`,
+    description: brand.tagline,
   },
-  twitter: { card: 'summary_large_image', title: 'avān.', description: 'Premium event planning for the moments that matter.' },
+  twitter: {
+    card: 'summary_large_image',
+    title: brand.name,
+    description: brand.tagline,
+  },
   robots: { index: true, follow: true },
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'dark',
-  themeColor: '#0b0b0d',
+  themeColor: '#17151D',
 }
+
+/** Runs before first paint: applies the stored theme (or dark default).
+ *  The key is inlined because the provider is a client module and its
+ *  constant cannot be referenced as a value from a server component. */
+const themeBootstrap = `(function(){try{var t=localStorage.getItem('heptome-theme');if(t!=='light'&&t!=='dark'){t='dark';}var r=document.documentElement;r.classList.toggle('dark',t==='dark');r.dataset.theme=t;}catch(e){}})();`
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark" data-scroll-behavior="smooth">
+    <html lang="en" className="dark" suppressHydrationWarning data-scroll-behavior="smooth">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
+      </head>
       <body className={`${cormorant.variable} ${inter.variable} ${spaceGrotesk.variable} antialiased`}>
         <Providers>
           {children}

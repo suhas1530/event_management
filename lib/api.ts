@@ -1,5 +1,5 @@
 /**
- * Typed API client for the avān backend.
+ * Typed API client for the Heptome backend.
  * Uses fetch (no axios dependency needed). Handles auth tokens, refresh, and error normalisation.
  */
 
@@ -352,23 +352,84 @@ export interface DashboardStats {
 
 // ─── Token storage (localStorage — works in browser only) ────────────────────
 
-const TOKEN_KEY = 'avan_access_token';
-const REFRESH_KEY = 'avan_refresh_token';
-const ADMIN_TOKEN_KEY = 'avan_admin_token';
-const ADMIN_REFRESH_KEY = 'avan_admin_refresh_token';
+const TOKEN_KEY = 'heptome_access_token';
+const REFRESH_KEY = 'heptome_refresh_token';
+const ADMIN_TOKEN_KEY = 'heptome_admin_token';
+const ADMIN_REFRESH_KEY = 'heptome_admin_refresh_token';
+
+/**
+ * Pre-rebrand keys. Sessions created before the Heptome rename are read once
+ * and migrated across, so nobody is silently logged out by the rebrand. The
+ * legacy key is removed on the first successful read.
+ */
+const LEGACY_TOKEN_KEY = 'avan_access_token';
+const LEGACY_REFRESH_KEY = 'avan_refresh_token';
+const LEGACY_ADMIN_TOKEN_KEY = 'avan_admin_token';
+const LEGACY_ADMIN_REFRESH_KEY = 'avan_admin_refresh_token';
+
+function migrateKey(key: string, legacyKey: string): void {
+  try {
+    const legacy = localStorage.getItem(legacyKey);
+    if (!legacy) return;
+    if (!localStorage.getItem(key)) localStorage.setItem(key, legacy);
+    localStorage.removeItem(legacyKey);
+  } catch {
+    /* storage blocked — the legacy value is still readable this session */
+  }
+}
+
+function readToken(key: string, legacyKey: string): string | null {
+  if (typeof window === 'undefined') return null;
+  const current = localStorage.getItem(key);
+  if (current) return current;
+  const legacy = localStorage.getItem(legacyKey);
+  if (!legacy) return null;
+  migrateKey(key, legacyKey);
+  return legacy;
+}
+
+function writeToken(key: string, legacyKey: string, value: string): void {
+  localStorage.setItem(key, value);
+  try {
+    localStorage.removeItem(legacyKey);
+  } catch {
+    /* ignore */
+  }
+}
+
+function clearTokens(keys: string[]): void {
+  for (const key of keys) localStorage.removeItem(key);
+}
 
 export const tokenStore = {
-  get: () => (typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null),
-  set: (t: string) => localStorage.setItem(TOKEN_KEY, t),
-  getRefresh: () => (typeof window !== 'undefined' ? localStorage.getItem(REFRESH_KEY) : null),
-  setRefresh: (t: string) => localStorage.setItem(REFRESH_KEY, t),
-  clear: () => { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(REFRESH_KEY); },
+  /**
+   * Moves every pre-rebrand key across in one pass.
+   *
+   * Reading is lazy per key, so without this a returning customer would carry
+   * their access token under the new name and their refresh token under the
+   * old one until the first 401 — half-migrated storage that is hard to reason
+   * about. The auth bootstrap calls this once on mount; on the server it is a
+   * no-op because reads are guarded by `typeof window`.
+   */
+  migrate: () => {
+    tokenStore.get()
+    tokenStore.getRefresh()
+    tokenStore.getAdmin()
+    tokenStore.getAdminRefresh()
+  },
 
-  getAdmin: () => (typeof window !== 'undefined' ? localStorage.getItem(ADMIN_TOKEN_KEY) : null),
-  setAdmin: (t: string) => localStorage.setItem(ADMIN_TOKEN_KEY, t),
-  getAdminRefresh: () => (typeof window !== 'undefined' ? localStorage.getItem(ADMIN_REFRESH_KEY) : null),
-  setAdminRefresh: (t: string) => localStorage.setItem(ADMIN_REFRESH_KEY, t),
-  clearAdmin: () => { localStorage.removeItem(ADMIN_TOKEN_KEY); localStorage.removeItem(ADMIN_REFRESH_KEY); },
+  get: () => readToken(TOKEN_KEY, LEGACY_TOKEN_KEY),
+  set: (t: string) => writeToken(TOKEN_KEY, LEGACY_TOKEN_KEY, t),
+  getRefresh: () => readToken(REFRESH_KEY, LEGACY_REFRESH_KEY),
+  setRefresh: (t: string) => writeToken(REFRESH_KEY, LEGACY_REFRESH_KEY, t),
+  clear: () => clearTokens([TOKEN_KEY, REFRESH_KEY, LEGACY_TOKEN_KEY, LEGACY_REFRESH_KEY]),
+
+  getAdmin: () => readToken(ADMIN_TOKEN_KEY, LEGACY_ADMIN_TOKEN_KEY),
+  setAdmin: (t: string) => writeToken(ADMIN_TOKEN_KEY, LEGACY_ADMIN_TOKEN_KEY, t),
+  getAdminRefresh: () => readToken(ADMIN_REFRESH_KEY, LEGACY_ADMIN_REFRESH_KEY),
+  setAdminRefresh: (t: string) => writeToken(ADMIN_REFRESH_KEY, LEGACY_ADMIN_REFRESH_KEY, t),
+  clearAdmin: () =>
+    clearTokens([ADMIN_TOKEN_KEY, ADMIN_REFRESH_KEY, LEGACY_ADMIN_TOKEN_KEY, LEGACY_ADMIN_REFRESH_KEY]),
 };
 
 // ─── Core fetch wrapper ───────────────────────────────────────────────────────
@@ -389,7 +450,14 @@ async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T>
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_BASE}${path}`, { ...fetchOpts, headers });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, { ...fetchOpts, headers });
+  } catch {
+    // Network failure (backend down, DNS, CORS hard-block) — normalise so
+    // callers show a truthful message instead of "Invalid credentials".
+    throw { error: 'Cannot reach the server. Please try again shortly.', code: 'NETWORK_ERROR' } as ApiError;
+  }
 
   // Token expired — try refresh once
   if (res.status === 401 && !skipAuth) {

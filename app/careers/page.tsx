@@ -10,7 +10,7 @@ import { siteConfig } from '@/lib/site-config'
 export const metadata: Metadata = {
   title: 'Careers',
   description:
-    'Join avān. as a technician, event planner or platform engineer. Work on real problems with real customers.',
+    'Join Heptome as a technician, event planner or platform engineer. Work on real problems with real customers.',
 }
 
 const ROLES = [
@@ -58,16 +58,16 @@ export default function CareersPage() {
           {ROLES.map(({ icon: Icon, title, body, points }) => (
             <article
               key={title}
-              className="flex flex-col rounded-2xl border border-white/8 bg-white/[0.02] p-7 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-primary/30"
+              className="flex flex-col rounded-2xl border border-border-subtle bg-muted/50 p-7 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-primary/30"
             >
               <span className="mb-5 grid size-11 place-items-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
                 <Icon className="size-5" aria-hidden="true" />
               </span>
-              <h3 className="text-base font-semibold text-white/90">{title}</h3>
-              <p className="mt-2.5 text-sm leading-6 text-white/45">{body}</p>
+              <h3 className="text-base font-semibold text-foreground/90">{title}</h3>
+              <p className="mt-2.5 text-sm leading-6 text-muted-foreground">{body}</p>
               <ul className="mt-5 flex-1 space-y-2">
                 {points.map(point => (
-                  <li key={point} className="flex gap-2.5 text-sm text-white/50">
+                  <li key={point} className="flex gap-2.5 text-sm text-muted-foreground">
                     <span className="mt-2 size-1 shrink-0 rounded-full bg-primary/60" aria-hidden="true" />
                     {point}
                   </li>
@@ -83,14 +83,14 @@ export default function CareersPage() {
         eyebrow="How we work"
         title="What we expect from each other"
         spacing="lg"
-        className="border-t border-white/8 bg-white/[0.01]"
+        className="border-t border-border-subtle bg-muted/50"
       >
         <div className="grid gap-5 md:grid-cols-3">
           {VALUES.map(({ icon: Icon, title, body }) => (
-            <div key={title} className="rounded-2xl border border-white/8 bg-white/[0.02] p-6">
+            <div key={title} className="rounded-2xl border border-border-subtle bg-muted/50 p-6">
               <Icon className="mb-4 size-5 text-primary" aria-hidden="true" />
-              <h3 className="text-[0.9375rem] font-semibold text-white/90">{title}</h3>
-              <p className="mt-2 text-sm leading-6 text-white/45">{body}</p>
+              <h3 className="text-[0.9375rem] font-semibold text-foreground/90">{title}</h3>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{body}</p>
             </div>
           ))}
         </div>
@@ -98,7 +98,7 @@ export default function CareersPage() {
 
       {/* No open roles → honest empty state, with a way in. */}
       <Section spacing="lg">
-        <div className="rounded-2xl border border-white/8 bg-white/[0.02]">
+        <div className="rounded-2xl border border-border-subtle bg-muted/50">
           <EmptyState
             icon={MapPin}
             title="No open roles posted right now"
@@ -107,7 +107,7 @@ export default function CareersPage() {
             secondaryAction={{ label: 'Explore the platform', href: '/services' }}
           />
         </div>
-        <p className="mt-8 text-center text-sm text-white/35">
+        <p className="mt-8 text-center text-sm text-muted-foreground/80">
           Prefer email?{' '}
           <a
             href={`mailto:${siteConfig.contact.email}`}

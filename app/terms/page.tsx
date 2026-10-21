@@ -4,7 +4,7 @@ import LegalPage from '@/components/layout/LegalPage'
 export const metadata: Metadata = {
   title: 'Terms & Conditions',
   description:
-    'The terms that govern your use of avān. — bookings, event requests, payments, cancellations and responsibilities for customers and technicians.',
+    'The terms that govern your use of Heptome — bookings, event requests, payments, cancellations and responsibilities for customers and technicians.',
 }
 
 export default function TermsPage() {
@@ -13,12 +13,12 @@ export default function TermsPage() {
       eyebrow="Legal"
       title="Terms & Conditions"
       updated="2026-01-15"
-      intro="These terms explain the agreement between you and avān. when you use our platform to book home services or plan an event. By creating an account or placing a booking, you accept them."
+      intro="These terms explain the agreement between you and Heptome when you use our platform to book home services or plan an event. By creating an account or placing a booking, you accept them."
       sections={[
         {
           heading: 'About this agreement',
           paragraphs: [
-            'avān. operates a marketplace connecting customers with verified technicians for home services, and with event managers for the planning and execution of events. When you place a booking, your contract for the service itself is between you and the technician or event manager delivering it. We operate the platform, the payment flow and the quality standards that hold all parties to the same rules.',
+            'Heptome operates a marketplace connecting customers with verified technicians for home services, and with event managers for the planning and execution of events. When you place a booking, your contract for the service itself is between you and the technician or event manager delivering it. We operate the platform, the payment flow and the quality standards that hold all parties to the same rules.',
             'These terms apply to every visitor and registered user of the platform. Where a specific booking includes additional commitments — for example, a signed event proposal — those commitments supplement, and do not replace, these terms.',
           ],
         },
@@ -92,7 +92,7 @@ export default function TermsPage() {
         {
           heading: 'Intellectual property',
           paragraphs: [
-            'The avān. name, logo, interface and underlying software are our property. Reference images, designs and event concepts you submit remain yours; by uploading them you grant us a limited licence to host and display them as part of delivering your request.',
+            'The Heptome name, logo, interface and underlying software are our property. Reference images, designs and event concepts you submit remain yours; by uploading them you grant us a limited licence to host and display them as part of delivering your request.',
           ],
         },
         {

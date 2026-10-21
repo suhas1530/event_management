@@ -34,14 +34,14 @@ export default function GlobalError({
               fontSize: '0.6875rem',
               letterSpacing: '0.25em',
               textTransform: 'uppercase',
-              color: '#d7b98b',
+              color: '#d5ae79',
               margin: 0,
             }}
           >
             Something went wrong
           </p>
           <h1 style={{ fontSize: '2rem', lineHeight: 1.15, margin: '1rem 0 0' }}>
-            We couldn’t load avān.
+            We couldn’t load Heptome.
           </h1>
           <p style={{ color: 'rgba(244,241,236,0.55)', lineHeight: 1.7, margin: '1rem 0 0' }}>
             The application hit an unexpected error. Reloading usually fixes it.
@@ -54,8 +54,8 @@ export default function GlobalError({
               cursor: 'pointer',
               border: 0,
               borderRadius: '0.5rem',
-              background: '#d7b98b',
-              color: '#17130e',
+              background: '#d5ae79',
+              color: '#17151d',
               fontWeight: 600,
               padding: '0.875rem 1.75rem',
             }}

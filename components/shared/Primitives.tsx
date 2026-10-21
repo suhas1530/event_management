@@ -51,11 +51,11 @@ export function PageHeader({
           {eyebrow}
         </span>
       )}
-      <h1 className="text-balance font-serif text-[clamp(2rem,5vw,3.25rem)] leading-[1.05] tracking-tight text-white">
+      <h1 className="text-balance font-serif text-[clamp(2rem,5vw,3.25rem)] leading-[1.05] tracking-tight text-foreground">
         {title}
       </h1>
       {description && (
-        <p className="max-w-2xl text-pretty text-base leading-7 text-white/50">{description}</p>
+        <p className="max-w-2xl text-pretty text-base leading-7 text-muted-foreground">{description}</p>
       )}
       {actions && <div className="mt-1 flex flex-wrap items-center gap-3">{actions}</div>}
     </motion.header>
@@ -112,12 +112,12 @@ export function Section({
         >
           {eyebrow && <span className="text-label text-primary">{eyebrow}</span>}
           {title && (
-            <h2 className="text-balance font-serif text-[clamp(1.75rem,4vw,2.75rem)] leading-[1.1] tracking-tight text-white">
+            <h2 className="text-balance font-serif text-[clamp(1.75rem,4vw,2.75rem)] leading-[1.1] tracking-tight text-foreground">
               {title}
             </h2>
           )}
           {description && (
-            <p className="text-pretty text-base leading-7 text-white/45">{description}</p>
+            <p className="text-pretty text-base leading-7 text-muted-foreground">{description}</p>
           )}
         </motion.div>
 

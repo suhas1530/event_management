@@ -138,12 +138,12 @@ export default function ContactForm() {
 
         <div className="mt-14 grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12">
           {/* ── Form ────────────────────────────────────────────────────── */}
-          <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-6 sm:p-8">
+          <div className="rounded-2xl border border-border-subtle bg-muted/50 p-6 sm:p-8">
             {sent ? (
               <div className="flex flex-col items-center py-10 text-center">
                 <SuccessIcon />
-                <h2 className="mt-6 text-balance font-serif text-2xl text-white">Message received.</h2>
-                <p className="mt-3 max-w-sm text-pretty text-sm leading-6 text-white/50">
+                <h2 className="mt-6 text-balance font-serif text-2xl text-foreground">Message received.</h2>
+                <p className="mt-3 max-w-sm text-pretty text-sm leading-6 text-muted-foreground">
                   Your enquiry reference is{' '}
                   <span className="font-medium text-primary">{sent.slice(-8).toUpperCase()}</span>. Our team
                   will respond within one business day.
@@ -158,12 +158,12 @@ export default function ContactForm() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} noValidate>
-                <h2 className="text-lg font-medium text-white/90">Send us a message</h2>
-                <p className="mt-1.5 text-sm text-white/40">All fields marked * are required.</p>
+                <h2 className="text-lg font-medium text-foreground/90">Send us a message</h2>
+                <p className="mt-1.5 text-sm text-muted-foreground">All fields marked * are required.</p>
 
                 {/* Topic */}
                 <fieldset className="mt-7">
-                  <legend className="text-label text-white/45">What is this about?</legend>
+                  <legend className="text-label text-muted-foreground">What is this about?</legend>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {TOPICS.map(({ value, label, icon: Icon }) => (
                       <label
@@ -172,7 +172,7 @@ export default function ContactForm() {
                           'inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3.5 py-2 text-sm transition-all duration-200 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring',
                           form.topic === value
                             ? 'border-primary/60 bg-primary/10 text-primary'
-                            : 'border-white/12 text-white/60 hover:border-white/25 hover:text-white'
+                            : 'border-border text-muted-foreground h hover:text-foreground'
                         )}
                       >
                         <input
@@ -232,7 +232,7 @@ export default function ContactForm() {
 
                 {/* Message */}
                 <div className="mt-5">
-                  <label htmlFor="message" className="text-label text-white/45">
+                  <label htmlFor="message" className="text-label text-muted-foreground">
                     Message<span className="ml-1 text-primary">*</span>
                   </label>
                   <textarea
@@ -244,10 +244,10 @@ export default function ContactForm() {
                     aria-describedby={errors.message ? 'message-error' : 'message-hint'}
                     placeholder="Tell us about your requirement, preferred dates, or anything else we should know."
                     className={cn(
-                      'mt-2 w-full resize-y rounded-lg border bg-white/[0.03] px-4 py-3 text-sm leading-6 text-white placeholder:text-white/25 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/25',
+                      'mt-2 w-full resize-y rounded-lg border bg-muted/50 px-4 py-3 text-sm leading-6 text-foreground placeholder:text-muted-foreground/80 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/25',
                       errors.message
                         ? 'border-red-400/60 focus:border-red-400'
-                        : 'border-white/12 focus:border-primary/60'
+                        : 'border-border focus:border-primary/60'
                     )}
                   />
                   {errors.message ? (
@@ -256,7 +256,7 @@ export default function ContactForm() {
                       {errors.message}
                     </p>
                   ) : (
-                    <p id="message-hint" className="mt-1.5 text-xs text-white/30">
+                    <p id="message-hint" className="mt-1.5 text-xs text-muted-foreground/80">
                       The more detail you share, the faster we can help.
                     </p>
                   )}
@@ -285,28 +285,28 @@ export default function ContactForm() {
 
           {/* ── Channels ────────────────────────────────────────────────── */}
           <aside className="space-y-6">
-            <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-6 sm:p-7">
-              <h2 className="text-lg font-medium text-white/90">Reach us directly</h2>
-              <p className="mt-1.5 text-sm leading-6 text-white/40">
+            <div className="rounded-2xl border border-border-subtle bg-muted/50 p-6 sm:p-7">
+              <h2 className="text-lg font-medium text-foreground/90">Reach us directly</h2>
+              <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
                 Prefer to skip the form? Our support desk is available during working hours.
               </p>
               <ul className="mt-6 space-y-5">
                 {channels.map(({ icon: Icon, label, value, href }) => (
                   <li key={label} className="flex gap-4">
-                    <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-primary">
+                    <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-border bg-muted/50 text-primary">
                       <Icon className="size-[18px]" aria-hidden="true" />
                     </span>
                     <div className="min-w-0">
-                      <p className="text-label text-white/35">{label}</p>
+                      <p className="text-label text-muted-foreground/80">{label}</p>
                       {href ? (
                         <a
                           href={href}
-                          className="mt-1 block truncate text-[0.9375rem] text-white/80 transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:text-primary"
+                          className="mt-1 block truncate text-[0.9375rem] text-foreground/90 transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:text-primary"
                         >
                           {value}
                         </a>
                       ) : (
-                        <p className="mt-1 text-[0.9375rem] text-white/80">{value}</p>
+                        <p className="mt-1 text-[0.9375rem] text-foreground/90">{value}</p>
                       )}
                     </div>
                   </li>
@@ -315,8 +315,8 @@ export default function ContactForm() {
             </div>
 
             <div className="rounded-2xl border border-primary/20 bg-primary/[0.06] p-6 sm:p-7">
-              <h2 className="text-base font-medium text-white/90">Need something faster?</h2>
-              <p className="mt-2 text-sm leading-6 text-white/45">
+              <h2 className="text-base font-medium text-foreground/90">Need something faster?</h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 If you already know what you need, you can skip the queue entirely and start the flow
                 yourself.
               </p>
@@ -376,7 +376,7 @@ function Field({
 }: FieldProps) {
   return (
     <div>
-      <label htmlFor={id} className="text-label text-white/45">
+      <label htmlFor={id} className="text-label text-muted-foreground">
         {label}
         {required && <span className="ml-1 text-primary">*</span>}
       </label>
@@ -391,8 +391,8 @@ function Field({
         aria-invalid={error ? 'true' : undefined}
         aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
         className={cn(
-          'mt-2 w-full rounded-lg border bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder:text-white/25 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/25',
-          error ? 'border-red-400/60 focus:border-red-400' : 'border-white/12 focus:border-primary/60'
+          'mt-2 w-full rounded-lg border bg-muted/50 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/80 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/25',
+          error ? 'border-red-400/60 focus:border-red-400' : 'border-border focus:border-primary/60'
         )}
       />
       {error ? (
@@ -401,7 +401,7 @@ function Field({
           {error}
         </p>
       ) : hint ? (
-        <p id={`${id}-hint`} className="mt-1.5 text-xs text-white/30">
+        <p id={`${id}-hint`} className="mt-1.5 text-xs text-muted-foreground/80">
           {hint}
         </p>
       ) : null}

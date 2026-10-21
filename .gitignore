@@ -23,3 +23,9 @@ pnpm-debug.log*
 
 # Build outputs
 backend/dist/
+
+# Test outputs
+test-results/
+playwright-report/
+blob-report/
+coverage/

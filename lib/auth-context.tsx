@@ -36,6 +36,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // Pre-rebrand sessions are moved onto the Heptome keys before the first read.
+  useEffect(() => { tokenStore.migrate() }, [])
+
   useEffect(() => { refreshUser() }, [refreshUser])
 
   const login = async (email: string, password: string) => {

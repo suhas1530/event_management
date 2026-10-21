@@ -26,7 +26,7 @@ import { siteConfig } from '@/lib/site-config'
 export const metadata: Metadata = {
   title: 'Help Center',
   description:
-    'Answers about booking technicians, event requests, proposals, payments, cancellations and your account on avān.',
+    'Answers about booking technicians, event requests, proposals, payments, cancellations and your account on Heptome.',
 }
 
 const TOPICS = [
@@ -152,13 +152,13 @@ export default function HelpPage() {
           {TOPICS.map(({ icon: Icon, title, body, link }) => (
             <article
               key={title}
-              className="group flex flex-col rounded-2xl border border-white/8 bg-white/[0.02] p-6 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-primary/30 hover:bg-white/[0.04]"
+              className="group flex flex-col rounded-2xl border border-border-subtle bg-muted/50 p-6 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-primary/30 hover:bg-muted/50"
             >
               <span className="mb-5 grid size-11 place-items-center rounded-xl border border-primary/20 bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-105">
                 <Icon className="size-5" aria-hidden="true" />
               </span>
-              <h3 className="text-[0.9375rem] font-semibold text-white/90">{title}</h3>
-              <p className="mt-2.5 flex-1 text-sm leading-6 text-white/45">{body}</p>
+              <h3 className="text-[0.9375rem] font-semibold text-foreground/90">{title}</h3>
+              <p className="mt-2.5 flex-1 text-sm leading-6 text-muted-foreground">{body}</p>
               <Link
                 href={link.href}
                 className="mt-5 inline-flex items-center gap-1.5 text-[0.8125rem] font-medium text-primary transition-colors duration-200 hover:text-primary-hover focus-visible:outline-none focus-visible:text-primary-hover"
@@ -174,7 +174,7 @@ export default function HelpPage() {
       {/* FAQ accordion */}
       <Section id="faqs" eyebrow="FAQs" title="Frequently asked questions" spacing="lg">
         <div className="mx-auto max-w-3xl">
-          <Accordion className="rounded-2xl border border-white/8 bg-white/[0.02] px-5 sm:px-7">
+          <Accordion className="rounded-2xl border border-border-subtle bg-muted/50 px-5 sm:px-7">
             {FAQS.map(group => (
               <div key={group.group}>
                 <p className="pb-1 pt-7 text-label text-primary first:pt-0">{group.group}</p>
@@ -183,7 +183,7 @@ export default function HelpPage() {
                     <AccordionItem key={item.q} value={item.q}>
                       <AccordionTrigger>{item.q}</AccordionTrigger>
                       <AccordionContent>
-                        <p className="text-pretty text-sm leading-7 text-white/50">{item.a}</p>
+                        <p className="text-pretty text-sm leading-7 text-muted-foreground">{item.a}</p>
                       </AccordionContent>
                     </AccordionItem>
                   ))}
@@ -195,17 +195,17 @@ export default function HelpPage() {
       </Section>
 
       {/* Still stuck */}
-      <Section spacing="lg" className="border-t border-white/8 bg-white/[0.01]">
+      <Section spacing="lg" className="border-t border-border-subtle bg-muted/50">
         <div className="mx-auto grid max-w-4xl gap-5 sm:grid-cols-3">
           {[
             { icon: SearchX, title: 'Still stuck?', body: 'Send us the details and we will investigate personally.', action: { label: 'Send a message', href: '/contact' } },
             { icon: CreditCard, title: 'Billing question', body: 'Invoices, payment status and refunds for any booking.', action: { label: 'View bookings', href: '/bookings' } },
             { icon: MapPin, title: 'Service area', body: 'We currently operate on-site across India. Enter your city to check.', action: { label: 'Check services', href: '/services' } },
           ].map(({ icon: Icon, title, body, action }) => (
-            <div key={title} className="flex flex-col rounded-2xl border border-white/8 bg-white/[0.02] p-6">
+            <div key={title} className="flex flex-col rounded-2xl border border-border-subtle bg-muted/50 p-6">
               <Icon className="mb-4 size-5 text-primary" aria-hidden="true" />
-              <h3 className="text-[0.9375rem] font-semibold text-white/90">{title}</h3>
-              <p className="mt-2 flex-1 text-sm leading-6 text-white/45">{body}</p>
+              <h3 className="text-[0.9375rem] font-semibold text-foreground/90">{title}</h3>
+              <p className="mt-2 flex-1 text-sm leading-6 text-muted-foreground">{body}</p>
               <Link
                 href={action.href}
                 className="mt-5 inline-flex items-center gap-1.5 text-[0.8125rem] font-medium text-primary hover:text-primary-hover"
@@ -220,12 +220,12 @@ export default function HelpPage() {
 
       {/* Trust note */}
       <div className="mx-auto w-full max-w-[1380px] px-5 pb-20 lg:px-10">
-        <div className="flex flex-col items-start gap-4 rounded-2xl border border-white/8 bg-white/[0.02] p-6 sm:flex-row sm:items-center sm:gap-5 sm:p-7">
+        <div className="flex flex-col items-start gap-4 rounded-2xl border border-border-subtle bg-muted/50 p-6 sm:flex-row sm:items-center sm:gap-5 sm:p-7">
           <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
             <ShieldCheck className="size-5" aria-hidden="true" />
           </span>
-          <p className="text-pretty text-sm leading-6 text-white/50">
-            Every booking on avān. is covered by our service guarantee. If something does not go to plan,
+          <p className="text-pretty text-sm leading-6 text-muted-foreground">
+            Every booking on Heptome is covered by our service guarantee. If something does not go to plan,
             tell us within 24 hours and we will make it right.
           </p>
         </div>

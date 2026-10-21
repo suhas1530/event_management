@@ -20,10 +20,10 @@ export default function NotFound() {
         </span>
 
         <p className="mt-8 text-label text-primary">Error 404</p>
-        <h1 className="mt-3 text-balance font-serif text-[clamp(2rem,5vw,3.25rem)] leading-[1.05] tracking-tight text-white">
+        <h1 className="mt-3 text-balance font-serif text-[clamp(2rem,5vw,3.25rem)] leading-[1.05] tracking-tight text-foreground">
           This page has moved on.
         </h1>
-        <p className="mt-5 max-w-md text-pretty text-base leading-7 text-white/50">
+        <p className="mt-5 max-w-md text-pretty text-base leading-7 text-muted-foreground">
           The link you followed is broken or the page no longer exists. Try a search, or head
           back to something you know.
         </p>
@@ -51,7 +51,7 @@ export default function NotFound() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm text-white/40 transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="text-sm text-muted-foreground transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {link.label}
             </Link>

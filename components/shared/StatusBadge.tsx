@@ -19,7 +19,7 @@ const TONE_CLASSES: Record<StatusTone, string> = {
   warning: 'text-amber-300 bg-amber-500/12 ring-amber-500/25',
   error: 'text-red-300 bg-red-500/12 ring-red-500/25',
   info: 'text-sky-300 bg-sky-500/12 ring-sky-500/25',
-  neutral: 'text-white/55 bg-white/6 ring-white/12',
+  neutral: 'text-muted-foreground bg-muted/60 ring-white/12',
 }
 
 /** Raw enum value → human label + tone. */

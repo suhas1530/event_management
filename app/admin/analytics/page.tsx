@@ -93,7 +93,7 @@ export default function AdminAnalyticsPage() {
   /** Move the period control into the header without duplicating PageHeader. */
   const periodControl = (
     <div
-      className="flex flex-wrap items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] p-1"
+      className="flex flex-wrap items-center gap-1.5 rounded-lg border border-border bg-muted/50 p-1"
       role="group"
       aria-label="Reporting period"
     >
@@ -107,7 +107,7 @@ export default function AdminAnalyticsPage() {
             aria-pressed={active}
             className={cn(
               'min-h-9 rounded-md px-3 text-[0.8125rem] font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              active ? 'bg-primary/12 text-primary ring-1 ring-inset ring-primary/30' : 'text-white/45 hover:text-white'
+              active ? 'bg-primary/12 text-accent ring-1 ring-inset ring-accent/30' : 'text-muted-foreground hover:text-foreground'
             )}
           >
             {p.label}
@@ -122,7 +122,7 @@ export default function AdminAnalyticsPage() {
       <div>
         <Link
           href="/admin/dashboard"
-          className="inline-flex items-center gap-2 text-xs text-white/45 transition-colors duration-200 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="inline-flex items-center gap-2 text-xs text-muted-foreground transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <ArrowLeft className="size-3.5" aria-hidden="true" /> Dashboard
         </Link>
@@ -145,13 +145,13 @@ export default function AdminAnalyticsPage() {
         <div className="space-y-6" role="list" aria-label="Loading analytics">
           <div className="grid gap-4 sm:grid-cols-2">
             {[0, 1].map(i => (
-              <div key={i} className="rounded-2xl border border-white/8 bg-white/[0.02] p-6">
+              <div key={i} className="rounded-2xl border border-border-subtle bg-muted/50 p-6">
                 <Skeleton className="h-3 w-24" />
                 <Skeleton className="mt-3 h-8 w-32" />
               </div>
             ))}
           </div>
-          <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-6">
+          <div className="rounded-2xl border border-border-subtle bg-muted/50 p-6">
             <Skeleton className="h-4 w-40" />
             <Skeleton className="mt-6 h-48 w-full" />
           </div>
@@ -160,32 +160,32 @@ export default function AdminAnalyticsPage() {
         <>
           {/* Totals */}
           <div className="grid gap-4 sm:grid-cols-2">
-            <article className="rounded-2xl border border-white/8 bg-white/[0.02] p-6">
-              <p className="flex items-center gap-2 text-label text-white/40">
+            <article className="rounded-2xl border border-border-subtle bg-muted/50 p-6">
+              <p className="flex items-center gap-2 text-label text-muted-foreground">
                 <IndianRupee className="size-4 text-primary" aria-hidden="true" />
                 Revenue ({PERIODS.find(p => p.key === period)?.label.toLowerCase()})
               </p>
-              <p className="mt-3 font-serif text-3xl text-white tabular-nums">{money(total)}</p>
+              <p className="mt-3 font-serif text-3xl text-foreground tabular-nums">{money(total)}</p>
             </article>
-            <article className="rounded-2xl border border-white/8 bg-white/[0.02] p-6">
-              <p className="flex items-center gap-2 text-label text-white/40">
+            <article className="rounded-2xl border border-border-subtle bg-muted/50 p-6">
+              <p className="flex items-center gap-2 text-label text-muted-foreground">
                 <CalendarDays className="size-4 text-primary" aria-hidden="true" />
                 Bookings recorded
               </p>
-              <p className="mt-3 font-serif text-3xl text-white tabular-nums">
+              <p className="mt-3 font-serif text-3xl text-foreground tabular-nums">
                 {(bookings?.byStatus ?? []).reduce((sum, s) => sum + s.count, 0).toLocaleString('en-IN')}
               </p>
             </article>
           </div>
 
           {/* Revenue chart */}
-          <section className="rounded-2xl border border-white/8 bg-white/[0.02] p-6">
+          <section className="rounded-2xl border border-border-subtle bg-muted/50 p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="flex items-center gap-2 text-base font-medium text-white/90">
+              <h2 className="flex items-center gap-2 text-base font-medium text-foreground/90">
                 <BarChart3 className="size-[18px] text-primary" aria-hidden="true" />
                 Revenue over time
               </h2>
-              <p className="text-xs text-white/35">Peak {money(peak)}</p>
+              <p className="text-xs text-muted-foreground/80">Peak {money(peak)}</p>
             </div>
 
             {revenue.length === 0 ? (
@@ -217,7 +217,7 @@ export default function AdminAnalyticsPage() {
                     )
                   })}
                 </ul>
-                <div className="mt-3 flex items-center justify-between text-[0.6875rem] text-white/30">
+                <div className="mt-3 flex items-center justify-between text-[0.6875rem] text-muted-foreground/80">
                   <span>{axisLabel(revenue[0].date, period)}</span>
                   <span>{axisLabel(revenue[revenue.length - 1].date, period)}</span>
                 </div>
@@ -227,10 +227,10 @@ export default function AdminAnalyticsPage() {
 
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Bookings by status */}
-            <section className="rounded-2xl border border-white/8 bg-white/[0.02] p-6">
-              <h2 className="text-base font-medium text-white/90">Bookings by status</h2>
+            <section className="rounded-2xl border border-border-subtle bg-muted/50 p-6">
+              <h2 className="text-base font-medium text-foreground/90">Bookings by status</h2>
               {(bookings?.byStatus.length ?? 0) === 0 ? (
-                <p className="mt-4 text-sm text-white/40">No bookings recorded yet.</p>
+                <p className="mt-4 text-sm text-muted-foreground">No bookings recorded yet.</p>
               ) : (
                 <ul className="mt-5 space-y-3" role="list">
                   {bookings!.byStatus
@@ -240,9 +240,9 @@ export default function AdminAnalyticsPage() {
                       <li key={row.status}>
                         <div className="flex items-center justify-between gap-3">
                           <StatusBadge status={row.status} size="sm" />
-                          <span className="text-sm text-white/60 tabular-nums">{row.count}</span>
+                          <span className="text-sm text-muted-foreground tabular-nums">{row.count}</span>
                         </div>
-                        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/8">
+                        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted/60">
                           <div
                             className="h-full rounded-full bg-primary/60"
                             style={{ width: `${(row.count / statusMax) * 100}%` }}
@@ -255,10 +255,10 @@ export default function AdminAnalyticsPage() {
             </section>
 
             {/* Bookings by event type */}
-            <section className="rounded-2xl border border-white/8 bg-white/[0.02] p-6">
-              <h2 className="text-base font-medium text-white/90">Popular event types</h2>
+            <section className="rounded-2xl border border-border-subtle bg-muted/50 p-6">
+              <h2 className="text-base font-medium text-foreground/90">Popular event types</h2>
               {(bookings?.byEventType.length ?? 0) === 0 ? (
-                <p className="mt-4 text-sm text-white/40">No event bookings recorded yet.</p>
+                <p className="mt-4 text-sm text-muted-foreground">No event bookings recorded yet.</p>
               ) : (
                 <ol className="mt-5 space-y-3" role="list">
                   {bookings!.byEventType
@@ -267,17 +267,17 @@ export default function AdminAnalyticsPage() {
                     .slice(0, 8)
                     .map((row, index) => (
                       <li key={row.type} className="flex items-center gap-3">
-                        <span className="w-5 shrink-0 text-xs text-white/25 tabular-nums">{index + 1}</span>
-                        <span className="min-w-0 flex-1 truncate text-sm text-white/70">
+                        <span className="w-5 shrink-0 text-xs text-muted-foreground/80 tabular-nums">{index + 1}</span>
+                        <span className="min-w-0 flex-1 truncate text-sm text-foreground/90">
                           {row.type.replaceAll('_', ' ').toLowerCase()}
                         </span>
-                        <div className="hidden h-1.5 w-24 overflow-hidden rounded-full bg-white/8 sm:block">
+                        <div className="hidden h-1.5 w-24 overflow-hidden rounded-full bg-muted/60 sm:block">
                           <div
                             className="h-full rounded-full bg-primary/40"
                             style={{ width: `${(row.count / typeMax) * 100}%` }}
                           />
                         </div>
-                        <span className="w-8 shrink-0 text-right text-sm text-white/50 tabular-nums">{row.count}</span>
+                        <span className="w-8 shrink-0 text-right text-sm text-muted-foreground tabular-nums">{row.count}</span>
                       </li>
                     ))}
                 </ol>

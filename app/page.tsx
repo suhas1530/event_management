@@ -4,22 +4,29 @@ import { useRef } from 'react'
 import SiteShell from '@/components/layout/SiteShell'
 import PlatformStats from '@/components/brand/PlatformStats'
 import HeroSection from '@/components/home/HeroSection'
+import DiscoveryPaths from '@/components/home/DiscoveryPaths'
 import CategoryGrid from '@/components/home/CategoryGrid'
 import FeaturedEvents from '@/components/home/FeaturedEvents'
 import ServicesSection from '@/components/home/ServicesSection'
+import HomeServicesShowcase from '@/components/home/HomeServicesShowcase'
 import HowItWorks from '@/components/home/HowItWorks'
 import VenuePreview from '@/components/home/VenuePreview'
-import TechStrip from '@/components/home/TechStrip'
+import PartnerBand from '@/components/home/PartnerBand'
 import FinalCTA from '@/components/home/FinalCTA'
 import { usePrefersReducedMotion } from '@/lib/motion'
 import { useHomeAnimations } from '@/lib/use-home-animations'
 
 /**
- * Immersive homepage.
+ * The Heptome homepage.
  *
- * Story flow: cinematic 3D hero → live platform stats → event categories →
- * featured experiences (live API) → services → how it works → venue preview →
- * home-services strip → final CTA.
+ * Story flow: the living-world hero → the two discovery paths (both verticals at
+ * equal weight) → live platform counts → the event catalogue and its services →
+ * the ivory home-services showcase → how both journeys run → the world preview
+ * → partner recruitment → the final dual CTA.
+ *
+ * Surface rhythm alternates deliberately: cinematic dark with champagne for the
+ * event half, ivory with purple for the home half, so one brand reads as two
+ * distinct products rather than a single dark page.
  *
  * All scroll choreography is added by `useHomeAnimations`; without it (reduced
  * motion, no JS yet) every section renders in its final, readable state.
@@ -31,15 +38,17 @@ export default function HomePage() {
 
   return (
     <SiteShell transparentHeader>
-      <div ref={rootRef} className="bg-ink-950 text-slate-50">
+      <div ref={rootRef} className="immersive bg-ink-950 text-slate-50">
         <HeroSection />
+        <DiscoveryPaths />
         <PlatformStats />
         <CategoryGrid />
         <FeaturedEvents />
         <ServicesSection />
+        <HomeServicesShowcase />
         <HowItWorks />
         <VenuePreview />
-        <TechStrip />
+        <PartnerBand />
         <FinalCTA />
       </div>
     </SiteShell>

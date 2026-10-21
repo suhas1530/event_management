@@ -23,8 +23,8 @@ const STATUS_LABELS: Record<string, string> = {
 const STATUS_COLORS: Record<string, string> = {
   REQUESTED: 'text-blue-300', PENDING_REVIEW: 'text-yellow-300', QUOTED: 'text-purple-300',
   CUSTOMER_APPROVAL: 'text-orange-300', PAYMENT_PENDING: 'text-red-300',
-  CONFIRMED: 'text-[#d7b98b]', IN_PROGRESS: 'text-green-300', COMPLETED: 'text-green-400',
-  CANCELLED: 'text-white/30', REJECTED: 'text-red-400',
+  CONFIRMED: 'text-gold-text', IN_PROGRESS: 'text-green-300', COMPLETED: 'text-green-400',
+  CANCELLED: 'text-muted-foreground/80', REJECTED: 'text-red-400',
 }
 
 function fmt(n: number) { return '₹' + n.toLocaleString('en-IN') }
@@ -123,41 +123,41 @@ export default function AdminBookingDetailPage() {
     } finally { setCreatingQuote(false) }
   }
 
-  if (loading) return <div className="flex justify-center py-24"><Loader2 className="size-8 animate-spin text-[#d7b98b]" /></div>
-  if (!booking) return <div className="py-20 text-center text-sm text-white/40">Booking not found</div>
+  if (loading) return <div className="flex justify-center py-24"><Loader2 className="size-8 animate-spin text-gold-text" /></div>
+  if (!booking) return <div className="py-20 text-center text-sm text-muted-foreground">Booking not found</div>
 
   return (
     <div>
       {/* Header */}
       <div className="mb-6">
-        <Link href="/admin/bookings" className="inline-flex items-center gap-2 text-xs text-white/30 hover:text-[#d7b98b]">
+        <Link href="/admin/bookings" className="inline-flex items-center gap-2 text-xs text-muted-foreground/80 hover:text-gold-text">
           <ArrowLeft className="size-3" /> All bookings
         </Link>
         <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="font-mono text-xs text-[#d7b98b]">{booking.bookingNumber}</p>
-            <h1 className="mt-1 font-serif text-3xl text-white">{booking.event?.title ?? 'Booking'}</h1>
-            <p className="mt-1 text-sm text-white/50">
+            <p className="font-mono text-xs text-gold-text">{booking.bookingNumber}</p>
+            <h1 className="mt-1 font-serif text-3xl text-foreground">{booking.event?.title ?? 'Booking'}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
               {booking.user?.name} · {fmtDate(booking.eventDate)} · {booking.guestCount} guests
             </p>
           </div>
           {/* Status selector */}
           <div className="flex items-center gap-3">
-            {statusUpdating && <Loader2 className="size-4 animate-spin text-[#d7b98b]" />}
+            {statusUpdating && <Loader2 className="size-4 animate-spin text-gold-text" />}
             <select value={booking.status} onChange={e => handleStatusChange(e.target.value)}
-              className={`border border-white/20 bg-[#111114] px-3 py-2 text-sm focus:border-[#d7b98b] focus:outline-none ${STATUS_COLORS[booking.status]}`}>
-              {STATUS_OPTIONS.map(s => <option key={s} value={s} className="text-white bg-[#111114]">{STATUS_LABELS[s]}</option>)}
+              className={`border border-border bg-card px-3 py-2 text-sm focus:border-[#d5ae79] focus:outline-none ${STATUS_COLORS[booking.status]}`}>
+              {STATUS_OPTIONS.map(s => <option key={s} value={s} className="text-foreground bg-card">{STATUS_LABELS[s]}</option>)}
             </select>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="mb-6 border-b border-white/10">
+      <div className="mb-6 border-b border-border">
         <div className="flex gap-0 overflow-x-auto">
           {(['overview', 'quote', 'messages', 'timeline', 'documents'] as Tab[]).map(t => (
             <button type="button" key={t} onClick={() => setTab(t)}
-              className={`flex-shrink-0 px-5 py-3 text-[10px] uppercase tracking-[0.2em] transition ${tab === t ? 'border-b-2 border-[#d7b98b] text-[#d7b98b]' : 'text-white/40 hover:text-white/70'}`}>
+              className={`flex-shrink-0 px-5 py-3 text-[10px] uppercase tracking-[0.2em] transition ${tab === t ? 'border-b-2 border-[#d5ae79] text-gold-text' : 'text-muted-foreground hover:text-foreground/90'}`}>
               {t}
             </button>
           ))}
@@ -171,7 +171,7 @@ export default function AdminBookingDetailPage() {
             <AdminSection title="Customer">
               <dl className="grid gap-3 sm:grid-cols-2 text-sm">
                 {[['Name', booking.user?.name], ['Email', booking.user?.email], ['Phone', booking.user?.phone ?? '—']].map(([k, v]) => (
-                  <div key={k as string}><dt className="text-[10px] uppercase tracking-[0.15em] text-white/30">{k}</dt><dd className="mt-1 text-white/70">{v}</dd></div>
+                  <div key={k as string}><dt className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/80">{k}</dt><dd className="mt-1 text-foreground/90">{v}</dd></div>
                 ))}
               </dl>
             </AdminSection>
@@ -188,7 +188,7 @@ export default function AdminBookingDetailPage() {
                   ['Notes', booking.notes ?? '—'],
                   ['Special requests', booking.specialRequests ?? '—'],
                 ].filter(([, v]) => v).map(([k, v]) => (
-                  <div key={k as string}><dt className="text-[10px] uppercase tracking-[0.15em] text-white/30">{k}</dt><dd className="mt-1 text-white/70">{v}</dd></div>
+                  <div key={k as string}><dt className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/80">{k}</dt><dd className="mt-1 text-foreground/90">{v}</dd></div>
                 ))}
               </dl>
             </AdminSection>
@@ -196,9 +196,9 @@ export default function AdminBookingDetailPage() {
             <AdminSection title="Internal notes">
               <textarea value={internalNotes} onChange={e => setInternalNotes(e.target.value)} rows={4}
                 placeholder="Internal notes visible to admin only…"
-                className="w-full bg-transparent text-sm text-white/70 placeholder:text-white/20 focus:outline-none resize-none" />
+                className="w-full bg-transparent text-sm text-foreground/90 placeholder:text-muted-foreground/80 focus:outline-none resize-none" />
               <button onClick={handleSaveNotes} disabled={savingNotes}
-                className="mt-2 flex items-center gap-1.5 text-[10px] uppercase tracking-[0.15em] text-[#d7b98b] hover:underline disabled:opacity-50" type="button">
+                className="mt-2 flex items-center gap-1.5 text-[10px] uppercase tracking-[0.15em] text-gold-text hover:underline disabled:opacity-50" type="button">
                 <Save className="size-3" /> {savingNotes ? 'Saving…' : 'Save notes'}
               </button>
             </AdminSection>
@@ -208,24 +208,24 @@ export default function AdminBookingDetailPage() {
             <AdminSection title="Financials">
               <div className="space-y-2 text-sm">
                 {[['Subtotal', fmt(booking.subtotal)], ['Tax', fmt(booking.taxAmount)], ['Discount', `-${fmt(booking.discountAmount)}`]].map(([k, v]) => (
-                  <div key={k} className="flex justify-between"><span className="text-white/40">{k}</span><span className="text-white/60">{v}</span></div>
+                  <div key={k} className="flex justify-between"><span className="text-muted-foreground">{k}</span><span className="text-muted-foreground">{v}</span></div>
                 ))}
-                <div className="flex justify-between border-t border-white/10 pt-2 text-base font-medium">
-                  <span className="text-white">Total</span><span className="text-[#d7b98b]">{fmt(booking.totalAmount)}</span>
+                <div className="flex justify-between border-t border-border pt-2 text-base font-medium">
+                  <span className="text-foreground">Total</span><span className="text-gold-text">{fmt(booking.totalAmount)}</span>
                 </div>
-                <div className="flex justify-between text-xs"><span className="text-white/30">Paid</span><span className="text-green-400">{fmt(booking.paidAmount)}</span></div>
-                <div className="flex justify-between text-xs"><span className="text-white/30">Balance</span><span className="text-red-300">{fmt(booking.balanceAmount)}</span></div>
+                <div className="flex justify-between text-xs"><span className="text-muted-foreground/80">Paid</span><span className="text-green-400">{fmt(booking.paidAmount)}</span></div>
+                <div className="flex justify-between text-xs"><span className="text-muted-foreground/80">Balance</span><span className="text-red-300">{fmt(booking.balanceAmount)}</span></div>
               </div>
             </AdminSection>
 
             <AdminSection title="Quick actions">
               <div className="flex flex-col gap-2">
                 <button type="button" onClick={() => setTab('quote')}
-                  className="flex items-center gap-2 border border-white/15 px-4 py-2.5 text-xs text-white/60 transition hover:border-[#d7b98b] hover:text-[#d7b98b]">
+                  className="flex items-center gap-2 border border-border px-4 py-2.5 text-xs text-muted-foreground transition hover:border-[#d5ae79] hover:text-gold-text">
                   <FileText className="size-4" /> Create / view quote
                 </button>
                 <button type="button" onClick={() => setTab('messages')}
-                  className="flex items-center gap-2 border border-white/15 px-4 py-2.5 text-xs text-white/60 transition hover:border-[#d7b98b] hover:text-[#d7b98b]">
+                  className="flex items-center gap-2 border border-border px-4 py-2.5 text-xs text-muted-foreground transition hover:border-[#d5ae79] hover:text-gold-text">
                   <Send className="size-4" /> Send message
                 </button>
                 <button type="button" onClick={() => handleStatusChange('CONFIRMED')} disabled={booking.status === 'CONFIRMED'}
@@ -247,14 +247,14 @@ export default function AdminBookingDetailPage() {
         <div className="max-w-2xl">
           {booking.quotes && booking.quotes.length > 0 ? (
             <div className="mb-8 space-y-4">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Existing quotes</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Existing quotes</p>
               {booking.quotes.map((q: Quote) => (
-                <div key={q.id} className="border border-white/10 p-5">
+                <div key={q.id} className="border border-border p-5">
                   <div className="flex justify-between mb-3">
-                    <p className="text-sm text-white">Quote v{q.version} — {fmt(q.totalAmount)}</p>
-                    <span className={`text-[9px] uppercase tracking-[0.12em] ${q.status === 'APPROVED' ? 'text-green-400' : q.status === 'SENT' ? 'text-[#d7b98b]' : 'text-white/30'}`}>{q.status}</span>
+                    <p className="text-sm text-foreground">Quote v{q.version} — {fmt(q.totalAmount)}</p>
+                    <span className={`text-[9px] uppercase tracking-[0.12em] ${q.status === 'APPROVED' ? 'text-green-400' : q.status === 'SENT' ? 'text-gold-text' : 'text-muted-foreground/80'}`}>{q.status}</span>
                   </div>
-                  <p className="text-xs text-white/40">Valid until {fmtDate(q.validUntil)}</p>
+                  <p className="text-xs text-muted-foreground">Valid until {fmtDate(q.validUntil)}</p>
                 </div>
               ))}
             </div>
@@ -263,35 +263,35 @@ export default function AdminBookingDetailPage() {
           <AdminSection title="Create new quote">
             <div className="flex flex-col gap-4">
               <div>
-                <label htmlFor="q-items" className="mb-1.5 block text-[10px] uppercase tracking-[0.15em] text-white/40">Line items (Name, Qty, Price per line)</label>
+                <label htmlFor="q-items" className="mb-1.5 block text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Line items (Name, Qty, Price per line)</label>
                 <textarea id="q-items" value={quoteForm.items} onChange={e => setQuoteForm(p => ({ ...p, items: e.target.value }))}
                   rows={5} placeholder={"Decoration, 1, 25000\nPhotography, 1, 15000\nCake, 1, 5000"}
-                  className="w-full border border-white/15 bg-[#0b0b0d] px-3 py-2.5 font-mono text-sm text-white placeholder:text-white/20 focus:border-[#d7b98b] focus:outline-none resize-none" />
+                  className="w-full border border-border bg-background px-3 py-2.5 font-mono text-sm text-foreground placeholder:text-muted-foreground/80 focus:border-[#d5ae79] focus:outline-none resize-none" />
               </div>
               <div className="grid gap-3 sm:grid-cols-3">
                 <div>
-                  <label htmlFor="q-discount" className="mb-1.5 block text-[10px] uppercase tracking-[0.15em] text-white/40">Discount (₹)</label>
+                  <label htmlFor="q-discount" className="mb-1.5 block text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Discount (₹)</label>
                   <input id="q-discount" type="number" value={quoteForm.discount} onChange={e => setQuoteForm(p => ({ ...p, discount: e.target.value }))}
-                    className="w-full border border-white/15 bg-[#0b0b0d] px-3 py-2 text-sm text-white focus:border-[#d7b98b] focus:outline-none" />
+                    className="w-full border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-[#d5ae79] focus:outline-none" />
                 </div>
                 <div>
-                  <label htmlFor="q-tax" className="mb-1.5 block text-[10px] uppercase tracking-[0.15em] text-white/40">Tax (%)</label>
+                  <label htmlFor="q-tax" className="mb-1.5 block text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Tax (%)</label>
                   <input id="q-tax" type="number" value={quoteForm.tax} onChange={e => setQuoteForm(p => ({ ...p, tax: e.target.value }))}
-                    className="w-full border border-white/15 bg-[#0b0b0d] px-3 py-2 text-sm text-white focus:border-[#d7b98b] focus:outline-none" />
+                    className="w-full border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-[#d5ae79] focus:outline-none" />
                 </div>
                 <div>
-                  <label htmlFor="q-valid-days" className="mb-1.5 block text-[10px] uppercase tracking-[0.15em] text-white/40">Valid for (days)</label>
+                  <label htmlFor="q-valid-days" className="mb-1.5 block text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Valid for (days)</label>
                   <input id="q-valid-days" type="number" value={quoteForm.validDays} onChange={e => setQuoteForm(p => ({ ...p, validDays: e.target.value }))}
-                    className="w-full border border-white/15 bg-[#0b0b0d] px-3 py-2 text-sm text-white focus:border-[#d7b98b] focus:outline-none" />
+                    className="w-full border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-[#d5ae79] focus:outline-none" />
                 </div>
               </div>
               <div>
-                <label htmlFor="q-notes" className="mb-1.5 block text-[10px] uppercase tracking-[0.15em] text-white/40">Notes for customer</label>
+                <label htmlFor="q-notes" className="mb-1.5 block text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Notes for customer</label>
                 <textarea id="q-notes" value={quoteForm.notes} onChange={e => setQuoteForm(p => ({ ...p, notes: e.target.value }))} rows={2}
-                  className="w-full border border-white/15 bg-[#0b0b0d] px-3 py-2.5 text-sm text-white placeholder:text-white/20 focus:border-[#d7b98b] focus:outline-none resize-none" />
+                  className="w-full border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/80 focus:border-[#d5ae79] focus:outline-none resize-none" />
               </div>
               <button onClick={handleCreateQuote} disabled={creatingQuote}
-                className="flex items-center gap-2 bg-[#d7b98b] px-6 py-3 text-[10px] uppercase tracking-[0.2em] text-[#1c1915] hover:bg-[#e8cfa0] disabled:opacity-50" type="button">
+                className="flex items-center gap-2 bg-[#d5ae79] px-6 py-3 text-[10px] uppercase tracking-[0.2em] text-[#17151d] hover:bg-[#e8cfa9] disabled:opacity-50" type="button">
                 <FileText className="size-4" /> {creatingQuote ? 'Creating…' : 'Create & send quote'}
               </button>
             </div>
@@ -304,26 +304,26 @@ export default function AdminBookingDetailPage() {
         <div className="max-w-2xl flex flex-col" style={{ height: '60vh' }}>
           <div className="flex-1 overflow-y-auto space-y-4 pr-2 pb-4">
             {messages.length === 0
-              ? <p className="py-16 text-center text-sm text-white/30">No messages yet</p>
+              ? <p className="py-16 text-center text-sm text-muted-foreground/80">No messages yet</p>
               : messages.map(m => {
                   const isAdmin = ['ADMIN', 'SUPER_ADMIN', 'EVENT_MANAGER'].includes(m.sender?.role ?? '')
                   return (
                     <div key={m.id} className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[75%] px-4 py-3 text-sm leading-6 ${isAdmin ? 'bg-[#d7b98b] text-[#1c1915]' : 'border border-white/10 bg-white/5 text-white/80'}`}>
+                      <div className={`max-w-[75%] px-4 py-3 text-sm leading-6 ${isAdmin ? 'bg-[#d5ae79] text-[#17151d]' : 'border border-border bg-muted text-foreground/80'}`}>
                         {!isAdmin && <p className="text-[10px] uppercase tracking-[0.1em] mb-1 opacity-50">{m.sender?.name}</p>}
                         {m.content}
-                        <p className={`mt-1 text-[10px] ${isAdmin ? 'text-[#1c1915]/60' : 'text-white/30'}`}>{fmtTime(m.createdAt)}</p>
+                        <p className={`mt-1 text-[10px] ${isAdmin ? 'text-foreground/60' : 'text-muted-foreground/80'}`}>{fmtTime(m.createdAt)}</p>
                       </div>
                     </div>
                   )
                 })}
             <div ref={messagesEndRef} />
           </div>
-          <form onSubmit={handleSendMessage} className="flex gap-3 border-t border-white/10 pt-4">
+          <form onSubmit={handleSendMessage} className="flex gap-3 border-t border-border pt-4">
             <input value={msgText} onChange={e => setMsgText(e.target.value)} placeholder="Message to customer…"
-              className="flex-1 border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/25 focus:border-[#d7b98b] focus:outline-none" />
+              className="flex-1 border border-border bg-muted/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/80 focus:border-[#d5ae79] focus:outline-none" />
             <button type="submit" disabled={sendingMsg || !msgText.trim()}
-              className="bg-[#d7b98b] px-4 py-3 text-[#1c1915] hover:bg-[#e8cfa0] disabled:opacity-40">
+              className="bg-[#d5ae79] px-4 py-3 text-[#17151d] hover:bg-[#e8cfa9] disabled:opacity-40">
               <Send className="size-4" />
             </button>
           </form>
@@ -334,15 +334,15 @@ export default function AdminBookingDetailPage() {
       {tab === 'timeline' && (
         <div className="max-w-lg">
           {!booking.timeline?.length
-            ? <p className="py-16 text-center text-sm text-white/30">No timeline entries</p>
+            ? <p className="py-16 text-center text-sm text-muted-foreground/80">No timeline entries</p>
             : (
-              <ol className="relative border-l border-white/15 pl-6 space-y-8">
+              <ol className="relative border-l border-border pl-6 space-y-8">
                 {booking.timeline.map((entry, i) => (
                   <li key={entry.id}>
-                    <div className={`absolute -left-[25px] flex size-4 items-center justify-center rounded-full border ${i === (booking.timeline?.length ?? 0) - 1 ? 'border-[#d7b98b] bg-[#d7b98b]' : 'border-white/20 bg-[#111114]'}`} />
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-[#d7b98b]">{entry.title}</p>
-                    {entry.description && <p className="mt-1 text-sm text-white/50">{entry.description}</p>}
-                    <p className="mt-1 text-[10px] text-white/25">{fmtDate(entry.createdAt)} {fmtTime(entry.createdAt)}</p>
+                    <div className={`absolute -left-[25px] flex size-4 items-center justify-center rounded-full border ${i === (booking.timeline?.length ?? 0) - 1 ? 'border-[#d5ae79] bg-[#d5ae79]' : 'border-border bg-card'}`} />
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-gold-text">{entry.title}</p>
+                    {entry.description && <p className="mt-1 text-sm text-muted-foreground">{entry.description}</p>}
+                    <p className="mt-1 text-[10px] text-muted-foreground/80">{fmtDate(entry.createdAt)} {fmtTime(entry.createdAt)}</p>
                   </li>
                 ))}
               </ol>
@@ -354,14 +354,14 @@ export default function AdminBookingDetailPage() {
       {tab === 'documents' && (
         <div className="max-w-xl">
           {!booking.documents?.length
-            ? <p className="py-16 text-center text-sm text-white/30">No documents uploaded</p>
+            ? <p className="py-16 text-center text-sm text-muted-foreground/80">No documents uploaded</p>
             : <div className="space-y-2">
               {booking.documents?.map((d: any) => (
                 <a key={d.id} href={d.url} target="_blank" rel="noreferrer"
-                  className="flex items-center gap-3 border border-white/10 px-4 py-3 text-sm text-white/70 hover:border-[#d7b98b]/30">
-                  <FileText className="size-4 text-[#d7b98b]" />
+                  className="flex items-center gap-3 border border-border px-4 py-3 text-sm text-foreground/90 hover:border-[#d5ae79]/30">
+                  <FileText className="size-4 text-gold-text" />
                   <span className="flex-1">{d.name}</span>
-                  <span className="text-xs text-white/30">{(d.size / 1024).toFixed(0)} KB</span>
+                  <span className="text-xs text-muted-foreground/80">{(d.size / 1024).toFixed(0)} KB</span>
                 </a>
               ))}
             </div>}
@@ -373,8 +373,8 @@ export default function AdminBookingDetailPage() {
 
 function AdminSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="border border-white/10 bg-[#111114] p-5">
-      <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-white/30">{title}</p>
+    <div className="border border-border bg-card p-5">
+      <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-muted-foreground/80">{title}</p>
       {children}
     </div>
   )

@@ -134,13 +134,13 @@ function AIEventDesignerResults() {
       {/* Design actions live in their own strip above the canvas so they stay
           reachable while the global navbar scrolls away. */}
       {design && (
-        <div className="sticky top-16 z-30 border-b border-white/8 bg-[#0b0b0d]/95 backdrop-blur-md sm:top-[72px]">
+        <div className="sticky top-16 z-30 border-b border-border-subtle bg-background/95 backdrop-blur-md sm:top-[72px]">
           <div className="mx-auto flex max-w-6xl items-center justify-end gap-4 px-5 py-3">
-            <button type="button" onClick={reset} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-white/40 transition-colors duration-200 hover:text-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <button type="button" onClick={reset} className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground transition-colors duration-200 hover:text-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <RotateCcw className="size-3" aria-hidden="true" /> New design
             </button>
             <button type="button" onClick={handleSave} disabled={saving || saved}
-              className={`flex items-center gap-1.5 border px-4 py-2 text-[10px] uppercase tracking-[0.18em] transition ${saved ? 'border-green-400 text-green-400' : 'border-[#d7b98b] text-[#d7b98b] hover:bg-[#d7b98b] hover:text-[#1c1915]'}`}>
+              className={`flex items-center gap-1.5 border px-4 py-2 text-[10px] uppercase tracking-[0.18em] transition ${saved ? 'border-green-400 text-green-400' : 'border-[#d5ae79] text-[#d5ae79] hover:bg-[#d5ae79] hover:text-[#17151d]'}`}>
               {saved ? <><Check className="size-3" aria-hidden="true" /> Saved</> : saving ? 'Saving…' : <><Save className="size-3" aria-hidden="true" /> Save</>}
             </button>
           </div>
@@ -151,20 +151,20 @@ function AIEventDesignerResults() {
       {phase === 'input' && (
         <main className="mx-auto max-w-3xl px-5 py-16">
           <div className="text-center mb-12">
-            <div className="mx-auto mb-6 flex size-16 items-center justify-center border border-[#d7b98b]/30 bg-[#d7b98b]/10">
-              <Sparkles className="size-7 text-[#d7b98b]" />
+            <div className="mx-auto mb-6 flex size-16 items-center justify-center border border-[#d5ae79]/30 bg-[#d5ae79]/10">
+              <Sparkles className="size-7 text-gold-text" />
             </div>
-            <p className="mb-3 text-[10px] uppercase tracking-[0.3em] text-[#d7b98b]">AI event designer</p>
-            <h1 className="font-serif text-5xl tracking-tight text-white lg:text-6xl">
-              Tell me about<br /><em className="font-light text-[#d7b98b]">your dream event.</em>
+            <p className="mb-3 text-[10px] uppercase tracking-[0.3em] text-gold-text">AI event designer</p>
+            <h1 className="font-serif text-5xl tracking-tight text-foreground lg:text-6xl">
+              Tell me about<br /><em className="font-light text-gold-text">your dream event.</em>
             </h1>
-            <p className="mt-4 text-sm leading-7 text-white/50">
+            <p className="mt-4 text-sm leading-7 text-muted-foreground">
               Describe what you're imagining — our AI will design a complete event concept with themes,
               décor, services, and a detailed cost estimate.
             </p>
           </div>
 
-          <div className="border border-white/15 bg-[#111114] p-6">
+          <div className="border border-border bg-card p-6">
             <textarea
               ref={textareaRef}
               value={prompt}
@@ -172,13 +172,13 @@ function AIEventDesignerResults() {
               onKeyDown={e => { if (e.key === 'Enter' && e.ctrlKey) handleGenerate() }}
               placeholder="e.g. I want a luxury black and gold birthday party for 40 guests with a ₹1,00,000 budget. Include decoration, photography, cake, and DJ. Outdoor venue in Mumbai."
               rows={5}
-              className="w-full bg-transparent text-sm leading-7 text-white placeholder:text-white/25 focus:outline-none resize-none"
+              className="w-full bg-transparent text-sm leading-7 text-foreground placeholder:text-muted-foreground/80 focus:outline-none resize-none"
               aria-label="Describe your event"
             />
-            <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
-              <p className="text-[10px] text-white/25">Ctrl+Enter to generate</p>
+            <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+              <p className="text-[10px] text-muted-foreground/80">Ctrl+Enter to generate</p>
               <button type="button" onClick={handleGenerate} disabled={!prompt.trim()}
-                className="group flex items-center gap-2 bg-[#d7b98b] px-6 py-3 text-[10px] uppercase tracking-[0.2em] text-[#1c1915] transition hover:bg-[#e8cfa0] disabled:opacity-40">
+                className="group flex items-center gap-2 bg-[#d5ae79] px-6 py-3 text-[10px] uppercase tracking-[0.2em] text-[#17151d] transition hover:bg-[#e8cfa9] disabled:opacity-40">
                 <Sparkles className="size-4" /> Generate design <ArrowRight className="size-3.5 transition group-hover:translate-x-1" />
               </button>
             </div>
@@ -186,11 +186,11 @@ function AIEventDesignerResults() {
 
           {/* Quick prompts */}
           <div className="mt-8">
-            <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-white/30">Try these</p>
+            <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground/80">Try these</p>
             <div className="flex flex-col gap-2">
               {QUICK_PROMPTS.map((p, i) => (
                 <button type="button" key={i} onClick={() => setPrompt(p)}
-                  className="border border-white/8 bg-white/3 px-4 py-3 text-left text-sm text-white/60 transition hover:border-[#d7b98b]/30 hover:text-white/80">
+                  className="border border-border-subtle bg-muted/60 px-4 py-3 text-left text-sm text-muted-foreground transition hover:border-[#d5ae79]/30 hover:text-foreground/90">
                   {p}
                 </button>
               ))}
@@ -202,11 +202,11 @@ function AIEventDesignerResults() {
       {/* ── GENERATING PHASE ── */}
       {phase === 'generating' && (
         <main className="flex min-h-[80vh] flex-col items-center justify-center px-5">
-          <Loader2 className="mb-6 size-12 animate-spin text-[#d7b98b]" />
-          <p className="font-serif text-3xl text-white">Designing your event…</p>
-          <p className="mt-3 text-sm text-white/40">Our AI is crafting a complete concept just for you</p>
+          <Loader2 className="mb-6 size-12 animate-spin text-gold-text" />
+          <p className="font-serif text-3xl text-foreground">Designing your event…</p>
+          <p className="mt-3 text-sm text-muted-foreground">Our AI is crafting a complete concept just for you</p>
           <div className="mt-8 max-w-sm text-center">
-            <p className="text-xs italic text-white/25">&ldquo;{prompt.slice(0, 120)}{prompt.length > 120 ? '…' : ''}&rdquo;</p>
+            <p className="text-xs italic text-muted-foreground/80">&ldquo;{prompt.slice(0, 120)}{prompt.length > 120 ? '…' : ''}&rdquo;</p>
           </div>
         </main>
       )}
@@ -217,22 +217,22 @@ function AIEventDesignerResults() {
           {/* Header */}
           <div className="mb-10 flex flex-wrap items-start justify-between gap-6">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.3em] text-[#d7b98b]">Your event vision</p>
-              <h1 className="mt-2 font-serif text-5xl text-white">{design.theme}</h1>
-              <p className="mt-2 text-sm text-white/50">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-gold-text">Your event vision</p>
+              <h1 className="mt-2 font-serif text-5xl text-foreground">{design.theme}</h1>
+              <p className="mt-2 text-sm text-muted-foreground">
                 {design.eventType.replace(/_/g, ' ')} · {design.guestCount} guests · {formatCurrency(design.estimatedCost)}
               </p>
               {(aiData.mood as string) && (
-                <p className="mt-1 text-sm italic text-[#d7b98b]">{aiData.mood as string}</p>
+                <p className="mt-1 text-sm italic text-gold-text">{aiData.mood as string}</p>
               )}
             </div>
             <div className="flex flex-wrap gap-3">
               <button type="button" onClick={handleBookDesign}
-                className="flex items-center gap-2 bg-[#d7b98b] px-6 py-3 text-[10px] uppercase tracking-[0.2em] text-[#1c1915] hover:bg-[#e8cfa0]">
+                className="flex items-center gap-2 bg-[#d5ae79] px-6 py-3 text-[10px] uppercase tracking-[0.2em] text-[#17151d] hover:bg-[#e8cfa9]">
                 <BookOpen className="size-4" /> Book this design
               </button>
               <button type="button" onClick={handleSave} disabled={saving || saved}
-                className={`flex items-center gap-2 border px-5 py-3 text-[10px] uppercase tracking-[0.18em] transition ${saved ? 'border-green-400 text-green-400' : 'border-[#d7b98b] text-[#d7b98b] hover:bg-[#d7b98b]/10'}`}>
+                className={`flex items-center gap-2 border px-5 py-3 text-[10px] uppercase tracking-[0.18em] transition ${saved ? 'border-green-400 text-green-400' : 'border-[#d5ae79] text-[#d5ae79] hover:bg-[#d5ae79]/10'}`}>
                 {saved ? <><Check className="size-3" /> Saved</> : <><Save className="size-3" /> {saving ? 'Saving…' : 'Save design'}</>}
               </button>
             </div>
@@ -247,9 +247,9 @@ function AIEventDesignerResults() {
                   <div className="flex gap-4">
                     {colors.map((c, i) => (
                       <div key={i} className="flex flex-col items-center gap-2">
-                        <div className="size-14 border border-white/10 shadow-lg" style={{ background: c.hex }} />
-                        <p className="text-[9px] uppercase tracking-[0.1em] text-white/50">{c.name}</p>
-                        <p className="text-[9px] text-white/30">{c.hex}</p>
+                        <div className="size-14 border border-border shadow-lg" style={{ background: c.hex }} />
+                        <p className="text-[9px] uppercase tracking-[0.1em] text-muted-foreground">{c.name}</p>
+                        <p className="text-[9px] text-muted-foreground/80">{c.hex}</p>
                       </div>
                     ))}
                   </div>
@@ -261,8 +261,8 @@ function AIEventDesignerResults() {
                 <Card title="Decoration & ambience">
                   <ul className="grid gap-2 sm:grid-cols-2">
                     {decor.map((d, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-white/70">
-                        <span className="mt-1 size-1.5 flex-shrink-0 rounded-full bg-[#d7b98b]" />{d}
+                      <li key={i} className="flex items-start gap-2 text-sm text-foreground/90">
+                        <span className="mt-1 size-1.5 flex-shrink-0 rounded-full bg-[#d5ae79]" />{d}
                       </li>
                     ))}
                   </ul>
@@ -273,7 +273,7 @@ function AIEventDesignerResults() {
               {food.length > 0 && (
                 <Card title="Food & beverages">
                   <ul className="grid gap-2 sm:grid-cols-2">
-                    {food.map((f, i) => <li key={i} className="flex items-start gap-2 text-sm text-white/70"><span className="mt-1 size-1.5 flex-shrink-0 rounded-full bg-[#d7b98b]" />{f}</li>)}
+                    {food.map((f, i) => <li key={i} className="flex items-start gap-2 text-sm text-white/70"><span className="mt-1 size-1.5 flex-shrink-0 rounded-full bg-[#d5ae79]" />{f}</li>)}
                   </ul>
                 </Card>
               )}
@@ -283,7 +283,7 @@ function AIEventDesignerResults() {
                 <Card title="Entertainment">
                   <div className="flex flex-wrap gap-2">
                     {entertainment.map((e, i) => (
-                      <span key={i} className="border border-white/15 px-3 py-1.5 text-xs text-white/60">{e}</span>
+                      <span key={i} className="border border-border px-3 py-1.5 text-xs text-muted-foreground">{e}</span>
                     ))}
                   </div>
                 </Card>
@@ -292,13 +292,13 @@ function AIEventDesignerResults() {
               {/* Photography */}
               {(aiData.photography as any)?.style && (
                 <Card title="Photography & videography">
-                  <p className="text-sm text-white/70">{(aiData.photography as any).style}</p>
-                  <p className="mt-1 text-xs text-white/40">{(aiData.photography as any).hours} hours coverage</p>
+                  <p className="text-sm text-foreground/90">{(aiData.photography as any).style}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{(aiData.photography as any).hours} hours coverage</p>
                   {(aiData.photography as any).deliverables && (
                     <ul className="mt-3 space-y-1">
                       {((aiData.photography as any).deliverables as string[]).map((d, i) => (
-                        <li key={i} className="flex items-center gap-2 text-xs text-white/50">
-                          <Check className="size-3 text-[#d7b98b]" />{d}
+                        <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Check className="size-3 text-gold-text" />{d}
                         </li>
                       ))}
                     </ul>
@@ -309,11 +309,11 @@ function AIEventDesignerResults() {
               {/* Event day timeline */}
               {timeline.length > 0 && (
                 <Card title="Event day timeline">
-                  <ol className="relative border-l border-white/15 pl-5 space-y-4">
+                  <ol className="relative border-l border-border pl-5 space-y-4">
                     {timeline.map((t, i) => (
                       <li key={i}>
-                        <p className="text-[10px] uppercase tracking-[0.15em] text-[#d7b98b]">{t.time}</p>
-                        <p className="mt-0.5 text-sm text-white/70">{t.activity}</p>
+                        <p className="text-[10px] uppercase tracking-[0.15em] text-gold-text">{t.time}</p>
+                        <p className="mt-0.5 text-sm text-foreground/90">{t.activity}</p>
                       </li>
                     ))}
                   </ol>
@@ -325,8 +325,8 @@ function AIEventDesignerResults() {
                 <Card title="Our recommendations">
                   <ul className="space-y-2">
                     {recommendations.map((r, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-white/60">
-                        <span className="mt-1 text-[#d7b98b]">→</span>{r}
+                      <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <span className="mt-1 text-gold-text">→</span>{r}
                       </li>
                     ))}
                   </ul>
@@ -337,21 +337,21 @@ function AIEventDesignerResults() {
             {/* Right — cost + refine */}
             <div className="space-y-6">
               {/* Budget breakdown */}
-              <div className="border border-white/15 bg-[#111114] p-5">
+              <div className="border border-border bg-card p-5">
                 <button type="button" onClick={() => setShowBudget(!showBudget)}
                   className="flex w-full items-center justify-between">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Estimated cost</p>
-                  {showBudget ? <ChevronUp className="size-4 text-white/30" /> : <ChevronDown className="size-4 text-white/30" />}
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Estimated cost</p>
+                  {showBudget ? <ChevronUp className="size-4 text-muted-foreground/80" /> : <ChevronDown className="size-4 text-muted-foreground/80" />}
                 </button>
-                <p className="mt-2 font-serif text-4xl text-[#d7b98b]">{formatCurrency(design.estimatedCost)}</p>
-                <p className="text-xs text-white/30">Indicative estimate</p>
+                <p className="mt-2 font-serif text-4xl text-gold-text">{formatCurrency(design.estimatedCost)}</p>
+                <p className="text-xs text-muted-foreground/80">Indicative estimate</p>
 
                 {showBudget && Object.keys(budgetBreakdown).length > 0 && (
-                  <div className="mt-4 space-y-2 border-t border-white/10 pt-4">
+                  <div className="mt-4 space-y-2 border-t border-border pt-4">
                     {Object.entries(budgetBreakdown).map(([k, v]) => (
                       <div key={k} className="flex justify-between text-xs">
-                        <span className="text-white/50">{k}</span>
-                        <span className="text-white/70">{formatCurrency(v)}</span>
+                        <span className="text-muted-foreground">{k}</span>
+                        <span className="text-foreground/90">{formatCurrency(v)}</span>
                       </div>
                     ))}
                   </div>
@@ -360,23 +360,23 @@ function AIEventDesignerResults() {
 
               {/* Services list */}
               {design.services.length > 0 && (
-                <div className="border border-white/15 bg-[#111114] p-5">
-                  <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-white/40">Included services</p>
+                <div className="border border-border bg-card p-5">
+                  <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Included services</p>
                   <div className="flex flex-wrap gap-2">
                     {design.services.map((s, i) => (
-                      <span key={i} className="bg-[#d7b98b]/10 px-2 py-1 text-[10px] text-[#d7b98b]">{s}</span>
+                      <span key={i} className="bg-[#d5ae79]/10 px-2 py-1 text-[10px] text-[#d5ae79]">{s}</span>
                     ))}
                   </div>
                 </div>
               )}
 
               {/* Refine panel */}
-              <div className="border border-white/15 bg-[#111114] p-5">
-                <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#d7b98b]">Refine this design</p>
+              <div className="border border-border bg-card p-5">
+                <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-gold-text">Refine this design</p>
                 <div className="mb-3 flex flex-wrap gap-1.5">
                   {REFINE_SUGGESTIONS.slice(0, 6).map((s, i) => (
                     <button type="button" key={i} onClick={() => setRefineInput(s)}
-                      className="border border-white/10 px-2.5 py-1 text-[9px] text-white/50 transition hover:border-[#d7b98b]/40 hover:text-[#d7b98b]">
+                      className="border border-border px-2.5 py-1 text-[9px] text-muted-foreground transition hover:border-[#d5ae79]/40 hover:text-gold-text">
                       {s}
                     </button>
                   ))}
@@ -385,9 +385,9 @@ function AIEventDesignerResults() {
                   <input value={refineInput} onChange={e => setRefineInput(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleRefine()}
                     placeholder="E.g. reduce budget by 20%…"
-                    className="flex-1 border border-white/15 bg-[#0b0b0d] px-3 py-2.5 text-sm text-white placeholder:text-white/25 focus:border-[#d7b98b] focus:outline-none" />
+                    className="flex-1 border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/80 focus:border-[#d5ae79] focus:outline-none" />
                   <button type="button" onClick={handleRefine} disabled={loading || !refineInput.trim()}
-                    className="flex items-center gap-1 border border-[#d7b98b] px-3 py-2.5 text-[#d7b98b] hover:bg-[#d7b98b] hover:text-[#1c1915] disabled:opacity-40">
+                    className="flex items-center gap-1 border border-[#d5ae79] px-3 py-2.5 text-[#d5ae79] hover:bg-[#d5ae79] hover:text-[#17151d] disabled:opacity-40">
                     {loading ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
                   </button>
                 </div>
@@ -395,7 +395,7 @@ function AIEventDesignerResults() {
 
               {/* CTA */}
               <button type="button" onClick={handleBookDesign}
-                className="w-full bg-[#d7b98b] py-4 text-[10px] uppercase tracking-[0.25em] text-[#1c1915] hover:bg-[#e8cfa0]">
+                className="w-full bg-[#d5ae79] py-4 text-[10px] uppercase tracking-[0.25em] text-[#17151d] hover:bg-[#e8cfa9]">
                 Book this design →
               </button>
             </div>
@@ -408,8 +408,8 @@ function AIEventDesignerResults() {
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="border border-white/10 bg-[#111114] p-5">
-      <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-white/40">{title}</p>
+    <div className="border border-border bg-card p-5">
+      <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{title}</p>
       {children}
     </div>
   )
