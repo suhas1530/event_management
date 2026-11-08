@@ -15,11 +15,11 @@
 export type StatusTone = 'success' | 'warning' | 'error' | 'info' | 'neutral'
 
 const TONE_CLASSES: Record<StatusTone, string> = {
-  success: 'text-emerald-300 bg-emerald-500/12 ring-emerald-500/25',
-  warning: 'text-amber-300 bg-amber-500/12 ring-amber-500/25',
-  error: 'text-red-300 bg-red-500/12 ring-red-500/25',
-  info: 'text-sky-300 bg-sky-500/12 ring-sky-500/25',
-  neutral: 'text-muted-foreground bg-muted/60 ring-white/12',
+  success: 'text-success bg-success-muted ring-success/25',
+  warning: 'text-warning bg-warning-muted ring-warning/25',
+  error: 'text-destructive bg-destructive-muted ring-destructive/25',
+  info: 'text-info bg-info-muted ring-info/25',
+  neutral: 'text-muted-foreground bg-muted/60 ring-border',
 }
 
 /** Raw enum value → human label + tone. */

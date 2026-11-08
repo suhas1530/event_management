@@ -40,7 +40,7 @@ export default function AdminLoginPage() {
       </div>
 
       <div className="w-full max-w-[380px]">
-        <Logo size="md" tone="dark" className="mb-10" />
+        <Logo size="md" tone="auto" className="mb-10" />
 
         <div className="mb-6 flex items-center gap-3">
           <div className="flex size-10 items-center justify-center border border-primary/30 bg-primary/10">
@@ -53,7 +53,7 @@ export default function AdminLoginPage() {
         </div>
 
         {error && (
-          <div className="mb-5 border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-500 dark:text-red-400" role="alert">{error}</div>
+          <div className="mb-5 border border-destructive/30 bg-destructive-muted px-4 py-3 text-sm text-destructive" role="alert">{error}</div>
         )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -61,14 +61,14 @@ export default function AdminLoginPage() {
             <label htmlFor="admin-email" className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Email</label>
             <input id="admin-email" type="email" value={email} onChange={e => setEmail(e.target.value)} required
               placeholder="admin@avan.events" autoComplete="email"
-              className="border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-ring focus:outline-none" />
+              className="input-base" />
           </div>
           <div className="flex flex-col gap-2">
             <label htmlFor="admin-password" className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Password</label>
             <div className="relative">
               <input id="admin-password" type={showPw ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} required
                 placeholder="Admin password" autoComplete="current-password"
-                className="w-full border border-border bg-card px-4 py-3 pr-11 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-ring focus:outline-none" />
+                className="input-base pr-11" />
               <button type="button" onClick={() => setShowPw(!showPw)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 aria-label={showPw ? 'Hide password' : 'Show password'}
@@ -79,7 +79,7 @@ export default function AdminLoginPage() {
             </div>
           </div>
           <button type="submit" disabled={loading}
-            className="group flex items-center justify-center gap-3 bg-[#d5ae79] py-3.5 text-[10px] uppercase tracking-[0.2em] text-[#17151d] transition hover:bg-[#e8cfa9] disabled:opacity-50">
+            className="group flex items-center justify-center gap-3 bg-gold py-3.5 text-[10px] uppercase tracking-[0.2em] text-gold-foreground transition hover:bg-gold-soft disabled:opacity-50">
             {loading ? 'Signing in…' : <><span>Access admin panel</span><ArrowRight className="size-4 transition group-hover:translate-x-1" /></>}
           </button>
         </form>

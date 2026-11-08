@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: 'All Services',
   description:
     'Every Heptome service in one place — event venues, catering, décor, photography and production, plus cleaning, repairs, appliance care and personal services at home.',
+  alternates: { canonical: '/services' },
 }
 
 export default function ServicesPage() {

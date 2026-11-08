@@ -3,25 +3,20 @@
 import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { AlertCircle, CalendarHeart, Sparkles, Wrench } from 'lucide-react'
+import { AlertCircle, CalendarHeart, Loader2, Sparkles, Wrench } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { HOME_EVENT_TYPES } from '@/lib/home-content'
 import { BOOKABLE_HOME_GROUPS } from '@/lib/catalog'
 import { checkCoverage } from '@/lib/service-area'
 import { readLocation } from '@/lib/location'
-import type { WorldZone } from '@/components/three/HeptomeWorld'
 
-interface HeroBookingPanelProps {
-  /** Panel tab — kept in sync with the 3D zone the visitor is looking at. */
-  mode: WorldZone
-  onModeChange: (mode: WorldZone) => void
-}
+export type BookingMode = 'celebration' | 'home'
 
 const fieldClass =
-  'w-full border border-white/12 bg-ink-900/80 px-3.5 py-3 text-sm text-slate-50 [color-scheme:dark] transition-colors duration-200 focus:border-hept-purple focus:outline-none focus-visible:ring-2 focus-visible:ring-hept-purple/40'
+  'w-full min-h-11 rounded-lg border border-border bg-background/80 px-3.5 py-2.5 text-sm text-foreground outline-none transition-colors duration-200 placeholder:text-subtle-foreground focus:border-primary focus:ring-2 focus:ring-primary/20'
 
 /**
- * Floating booking panel over the living world.
+ * Floating booking panel over the hero photography.
  *
  * Both verticals start here. Event selections are handed to the event-request
  * wizard through query params; home-service selections are handed to the
@@ -29,9 +24,11 @@ const fieldClass =
  * request fires until the visitor continues — the panel only pre-fills the real
  * forms, so there is exactly one source of truth per booking.
  */
-export default function HeroBookingPanel({ mode, onModeChange }: HeroBookingPanelProps) {
+export default function HeroBookingPanel() {
   const router = useRouter()
 
+  const [mode, setMode] = useState<BookingMode>('celebration')
+  const [pending, setPending] = useState(false)
   const [eventType, setEventType] = useState('')
   const [date, setDate] = useState('')
   const [guests, setGuests] = useState('')
@@ -45,6 +42,7 @@ export default function HeroBookingPanel({ mode, onModeChange }: HeroBookingPane
 
   function handleEventSubmit(event: FormEvent) {
     event.preventDefault()
+    setPending(true)
     const params = new URLSearchParams()
     if (eventType) params.set('type', eventType)
     if (date) params.set('date', date)
@@ -73,15 +71,19 @@ export default function HeroBookingPanel({ mode, onModeChange }: HeroBookingPane
       return
     }
 
+    setPending(true)
     const params = new URLSearchParams({ category, pincode })
     if (homeDate) params.set('date', homeDate)
     router.push(`/book/technician?${params.toString()}`)
   }
 
   return (
-    <div className="glass-panel w-full max-w-[400px] p-5 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)]">
-      {/* Vertical tabs */}
-      <div className="mb-4 grid grid-cols-2 border border-border bg-muted/50 p-1" role="tablist" aria-label="What would you like to book?">
+    <div className="w-full max-w-[420px] rounded-2xl border border-border bg-surface/95 p-5 text-foreground shadow-[0_30px_80px_-30px_rgba(0,0,0,0.65)] backdrop-blur-xl">
+      <div
+        className="mb-4 grid grid-cols-2 rounded-xl border border-border bg-muted/60 p-1"
+        role="tablist"
+        aria-label="What would you like to book?"
+      >
         {(
           [
             { id: 'celebration' as const, label: 'Event', icon: CalendarHeart },
@@ -94,12 +96,15 @@ export default function HeroBookingPanel({ mode, onModeChange }: HeroBookingPane
             role="tab"
             aria-selected={mode === id}
             onClick={() => {
-              onModeChange(id)
+              setMode(id)
               setError('')
+              setPending(false)
             }}
             className={cn(
-              'inline-flex min-h-10 items-center justify-center gap-2 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-pale',
-              mode === id ? 'bg-hept-purple text-white' : 'text-white/55 hover:text-white'
+              'inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              mode === id
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'text-muted-foreground hover:bg-background/70 hover:text-foreground',
             )}
           >
             <Icon className="size-3.5" aria-hidden="true" />
@@ -109,7 +114,10 @@ export default function HeroBookingPanel({ mode, onModeChange }: HeroBookingPane
       </div>
 
       {error && (
-        <p className="mb-4 flex items-start gap-2 border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-xs leading-5 text-red-300" role="alert">
+        <p
+          className="mb-4 flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-xs leading-5 text-destructive"
+          role="alert"
+        >
           <AlertCircle className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
           {error}
         </p>
@@ -117,14 +125,14 @@ export default function HeroBookingPanel({ mode, onModeChange }: HeroBookingPane
 
       {mode === 'celebration' ? (
         <form onSubmit={handleEventSubmit} aria-label="Start planning your event">
-          <p className="mb-4 flex items-center gap-2 text-[10px] uppercase tracking-[0.28em] text-champagne-light">
+          <p className="mb-4 flex items-center gap-2 text-[10px] uppercase tracking-[0.28em] text-gold-text">
             <Sparkles className="size-3.5" aria-hidden="true" />
             Start your event plan
           </p>
 
           <div className="flex flex-col gap-3.5">
             <label className="block">
-              <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.14em] text-fg-dim">
+              <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
                 Event type
               </span>
               <select value={eventType} onChange={e => setEventType(e.target.value)} className={fieldClass}>
@@ -139,13 +147,13 @@ export default function HeroBookingPanel({ mode, onModeChange }: HeroBookingPane
 
             <div className="grid grid-cols-2 gap-3.5">
               <label className="block">
-                <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.14em] text-fg-dim">
+                <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
                   Date
                 </span>
                 <input type="date" min={today} value={date} onChange={e => setDate(e.target.value)} className={fieldClass} />
               </label>
               <label className="block">
-                <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.14em] text-fg-dim">
+                <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
                   Guests
                 </span>
                 <input
@@ -163,26 +171,28 @@ export default function HeroBookingPanel({ mode, onModeChange }: HeroBookingPane
 
             <button
               type="submit"
-              className="gradient-cta mt-1 min-h-12 w-full px-6 py-3.5 text-sm font-semibold text-foreground shadow-[0_8px_30px_-10px_rgba(109,54,216,0.85)] transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-pale"
+              disabled={pending}
+              className="mt-1 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-[0_8px_30px_-10px_rgba(0,0,0,0.35)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-wait disabled:opacity-80"
             >
-              Check availability
+              {pending && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
+              {pending ? 'Opening your plan…' : 'Check availability'}
             </button>
 
-            <p className="text-center text-[11px] leading-5 text-fg-mute">
+            <p className="text-center text-[11px] leading-5 text-muted-foreground">
               Free to start · No payment until you approve a plan
             </p>
           </div>
         </form>
       ) : (
         <form onSubmit={handleHomeSubmit} aria-label="Book a home service">
-          <p className="mb-4 flex items-center gap-2 text-[10px] uppercase tracking-[0.28em] text-violet-pale">
+          <p className="mb-4 flex items-center gap-2 text-[10px] uppercase tracking-[0.28em] text-primary">
             <Wrench className="size-3.5" aria-hidden="true" />
             Book at your doorstep
           </p>
 
           <div className="flex flex-col gap-3.5">
             <label className="block">
-              <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.14em] text-fg-dim">
+              <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
                 Service
               </span>
               <select value={category} onChange={e => setCategory(e.target.value)} className={fieldClass} required>
@@ -197,7 +207,7 @@ export default function HeroBookingPanel({ mode, onModeChange }: HeroBookingPane
 
             <div className="grid grid-cols-2 gap-3.5">
               <label className="block">
-                <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.14em] text-fg-dim">
+                <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
                   Pincode
                 </span>
                 <input
@@ -211,7 +221,7 @@ export default function HeroBookingPanel({ mode, onModeChange }: HeroBookingPane
                 />
               </label>
               <label className="block">
-                <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.14em] text-fg-dim">
+                <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
                   Preferred date
                 </span>
                 <input type="date" min={today} value={homeDate} onChange={e => setHomeDate(e.target.value)} className={fieldClass} />
@@ -220,12 +230,14 @@ export default function HeroBookingPanel({ mode, onModeChange }: HeroBookingPane
 
             <button
               type="submit"
-              className="btn-heptome mt-1 min-h-12 w-full px-6 py-3.5 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-pale"
+              disabled={pending}
+              className="mt-1 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-wait disabled:opacity-80"
             >
-              See services & prices
+              {pending && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
+              {pending ? 'Opening services…' : 'See services & prices'}
             </button>
 
-            <p className="text-center text-[11px] leading-5 text-fg-mute">
+            <p className="text-center text-[11px] leading-5 text-muted-foreground">
               Prices come from the live service catalog · pay after the work is done
             </p>
           </div>
@@ -235,7 +247,7 @@ export default function HeroBookingPanel({ mode, onModeChange }: HeroBookingPane
       <div className="mt-4 border-t border-border-subtle pt-3.5 text-center">
         <Link
           href={mode === 'celebration' ? '/home-services' : '/events'}
-          className="text-[11px] text-fg-dim underline-offset-4 transition-colors hover:text-foreground hover:underline"
+          className="text-[11px] text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
         >
           {mode === 'celebration' ? 'Looking for home services instead?' : 'Planning a celebration instead?'}
         </Link>

@@ -1,4 +1,10 @@
+import type { Metadata } from 'next'
 import ThemeToggle from '@/components/ui/ThemeToggle'
+
+/** Sign-in and account-recovery screens must never appear in search results. */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false, nocache: true },
+}
 
 /**
  * Auth group layout — the sign-in flow deliberately has no marketing navbar,

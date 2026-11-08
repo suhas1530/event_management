@@ -63,7 +63,7 @@ export const Stepper = forwardRef<HTMLDivElement, StepperProps>(
                     {step.description && variant !== 'compact' && (
                       <span className={cn(
                         'block text-sm transition-colors mt-0.5',
-                        isActive || isCompleted ? 'text-muted-foreground' : 'text-muted-foreground/60'
+                        isActive || isCompleted ? 'text-muted-foreground' : 'text-muted-foreground'
                       )}>
                         {step.description}
                       </span>

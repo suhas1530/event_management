@@ -1,8 +1,7 @@
 /**
- * Client-environment hooks for the immersive homepage.
- *
- * These are intentionally tiny and dependency-free so the 3D hero can gate on
- * them without pulling any part of Three.js into the initial bundle.
+ * Small, dependency-free browser hooks shared by the marketing surfaces.
+ * There is no WebGL capability probe here any more — the site is
+ * photography-first and every visual works without a GPU.
  */
 'use client'
 
@@ -27,60 +26,8 @@ export function usePrefersReducedMotion(): boolean {
 }
 
 /**
- * WebGL capability probe. Returns `null` until mounted (unknown), then
- * `true`/`false` so callers can render the static fallback immediately when
- * WebGL is unavailable instead of mounting a Canvas that can never paint.
- */
-export function useWebGLAvailable(): boolean | null {
-  const [available, setAvailable] = useState<boolean | null>(null)
-
-  useEffect(() => {
-    try {
-      const canvas = document.createElement('canvas')
-      const gl =
-        canvas.getContext('webgl2') ??
-        canvas.getContext('webgl') ??
-        canvas.getContext('experimental-webgl')
-      setAvailable(Boolean(gl))
-    } catch {
-      setAvailable(false)
-    }
-  }, [])
-
-  return available
-}
-
-export type QualityTier = 'high' | 'low'
-
-/**
- * Rendering quality tier for the 3D scene.
- *
- * Starts at 'low' and only upgrades after measurement, so the first painted
- * frame is always the cheap one. Phones, tablets and any coarse-pointer device
- * stay on 'low' — fewer particles, simpler geometry, no cursor parallax.
- */
-export function useQualityTier(): QualityTier {
-  const [tier, setTier] = useState<QualityTier>('low')
-
-  useEffect(() => {
-    const coarse = window.matchMedia('(pointer: coarse)')
-    const narrow = window.matchMedia('(max-width: 767px)')
-    const update = () => setTier(coarse.matches || narrow.matches ? 'low' : 'high')
-    update()
-    coarse.addEventListener('change', update)
-    narrow.addEventListener('change', update)
-    return () => {
-      coarse.removeEventListener('change', update)
-      narrow.removeEventListener('change', update)
-    }
-  }, [])
-
-  return tier
-}
-
-/**
  * Observe an element and report once it has come near the viewport.
- * Used to defer-mount the venue preview canvas until it is actually needed.
+ * Used to defer non-critical imagery or mount work until it is needed.
  */
 export function useInView<T extends HTMLElement>(
   rootMargin = '240px',

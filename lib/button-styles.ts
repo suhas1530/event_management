@@ -10,14 +10,14 @@ import { cn } from './utils'
  */
 
 export const BUTTON_BASE =
-  'inline-flex items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b0b0d] disabled:pointer-events-none disabled:opacity-50'
+  'inline-flex items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50'
 
 export const BUTTON_VARIANTS = {
   primary:
     'bg-primary text-primary-foreground hover:-translate-y-px hover:bg-primary-hover hover:shadow-lg',
   secondary:
-    'border border-white/15 text-white/80 hover:-translate-y-px hover:border-primary/50 hover:text-primary',
-  ghost: 'text-white/60 hover:bg-white/5 hover:text-white',
+    'border border-border bg-surface text-foreground/85 hover:-translate-y-px hover:border-primary/50 hover:text-primary',
+  ghost: 'text-muted-foreground hover:bg-muted hover:text-foreground',
   link: 'text-primary underline-offset-4 hover:underline',
 } as const
 

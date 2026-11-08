@@ -6,103 +6,180 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
 
 /**
- * Heptome theme system.
+ * Heptome theme system — the single source of truth.
  *
- * - One global `Theme` state, persisted in localStorage (`heptome-theme`).
- * - The class lives on `<html>` and the inline bootstrap script in
- *   `app/layout.tsx` applies it BEFORE first paint, so there is no flash of
- *   the wrong theme and no hydration mismatch (the server and the client
- *   first render agree; the stored value only affects DOM mutations after
- *   hydration).
- * - First visit defaults to the cinematic dark design; the visitor's explicit
- *   choice then persists across refreshes and navigation.
- * - Blocking structures (3D hero, fall-back art) read from static tokens and
- *   stay dark in both themes by design.
+ * - One `ThemeMode` (`light`, `dark`, `system`) lives in this provider.
+ * - `system` follows the operating-system preference and keeps following it
+ *   while the tab is open; it is a real mode, not a one-time snapshot.
+ * - The resolved theme is written to `<html class="dark">`, `data-theme` and
+ *   `data-theme-mode`. An inline bootstrap script in `app/layout.tsx` applies
+ *   the same values before first paint, so there is no flash and no
+ *   hydration mismatch.
+ * - Explicit choices persist in localStorage under `heptome-theme`. A first
+ *   visit defaults to `system` and writes nothing until the visitor chooses.
  */
 
-export type Theme = 'light' | 'dark'
+export type Theme = 'light' | 'dark' | 'system'
+export type ResolvedTheme = 'light' | 'dark'
 
 export const THEME_STORAGE_KEY = 'heptome-theme'
 
-function bootstrapTheme(): Theme | null {
+export function systemTheme(): ResolvedTheme {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return 'light'
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
+
+export function readStoredTheme(): Theme | null {
   if (typeof window === 'undefined') return null
-  const applied = document.documentElement.dataset.theme
-  if (applied === 'light' || applied === 'dark') return applied
-  // Pre-hydration the inline script may not have run for some reason — do the
-  // same job it does so `theme` is never out of sync with the class list.
-  let stored: string | null = null
   try {
-    stored = window.localStorage.getItem(THEME_STORAGE_KEY)
+    const stored = window.localStorage.getItem(THEME_STORAGE_KEY)
+    return stored === 'light' || stored === 'dark' || stored === 'system' ? stored : null
   } catch {
-    stored = null
+    return null
   }
-  const theme: Theme = stored === 'light' || stored === 'dark' ? stored : 'dark'
-  document.documentElement.classList.toggle('dark', theme === 'dark')
-  document.documentElement.dataset.theme = theme
-  return theme
+}
+
+function resolveTheme(mode: Theme): ResolvedTheme {
+  return mode === 'system' ? systemTheme() : mode
 }
 
 let switchTimer: ReturnType<typeof setTimeout> | undefined
 
-function applyTheme(theme: Theme) {
-  const root = document.documentElement
-  root.classList.toggle('dark', theme === 'dark')
-  root.dataset.theme = theme
+/** Applies a mode to the document and returns the concrete theme it resolved to. */
+export function applyTheme(mode: Theme, animate = false): ResolvedTheme {
+  if (typeof document === 'undefined') return resolveTheme(mode)
 
-  // One short cross-fade of background/border/colors, then cleanup so steady
-  // state never carries transition classes (reduced-motion users get the
-  // instant switch because globals.css reduces all transitions).
-  root.classList.add('theme-switching')
-  if (switchTimer) clearTimeout(switchTimer)
-  switchTimer = setTimeout(() => root.classList.remove('theme-switching'), 380)
+  const resolved = resolveTheme(mode)
+  const root = document.documentElement
+
+  root.classList.toggle('dark', resolved === 'dark')
+  root.dataset.theme = resolved
+  root.dataset.themeMode = mode
+
+  if (animate && typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (!reduced) {
+      root.classList.add('theme-switching')
+      if (switchTimer) clearTimeout(switchTimer)
+      switchTimer = setTimeout(() => root.classList.remove('theme-switching'), 260)
+    }
+  }
+
+  return resolved
 }
 
 interface ThemeContextValue {
-  /** `null` until the client is mounted (SSR/first render agree on dark). */
-  theme: Theme | null
-  setTheme: (theme: Theme) => void
+  /** Selected mode. `null` until the client is mounted (SSR-safe). */
+  mode: Theme | null
+  /** Concrete light/dark theme currently painted. */
+  theme: ResolvedTheme | null
+  resolvedTheme: ResolvedTheme | null
+  setMode: (mode: Theme) => void
+  /** Backwards-compatible alias for `setMode`. */
+  setTheme: (mode: Theme) => void
+  /** Cycles light → dark → system. */
   toggleTheme: () => void
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
+  mode: null,
   theme: null,
+  resolvedTheme: null,
+  setMode: () => {},
   setTheme: () => {},
   toggleTheme: () => {},
 })
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme | null>(null)
+  const [mode, setModeState] = useState<Theme | null>(null)
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme | null>(null)
+  const modeRef = useRef<Theme>('system')
 
-  const setTheme = useCallback((next: Theme) => {
-    try {
-      window.localStorage.setItem(THEME_STORAGE_KEY, next)
-    } catch {
-      // Storage unavailable (private mode, quota…) — the choice still applies
-      // for this session; persistence silently degrades.
+  const commit = useCallback((next: Theme, persist: boolean) => {
+    modeRef.current = next
+
+    if (persist) {
+      try {
+        window.localStorage.setItem(THEME_STORAGE_KEY, next)
+      } catch {
+        // Storage unavailable (private mode, quota…) — the choice still
+        // applies for this session; persistence degrades quietly.
+      }
     }
-    applyTheme(next)
-    setThemeState(next)
+
+    const resolved = applyTheme(next, true)
+    setModeState(next)
+    setResolvedTheme(resolved)
   }, [])
 
+  const setMode = useCallback((next: Theme) => commit(next, true), [commit])
   const toggleTheme = useCallback(() => {
-    // The DOM class list is the source of truth — safe inside the callback
-    // (no stale state) and identical after hydration.
-    const current: Theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light'
-    setTheme(current === 'dark' ? 'light' : 'dark')
-  }, [setTheme])
+    const current = modeRef.current
+    const next: Theme = current === 'light' ? 'dark' : current === 'dark' ? 'system' : 'light'
+    commit(next, true)
+  }, [commit])
 
+  /* Hydrate from the values the inline script already applied. The first
+     render intentionally renders no mode-dependent label; this effect then
+     syncs React with the DOM without changing the painted theme. */
   useEffect(() => {
-    setThemeState(bootstrapTheme())
+    const root = document.documentElement
+    const stored = readStoredTheme()
+    const appliedMode = root.dataset.themeMode
+    const initial: Theme =
+      stored ??
+      (appliedMode === 'light' || appliedMode === 'dark' || appliedMode === 'system'
+        ? appliedMode
+        : 'system')
+
+    modeRef.current = initial
+    root.dataset.themeMode = initial
+    const applied = root.dataset.theme
+    /* In system mode the OS may have changed between the inline bootstrap
+       paint and hydration (a browser/OS switch, or Playwright's emulation).
+       Re-resolve instead of trusting the painted attribute. */
+    const resolved =
+      initial === 'system'
+        ? applyTheme('system', false)
+        : applied === 'light' || applied === 'dark'
+          ? applied
+          : applyTheme(initial, false)
+
+    setModeState(initial)
+    setResolvedTheme(resolved)
+  }, [])
+
+  /* In system mode, follow the OS live — no refresh required. */
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return
+    const media = window.matchMedia('(prefers-color-scheme: dark)')
+
+    const onChange = () => {
+      if (modeRef.current !== 'system') return
+      const resolved = applyTheme('system', true)
+      setResolvedTheme(resolved)
+    }
+
+    media.addEventListener('change', onChange)
+    return () => media.removeEventListener('change', onChange)
   }, [])
 
   const value = useMemo(
-    () => ({ theme, setTheme, toggleTheme }),
-    [theme, setTheme, toggleTheme],
+    () => ({
+      mode,
+      theme: resolvedTheme,
+      resolvedTheme,
+      setMode,
+      setTheme: setMode,
+      toggleTheme,
+    }),
+    [mode, resolvedTheme, setMode, toggleTheme],
   )
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>

@@ -1,54 +1,91 @@
-'use client'
-
-import { useRef } from 'react'
+import type { Metadata } from 'next'
 import SiteShell from '@/components/layout/SiteShell'
-import PlatformStats from '@/components/brand/PlatformStats'
 import HeroSection from '@/components/home/HeroSection'
 import DiscoveryPaths from '@/components/home/DiscoveryPaths'
 import CategoryGrid from '@/components/home/CategoryGrid'
 import FeaturedEvents from '@/components/home/FeaturedEvents'
-import ServicesSection from '@/components/home/ServicesSection'
 import HomeServicesShowcase from '@/components/home/HomeServicesShowcase'
+import VenueShowcase from '@/components/home/VenueShowcase'
+import BrandStory from '@/components/home/BrandStory'
 import HowItWorks from '@/components/home/HowItWorks'
-import VenuePreview from '@/components/home/VenuePreview'
-import PartnerBand from '@/components/home/PartnerBand'
+import TrustCoverage from '@/components/home/TrustCoverage'
 import FinalCTA from '@/components/home/FinalCTA'
-import { usePrefersReducedMotion } from '@/lib/motion'
-import { useHomeAnimations } from '@/lib/use-home-animations'
+import { brand } from '@/lib/brand'
+import { SUPPORTED_CITY } from '@/lib/service-area'
+import {
+  absoluteUrl,
+  jsonLdString,
+  organizationJsonLd,
+  serviceJsonLd,
+  websiteJsonLd,
+} from '@/lib/seo'
+import { siteConfig } from '@/lib/site-config'
+
+export const metadata: Metadata = {
+  title: { absolute: `${brand.name} — ${brand.headline}` },
+  description: brand.description,
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    locale: siteConfig.locale,
+    url: absoluteUrl('/'),
+    siteName: brand.name,
+    title: `${brand.name} — ${brand.headline}`,
+    description: brand.description,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${brand.name} — ${brand.headline}`,
+    description: brand.description,
+  },
+}
 
 /**
- * The Heptome homepage.
+ * Photography-first homepage.
  *
- * Story flow: the living-world hero → the two discovery paths (both verticals at
- * equal weight) → live platform counts → the event catalogue and its services →
- * the ivory home-services showcase → how both journeys run → the world preview
- * → partner recruitment → the final dual CTA.
- *
- * Surface rhythm alternates deliberately: cinematic dark with champagne for the
- * event half, ivory with purple for the home half, so one brand reads as two
- * distinct products rather than a single dark page.
- *
- * All scroll choreography is added by `useHomeAnimations`; without it (reduced
- * motion, no JS yet) every section renders in its final, readable state.
+ * The page tells one story in two halves: an eight-frame photographic hero, the
+ * two discovery paths, live event and home-service rails, venue discovery by
+ * style, the brand standard, and one factual section explaining how each
+ * journey actually works. All imagery is stored locally under `public/images`;
+ * all services come from `lib/catalog.ts`; prices only appear when the API
+ * supplies them.
  */
 export default function HomePage() {
-  const rootRef = useRef<HTMLDivElement>(null)
-  const reduced = usePrefersReducedMotion()
-  useHomeAnimations(rootRef, !reduced)
+  const structuredData = [
+    organizationJsonLd(),
+    websiteJsonLd(),
+    serviceJsonLd({
+      name: 'Event planning and celebration services',
+      description:
+        'Event planning for weddings, birthdays, corporate events and celebrations across India, with a reviewed proposal before anything is confirmed.',
+      path: '/event-management',
+      areaServed: 'India',
+    }),
+    serviceJsonLd({
+      name: 'Home services in Bengaluru',
+      description:
+        'Doorstep cleaning, repair, installation and personal-care services in Bengaluru, booked by a two-hour arrival window.',
+      path: '/home-services',
+      areaServed: SUPPORTED_CITY,
+    }),
+  ]
 
   return (
     <SiteShell transparentHeader>
-      <div ref={rootRef} className="immersive bg-ink-950 text-slate-50">
-        <HeroSection />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdString(structuredData) }}
+      />
+      <HeroSection />
+      <div className="home-flow">
         <DiscoveryPaths />
-        <PlatformStats />
         <CategoryGrid />
         <FeaturedEvents />
-        <ServicesSection />
         <HomeServicesShowcase />
+        <VenueShowcase />
+        <BrandStory />
         <HowItWorks />
-        <VenuePreview />
-        <PartnerBand />
+        <TrustCoverage />
         <FinalCTA />
       </div>
     </SiteShell>

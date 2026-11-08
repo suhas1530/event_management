@@ -144,7 +144,7 @@ export default function EventRequestsPage() {
           <div className="mt-9 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative sm:max-w-xs sm:flex-1">
               <Search
-                className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/80"
+                className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
                 aria-hidden="true"
               />
               <label htmlFor="request-search" className="sr-only">
@@ -156,12 +156,12 @@ export default function EventRequestsPage() {
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="Search by event, city or reference"
-                className="w-full rounded-lg border border-border bg-muted/50 py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground/80 transition-colors duration-200 focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/25"
+                className="w-full rounded-lg border border-border bg-muted/50 py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground transition-colors duration-200 focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/25"
               />
             </div>
 
             <div className="flex items-center gap-2" role="group" aria-label="Filter requests">
-              <Filter className="size-4 shrink-0 text-muted-foreground/80" aria-hidden="true" />
+              <Filter className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
               {FILTERS.map(f => {
                 const active = filter === f.key
                 const count = f.key === 'all' ? requests.length : counts[f.key]
@@ -179,7 +179,7 @@ export default function EventRequestsPage() {
                     )}
                   >
                     {f.label}
-                    <span className="ml-1.5 text-muted-foreground/80">{count}</span>
+                    <span className="ml-1.5 text-muted-foreground">{count}</span>
                   </button>
                 )
               })}
@@ -247,12 +247,12 @@ export default function EventRequestsPage() {
                           </h2>
                           <StatusBadge status={request.status} size="sm" />
                         </div>
-                        <p className="mt-1 text-xs text-muted-foreground/80">{request.requestNumber}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">{request.requestNumber}</p>
 
                         <ul className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-muted-foreground">
                           {request.eventDate && (
                             <li className="flex items-center gap-1.5">
-                              <CalendarDays className="size-3.5 text-muted-foreground/80" aria-hidden="true" />
+                              <CalendarDays className="size-3.5 text-muted-foreground" aria-hidden="true" />
                               <span>
                                 {new Date(request.eventDate).toLocaleDateString('en-IN', {
                                   day: 'numeric',
@@ -265,13 +265,13 @@ export default function EventRequestsPage() {
                           )}
                           {request.guestCount ? (
                             <li className="flex items-center gap-1.5">
-                              <Users className="size-3.5 text-muted-foreground/80" aria-hidden="true" />
+                              <Users className="size-3.5 text-muted-foreground" aria-hidden="true" />
                               {request.guestCount} guests
                             </li>
                           ) : null}
                           {request.city && (
                             <li className="flex items-center gap-1.5">
-                              <MapPin className="size-3.5 text-muted-foreground/80" aria-hidden="true" />
+                              <MapPin className="size-3.5 text-muted-foreground" aria-hidden="true" />
                               {request.city}
                             </li>
                           )}
@@ -280,7 +280,7 @@ export default function EventRequestsPage() {
                       </div>
 
                       <ArrowRight
-                        className="size-4 shrink-0 self-start text-muted-foreground/80 transition-colors duration-200 group-hover:translate-x-0.5 group-hover:text-primary sm:self-auto"
+                        className="size-4 shrink-0 self-start text-muted-foreground transition-colors duration-200 group-hover:translate-x-0.5 group-hover:text-primary sm:self-auto"
                         aria-hidden="true"
                       />
                     </Link>

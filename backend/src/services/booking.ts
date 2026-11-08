@@ -439,32 +439,15 @@ export class BookingService {
 
   // ─── Payments ─────────────────────────────────────────────────
 
-  async initiatePayment(bookingId: string, userId: string, data: PaymentInput) {
-    const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
-    if (!booking) throw new NotFoundError('Booking not found');
-    if (booking.userId !== userId) throw new AuthorizationError('Access denied');
-
-    if (booking.status !== BookingStatus.PAYMENT_PENDING) {
-      throw new AppError(400, 'Payment is not due for this booking', 'PAYMENT_NOT_DUE');
-    }
-
-    if (data.amount > booking.balanceAmount) {
-      throw new AppError(400, 'Payment amount exceeds balance due', 'AMOUNT_EXCEEDS_BALANCE');
-    }
-
-    const payment = await prisma.payment.create({
-      data: {
-        bookingId,
-        amount: data.amount,
-        currency: data.currency,
-        method: data.method,
-        status: PaymentStatus.PENDING,
-        // In production: create Razorpay/Stripe order here and return gatewayOrderId
-        gatewayOrderId: `GW-${Date.now()}`,
-      },
-    });
-
-    return payment;
+  async initiatePayment(_bookingId: string, _userId: string, _data: PaymentInput) {
+    // The old flow accepted a client-supplied amount and created a fake gateway
+    // order. Online payments now go through /api/v1/payments/orders, where the
+    // server derives the amount and verifies the provider response.
+    throw new AppError(
+      410,
+      'This payment endpoint has been replaced. Use /api/v1/payments/orders.',
+      'PAYMENT_FLOW_CHANGED',
+    );
   }
 
   async getPayments(bookingId: string, userId: string) {
@@ -485,6 +468,20 @@ export class BookingService {
   ) {
     const payment = await prisma.payment.findFirst({ where: { id: paymentId, bookingId } });
     if (!payment) throw new NotFoundError('Payment not found');
+
+    // Razorpay payments may only be completed by the provider webhook or the
+    // signature-verified checkout callback. This admin endpoint is retained for
+    // offline methods (cash / bank transfer) only.
+    if (payment.method === 'RAZORPAY' || payment.provider === 'razorpay') {
+      throw new AppError(
+        400,
+        'Razorpay payments must be verified through the payment provider.',
+        'PROVIDER_VERIFICATION_REQUIRED',
+      );
+    }
+    if (payment.status === PaymentStatus.COMPLETED) {
+      throw new AppError(409, 'Payment is already completed.', 'PAYMENT_ALREADY_COMPLETED');
+    }
 
     const updatedPayment = await prisma.payment.update({
       where: { id: paymentId },

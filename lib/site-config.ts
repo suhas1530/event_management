@@ -43,6 +43,7 @@ export const siteConfig = {
    * non-navigating label instead of a broken `#` link.
    */
   social: {
+    whatsapp: 'https://wa.me/918050171547',
     instagram: '',
     linkedin: '',
     facebook: '',
@@ -71,13 +72,14 @@ export const siteConfig = {
 export type SocialKey = keyof typeof siteConfig.social
 
 export const SOCIAL_LABELS: Record<SocialKey, string> = {
+  whatsapp: 'WhatsApp',
   instagram: 'Instagram',
   linkedin: 'LinkedIn',
   facebook: 'Facebook',
   youtube: 'YouTube',
 }
 
-export const SOCIAL_ORDER: SocialKey[] = ['instagram', 'linkedin', 'facebook', 'youtube']
+export const SOCIAL_ORDER: SocialKey[] = ['whatsapp', 'instagram', 'linkedin', 'facebook', 'youtube']
 
 /* ------------------------------------------------------------------ */
 /* Footer navigation                                                   */
@@ -106,7 +108,7 @@ export const footerColumns: { title: string; links: FooterLink[] }[] = [
       { label: 'All Home Services', href: '/home-services' },
       { label: 'Book a Service', href: '/book/technician' },
       { label: 'Cleaning & Pest Control', href: '/home-services#cleaning' },
-      { label: 'AC & Appliance Repair', href: '/home-services#appliance' },
+      { label: 'AC & Appliance Repair', href: '/home-services#ac-service' },
     ],
   },
   {

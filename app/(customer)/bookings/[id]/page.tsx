@@ -7,9 +7,10 @@ import { useAuth } from '@/lib/auth-context'
 import { bookingsApi } from '@/lib/api'
 import type { Booking, Quote, TimelineEntry, Message } from '@/lib/api'
 import SiteShell from '@/components/layout/SiteShell'
+import PaymentButton from '@/components/payments/PaymentButton'
 import {
   ArrowLeft, Loader2, CheckCircle2, Clock, AlertCircle,
-  Send, Check, X, CreditCard, CalendarDays, Users, MapPin,
+  Send, Check, X, CalendarDays, Users, MapPin,
   MessageCircle, FileText, ReceiptText, ChevronDown, ChevronUp
 } from 'lucide-react'
 
@@ -21,10 +22,10 @@ const STATUS_LABELS: Record<string, string> = {
   CANCELLED: 'Booking Cancelled', REJECTED: 'Booking Rejected',
 }
 const STATUS_COLORS: Record<string, string> = {
-  DRAFT: 'text-muted-foreground', REQUESTED: 'text-blue-300', PENDING_REVIEW: 'text-yellow-300',
-  QUOTED: 'text-purple-300', CUSTOMER_APPROVAL: 'text-orange-300', PAYMENT_PENDING: 'text-red-300',
-  CONFIRMED: 'text-gold-text', IN_PROGRESS: 'text-green-300', COMPLETED: 'text-green-400',
-  CANCELLED: 'text-muted-foreground/80', REJECTED: 'text-red-400',
+  DRAFT: 'text-muted-foreground', REQUESTED: 'text-info', PENDING_REVIEW: 'text-warning',
+  QUOTED: 'text-primary', CUSTOMER_APPROVAL: 'text-warning', PAYMENT_PENDING: 'text-destructive',
+  CONFIRMED: 'text-gold-text', IN_PROGRESS: 'text-success', COMPLETED: 'text-success',
+  CANCELLED: 'text-muted-foreground', REJECTED: 'text-destructive',
 }
 
 const TIMELINE_ORDER: string[] = [
@@ -50,7 +51,6 @@ export default function BookingDetailPage() {
   const [msgText, setMsgText] = useState('')
   const [sendingMsg, setSendingMsg] = useState(false)
   const [approvingQuote, setApprovingQuote] = useState<string | null>(null)
-  const [paymentLoading, setPaymentLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => { if (!authLoading && !isAuthenticated) router.replace('/login') }, [authLoading, isAuthenticated, router])
@@ -101,22 +101,6 @@ export default function BookingDetailPage() {
     } catch {} finally { setSendingMsg(false) }
   }
 
-  async function handleInitiatePayment() {
-    if (!booking) return
-    setPaymentLoading(true)
-    try {
-      const payment = await bookingsApi.initiatePayment(booking.id, {
-        amount: booking.balanceAmount,
-        method: 'BANK_TRANSFER',
-        currency: 'INR',
-      })
-      alert(`Payment initiated!\n\nPayment ID: ${payment.id}\nAmount: ${fmt(payment.amount)}\n\nFor Razorpay/Stripe integration, connect a payment gateway.`)
-      await load()
-    } catch (e: unknown) {
-      alert((e as { error?: string })?.error ?? 'Failed to initiate payment')
-    } finally { setPaymentLoading(false) }
-  }
-
   if (loading || authLoading) return (
     <Shell><div className="flex items-center justify-center py-40"><Loader2 className="size-8 animate-spin text-gold-text" /></div></Shell>
   )
@@ -141,29 +125,30 @@ export default function BookingDetailPage() {
             <p className={`mt-2 text-sm ${STATUS_COLORS[booking.status]}`}>{STATUS_LABELS[booking.status]}</p>
           </div>
           {booking.status === 'PAYMENT_PENDING' && (
-            <button type="button" onClick={handleInitiatePayment} disabled={paymentLoading}
-              className="flex items-center gap-2 bg-[#d5ae79] px-6 py-3 text-[10px] uppercase tracking-[0.2em] text-[#17151d] hover:bg-[#e8cfa9] disabled:opacity-50">
-              <CreditCard className="size-4" />
-              {paymentLoading ? 'Processing…' : `Pay ${fmt(booking.balanceAmount)}`}
-            </button>
+            <PaymentButton
+              targetType="EVENT_BOOKING"
+              targetId={booking.id}
+              amount={booking.balanceAmount}
+              onSuccess={() => { void load() }}
+            />
           )}
         </div>
       </div>
 
       {/* Alert — quote waiting for approval */}
       {sentQuote && (
-        <div className="mb-6 border border-[#d5ae79]/30 bg-[#d5ae79]/8 p-5">
+        <div className="mb-6 border border-gold/30 bg-gold/8 p-5">
           <p className="font-medium text-foreground">A quote is waiting for your approval</p>
           <p className="mt-1 text-sm text-muted-foreground">
             Total: <span className="text-gold-text">{fmt(sentQuote.totalAmount)}</span> · Valid until {fmtDate(sentQuote.validUntil)}
           </p>
           <div className="mt-4 flex gap-3">
             <button type="button" onClick={() => handleApproveQuote(sentQuote.id)} disabled={approvingQuote === sentQuote.id}
-              className="flex items-center gap-2 bg-[#d5ae79] px-5 py-2.5 text-[10px] uppercase tracking-[0.15em] text-[#17151d] hover:bg-[#e8cfa9] disabled:opacity-50">
+              className="flex items-center gap-2 bg-gold px-5 py-2.5 text-[10px] uppercase tracking-[0.15em] text-gold-foreground hover:bg-gold-soft disabled:opacity-50">
               <Check className="size-4" /> {approvingQuote === sentQuote.id ? 'Approving…' : 'Approve'}
             </button>
             <button type="button" onClick={() => handleRejectQuote(sentQuote.id)}
-              className="flex items-center gap-2 border border-border px-5 py-2.5 text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:border-red-400 hover:text-red-400">
+              className="flex items-center gap-2 border border-border px-5 py-2.5 text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:border-destructive hover:text-destructive">
               <X className="size-4" /> Decline
             </button>
           </div>
@@ -174,7 +159,7 @@ export default function BookingDetailPage() {
       <div className="mb-6 flex gap-0 border-b border-border">
         {(['overview', 'quote', 'messages', 'timeline'] as const).map(t => (
           <button type="button" key={t} onClick={() => setActiveTab(t)}
-            className={`px-5 py-3 text-[10px] uppercase tracking-[0.2em] transition ${activeTab === t ? 'border-b-2 border-[#d5ae79] text-gold-text' : 'text-muted-foreground hover:text-foreground/90'}`}>
+            className={`px-5 py-3 text-[10px] uppercase tracking-[0.2em] transition ${activeTab === t ? 'border-b-2 border-gold text-gold-text' : 'text-muted-foreground hover:text-foreground/90'}`}>
             {t}
           </button>
         ))}
@@ -232,7 +217,7 @@ export default function BookingDetailPage() {
                 {booking.balanceAmount > 0 && <PriceLine label="Balance due" value={fmt(booking.balanceAmount)} red />}
               </dl>
               <div className="mt-4">
-                <span className={`inline-block px-2 py-1 text-[9px] uppercase tracking-[0.1em] ${booking.paymentStatus === 'COMPLETED' ? 'bg-green-500/15 text-green-400' : 'bg-orange-500/10 text-orange-300'}`}>
+                <span className={`inline-block px-2 py-1 text-[9px] uppercase tracking-[0.1em] ${booking.paymentStatus === 'COMPLETED' ? 'bg-success-muted text-success' : 'bg-warning-muted text-warning'}`}>
                   Payment: {booking.paymentStatus}
                 </span>
               </div>
@@ -256,9 +241,9 @@ export default function BookingDetailPage() {
                       <p className="mt-1 text-2xl font-serif text-foreground">{fmt(q.totalAmount)}</p>
                     </div>
                     <span className={`px-3 py-1 text-[9px] uppercase tracking-[0.15em] ${
-                      q.status === 'APPROVED' ? 'bg-green-500/15 text-green-400' :
-                      q.status === 'REJECTED' ? 'bg-red-500/10 text-red-400' :
-                      q.status === 'SENT' ? 'bg-[#d5ae79]/10 text-[#d5ae79]' : 'bg-muted text-muted-foreground'
+                      q.status === 'APPROVED' ? 'bg-success-muted text-success' :
+                      q.status === 'REJECTED' ? 'bg-destructive-muted text-destructive' :
+                      q.status === 'SENT' ? 'bg-gold/10 text-gold-text' : 'bg-muted text-muted-foreground'
                     }`}>{q.status}</span>
                   </div>
                   <div className="flex flex-col gap-2 mb-4">
@@ -291,10 +276,10 @@ export default function BookingDetailPage() {
                   const isMe = m.senderId === user?.id
                   return (
                     <div key={m.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[75%] px-4 py-3 text-sm leading-6 ${isMe ? 'bg-[#d5ae79] text-[#17151d]' : 'border border-border bg-muted text-foreground/80'}`}>
+                      <div className={`max-w-[75%] px-4 py-3 text-sm leading-6 ${isMe ? 'bg-gold text-gold-foreground' : 'border border-border bg-muted text-foreground/80'}`}>
                         {!isMe && <p className="text-[10px] uppercase tracking-[0.1em] mb-1 opacity-60">{m.sender?.name}</p>}
                         {m.content}
-                        <p className={`mt-1 text-[10px] ${isMe ? 'text-foreground/60' : 'text-muted-foreground/80'}`}>{fmtTime(m.createdAt)}</p>
+                        <p className={`mt-1 text-[10px] ${isMe ? 'text-foreground/60' : 'text-muted-foreground'}`}>{fmtTime(m.createdAt)}</p>
                       </div>
                     </div>
                   )
@@ -304,9 +289,9 @@ export default function BookingDetailPage() {
           <form onSubmit={handleSendMessage} className="flex gap-3 border-t border-border pt-4">
             <input value={msgText} onChange={e => setMsgText(e.target.value)}
               placeholder="Type your message…"
-              className="flex-1 border border-border bg-muted/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/80 focus:border-[#d5ae79] focus:outline-none" />
+              className="flex-1 border border-border bg-muted/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-gold focus:outline-none" />
             <button type="submit" disabled={sendingMsg || !msgText.trim()}
-              className="flex items-center gap-2 bg-[#d5ae79] px-5 py-3 text-[10px] uppercase tracking-[0.15em] text-[#17151d] hover:bg-[#e8cfa9] disabled:opacity-40">
+              className="flex items-center gap-2 bg-gold px-5 py-3 text-[10px] uppercase tracking-[0.15em] text-gold-foreground hover:bg-gold-soft disabled:opacity-40">
               <Send className="size-4" />
             </button>
           </form>
@@ -322,12 +307,12 @@ export default function BookingDetailPage() {
               <ol className="relative border-l border-border pl-6 space-y-8">
                 {timeline.map((entry, i) => (
                   <li key={entry.id} className="relative">
-                    <div className={`absolute -left-[25px] flex size-4 items-center justify-center rounded-full border ${i === timeline.length - 1 ? 'border-[#d5ae79] bg-[#d5ae79]' : 'border-border bg-card'}`}>
-                      {i === timeline.length - 1 && <div className="size-1.5 rounded-full bg-[#17151d]" />}
+                    <div className={`absolute -left-[25px] flex size-4 items-center justify-center rounded-full border ${i === timeline.length - 1 ? 'border-gold bg-gold' : 'border-border bg-card'}`}>
+                      {i === timeline.length - 1 && <div className="size-1.5 rounded-full bg-foreground" />}
                     </div>
                     <p className="text-[10px] uppercase tracking-[0.2em] text-gold-text">{entry.title}</p>
                     {entry.description && <p className="mt-1 text-sm leading-6 text-muted-foreground">{entry.description}</p>}
-                    <p className="mt-1 text-[10px] text-muted-foreground/80">{fmtDate(entry.createdAt)} at {fmtTime(entry.createdAt)}</p>
+                    <p className="mt-1 text-[10px] text-muted-foreground">{fmtDate(entry.createdAt)} at {fmtTime(entry.createdAt)}</p>
                   </li>
                 ))}
               </ol>
@@ -359,7 +344,7 @@ function PriceLine({ label, value, bold, accent, red }: { label: string; value: 
   return (
     <div className="flex justify-between">
       <dt className={bold ? 'font-medium text-foreground' : 'text-muted-foreground'}>{label}</dt>
-      <dd className={`${bold ? 'font-medium text-foreground' : ''} ${accent ? 'text-gold-text' : ''} ${red ? 'text-red-300' : ''} ${!bold && !accent && !red ? 'text-muted-foreground' : ''}`}>{value}</dd>
+      <dd className={`${bold ? 'font-medium text-foreground' : ''} ${accent ? 'text-gold-text' : ''} ${red ? 'text-destructive' : ''} ${!bold && !accent && !red ? 'text-muted-foreground' : ''}`}>{value}</dd>
     </div>
   )
 }
@@ -367,9 +352,9 @@ function PriceLine({ label, value, bold, accent, red }: { label: string; value: 
 function Empty({ icon: Icon, title, desc }: { icon: React.ElementType; title: string; desc: string }) {
   return (
     <div className="flex flex-col items-center py-16 text-center">
-      <Icon className="mb-3 size-8 text-muted-foreground/80" />
+      <Icon className="mb-3 size-8 text-muted-foreground" />
       <p className="text-sm text-muted-foreground">{title}</p>
-      <p className="mt-1 text-xs text-muted-foreground/80">{desc}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{desc}</p>
     </div>
   )
 }

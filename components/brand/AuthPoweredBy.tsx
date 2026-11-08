@@ -12,7 +12,7 @@ export default function AuthPoweredBy() {
   const { name, tagline, url } = siteConfig.developer
 
   return (
-    <p className="mt-8 text-center text-[0.6875rem] tracking-wide text-muted-foreground/80">
+    <p className="mt-8 text-center text-[0.6875rem] tracking-wide text-muted-foreground">
       Technology by{' '}
       {url ? (
         <a
@@ -27,7 +27,7 @@ export default function AuthPoweredBy() {
         // No official URL configured yet — plain text rather than a dead link.
         <span className="text-muted-foreground">{name}</span>
       )}{' '}
-      <span className="text-muted-foreground/80">· {tagline}</span>
+      <span className="text-muted-foreground">· {tagline}</span>
     </p>
   )
 }

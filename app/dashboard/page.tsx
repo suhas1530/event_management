@@ -57,18 +57,18 @@ const TECH_STATUS_LABEL: Record<string, string> = {
   CANCELLED: 'Cancelled', REJECTED: 'Rejected',
 }
 const TECH_STATUS_COLOR: Record<string, string> = {
-  PENDING: 'text-yellow-300 bg-yellow-500/10',
-  CONFIRMED: 'text-blue-300 bg-blue-500/10',
-  TECHNICIAN_ASSIGNED: 'text-purple-300 bg-purple-500/10',
-  TECHNICIAN_CONFIRMED: 'text-purple-300 bg-purple-500/10',
-  TECHNICIAN_ON_THE_WAY: 'text-cyan-300 bg-cyan-500/10',
-  TECHNICIAN_ARRIVED: 'text-teal-300 bg-teal-500/10',
-  SERVICE_STARTED: 'text-orange-300 bg-orange-500/10',
-  SERVICE_COMPLETED: 'text-green-400 bg-green-500/15',
-  PAYMENT_COMPLETED: 'text-green-400 bg-green-500/15',
-  REVIEW_SUBMITTED: 'text-green-300 bg-green-500/10',
-  CANCELLED: 'text-muted-foreground/80 bg-muted/60',
-  REJECTED: 'text-red-400 bg-red-500/10',
+  PENDING: 'text-warning bg-warning-muted',
+  CONFIRMED: 'text-info bg-info-muted',
+  TECHNICIAN_ASSIGNED: 'text-primary bg-primary-muted',
+  TECHNICIAN_CONFIRMED: 'text-primary bg-primary-muted',
+  TECHNICIAN_ON_THE_WAY: 'text-info bg-info-muted',
+  TECHNICIAN_ARRIVED: 'text-info bg-info-muted',
+  SERVICE_STARTED: 'text-warning bg-warning-muted',
+  SERVICE_COMPLETED: 'text-success bg-success-muted',
+  PAYMENT_COMPLETED: 'text-success bg-success-muted',
+  REVIEW_SUBMITTED: 'text-success bg-success-muted',
+  CANCELLED: 'text-muted-foreground bg-muted/60',
+  REJECTED: 'text-destructive bg-destructive-muted',
 }
 
 const EVENT_STATUS_LABEL: Record<string, string> = {
@@ -78,11 +78,11 @@ const EVENT_STATUS_LABEL: Record<string, string> = {
   IN_PROGRESS: 'In Progress', COMPLETED: 'Completed', CANCELLED: 'Cancelled', REJECTED: 'Rejected',
 }
 const EVENT_STATUS_COLOR: Record<string, string> = {
-  DRAFT: 'text-muted-foreground bg-muted/60', REQUESTED: 'text-blue-300 bg-blue-500/10',
-  PENDING_REVIEW: 'text-yellow-300 bg-yellow-500/10', QUOTED: 'text-purple-300 bg-purple-500/10',
-  CUSTOMER_APPROVAL: 'text-orange-300 bg-orange-500/10', PAYMENT_PENDING: 'text-red-300 bg-red-500/10',
-  CONFIRMED: 'text-[#d5ae79] bg-[#d5ae79]/10', IN_PROGRESS: 'text-green-300 bg-green-500/10',
-  COMPLETED: 'text-green-400 bg-green-500/15', CANCELLED: 'text-muted-foreground/80 bg-muted/60', REJECTED: 'text-red-400 bg-red-500/10',
+  DRAFT: 'text-muted-foreground bg-muted/60', REQUESTED: 'text-info bg-info-muted',
+  PENDING_REVIEW: 'text-warning bg-warning-muted', QUOTED: 'text-primary bg-primary-muted',
+  CUSTOMER_APPROVAL: 'text-warning bg-warning-muted', PAYMENT_PENDING: 'text-destructive bg-destructive-muted',
+  CONFIRMED: 'text-gold-text bg-gold/10', IN_PROGRESS: 'text-success bg-success-muted',
+  COMPLETED: 'text-success bg-success-muted', CANCELLED: 'text-muted-foreground bg-muted/60', REJECTED: 'text-destructive bg-destructive-muted',
 }
 
 const QUICK_TECHS = [
@@ -213,7 +213,7 @@ export default function CustomerDashboard() {
 
   return (
     <SiteShell>
-      <main className="mx-auto max-w-7xl px-5 py-8 lg:px-10">
+      <div className="mx-auto max-w-7xl px-5 py-8 lg:px-10">
         {/* ── Header ── */}
         <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -224,7 +224,7 @@ export default function CustomerDashboard() {
             <Link href="/book/technician" className="flex items-center gap-2 bg-primary px-5 py-2.5 text-[11px] uppercase tracking-[0.18em] text-primary-foreground hover:bg-primary-hover">
               <Wrench className="size-3.5" /> Book a Home Service
             </Link>
-            <Link href="/plan-event" className="flex items-center gap-2 border border-border px-5 py-2.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:border-[#d5ae79] hover:text-gold-text">
+            <Link href="/plan-event" className="flex items-center gap-2 border border-border px-5 py-2.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:border-gold hover:text-gold-text">
               <Sparkles className="size-3.5" /> Plan an Event
             </Link>
           </div>
@@ -233,7 +233,7 @@ export default function CustomerDashboard() {
         {/* ── Alert banners ── */}
         {showEvent && pendingAction && (
           <Link href={`/bookings/${pendingAction.id}`}
-            className="mb-5 flex items-center gap-4 border border-[#d5ae79]/30 bg-[#d5ae79]/8 px-5 py-4 transition hover:bg-[#d5ae79]/12">
+            className="mb-5 flex items-center gap-4 border border-gold/30 bg-gold/8 px-5 py-4 transition hover:bg-gold/12">
             <AlertCircle className="size-5 flex-shrink-0 text-gold-text" />
             <div className="flex-1">
               <p className="text-sm font-medium text-foreground">Action required — {EVENT_STATUS_LABEL[pendingAction.status]}</p>
@@ -250,7 +250,7 @@ export default function CustomerDashboard() {
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
               {QUICK_TECHS.map(({ label, icon: Icon, cat }) => (
                 <Link key={cat} href={`/book/technician?category=${cat}`}
-                  className="flex flex-col items-center gap-2 border border-border py-4 text-center transition hover:border-[#d5ae79]/40 hover:bg-muted/60">
+                  className="flex flex-col items-center gap-2 border border-border py-4 text-center transition hover:border-gold/40 hover:bg-muted/60">
                   <Icon className="size-5 text-gold-text" />
                   <span className="text-[10px] text-muted-foreground">{label}</span>
                 </Link>
@@ -280,7 +280,7 @@ export default function CustomerDashboard() {
         {/* ── Upcoming event countdown ── */}
         {showEvent && upcomingEvent && (
           <Link href={`/bookings/${upcomingEvent.id}`}
-            className="mb-8 flex items-center gap-5 border border-[#d5ae79]/20 bg-[#d5ae79]/5 p-5 transition hover:bg-[#d5ae79]/8">
+            className="mb-8 flex items-center gap-5 border border-gold/20 bg-gold/5 p-5 transition hover:bg-gold/8">
             {upcomingEvent.event?.heroImages?.[0] && (
               <div className="hidden size-16 flex-shrink-0 overflow-hidden sm:block">
                 <img src={upcomingEvent.event.heroImages[0]} alt="" className="h-full w-full object-cover" />
@@ -301,17 +301,17 @@ export default function CustomerDashboard() {
         {/* ── Active home-service job ── */}
         {showTech && activeTechJob && (
           <Link href={`/dashboard/booking/${activeTechJob.id}`}
-            className="mb-8 flex items-center gap-4 border border-cyan-500/20 bg-cyan-500/5 p-4 transition hover:bg-cyan-500/8">
-            <Wrench className="size-5 flex-shrink-0 text-cyan-400" />
+            className="mb-8 flex items-center gap-4 border border-info/20 bg-info-muted p-4 transition hover:bg-info-muted">
+            <Wrench className="size-5 flex-shrink-0 text-info" />
             <div className="flex-1">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-cyan-400">Active service booking</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-info">Active service booking</p>
               <p className="mt-0.5 text-sm text-foreground">{activeTechJob.service?.name ?? 'Technician service'} · {activeTechJob.bookingNumber}</p>
               <p className="text-xs text-muted-foreground">{fmtDate(activeTechJob.scheduledDate)}</p>
             </div>
             <span className={`px-2 py-1 text-[9px] uppercase tracking-[0.1em] ${TECH_STATUS_COLOR[activeTechJob.status]}`}>
               {TECH_STATUS_LABEL[activeTechJob.status]}
             </span>
-            <ArrowRight className="size-4 flex-shrink-0 text-muted-foreground/80" />
+            <ArrowRight className="size-4 flex-shrink-0 text-muted-foreground" />
           </Link>
         )}
 
@@ -320,7 +320,7 @@ export default function CustomerDashboard() {
           <div className="flex gap-0 overflow-x-auto whitespace-nowrap" role="tablist" aria-label="What to show">
             {TABS.map(t => (
               <button type="button" key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => selectTab(t.id)}
-                className={`px-5 py-3 text-[11px] uppercase tracking-[0.18em] transition ${tab === t.id ? 'border-b-2 border-[#d5ae79] text-gold-text' : 'text-muted-foreground hover:text-foreground/90'}`}>
+                className={`px-5 py-3 text-[11px] uppercase tracking-[0.18em] transition ${tab === t.id ? 'border-b-2 border-gold text-gold-text' : 'text-muted-foreground hover:text-foreground/90'}`}>
                 {t.label}
               </button>
             ))}
@@ -332,7 +332,7 @@ export default function CustomerDashboard() {
           <div className="mb-6 flex flex-wrap gap-2">
             {STATUS_FILTERS.map(f => (
               <button type="button" key={f.id} onClick={() => setStatusFilter(f.id)} aria-pressed={statusFilter === f.id}
-                className={`border px-3.5 py-1.5 text-[10px] uppercase tracking-[0.15em] transition ${statusFilter === f.id ? 'border-primary bg-primary/15 text-accent' : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'}`}>
+                className={`border px-3.5 py-1.5 text-[10px] uppercase tracking-[0.15em] transition ${statusFilter === f.id ? 'border-primary bg-primary/15 text-primary' : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'}`}>
                 {f.label}
               </button>
             ))}
@@ -354,13 +354,13 @@ export default function CustomerDashboard() {
                 {eventRequests.length > 0 ? <div className="flex flex-col divide-y divide-border-subtle border border-border">
                   {(tab === 'overview' ? eventRequests.slice(0, 4) : eventRequests).map(request => (
                     <div key={request.id} className="flex flex-wrap items-center gap-4 px-5 py-4 transition hover:bg-muted/60">
-                      <div className="flex size-10 flex-shrink-0 items-center justify-center border border-[#d5ae79]/20 bg-[#d5ae79]/5"><Sparkles className="size-4 text-[#d5ae79]" /></div>
+                      <div className="flex size-10 flex-shrink-0 items-center justify-center border border-gold/20 bg-gold/5"><Sparkles className="size-4 text-gold-text" /></div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm text-foreground">{request.eventType.replaceAll('_', ' ')}</p>
                         <p className="mt-1 text-xs text-muted-foreground">{request.eventDate ? fmtDate(request.eventDate) : 'Date flexible'} · {request.guestCount ? `${request.guestCount} guests` : 'Guest count open'}{request.city ? ` · ${request.city}` : ''}</p>
-                        <p className="mt-1 text-[10px] text-muted-foreground/80">{request.requestNumber}</p>
+                        <p className="mt-1 text-[10px] text-muted-foreground">{request.requestNumber}</p>
                       </div>
-                      <span className={`border px-2.5 py-1 text-[9px] uppercase tracking-widest ${request.status === 'DRAFT' ? 'border-border bg-muted text-muted-foreground' : 'border-[#d5ae79]/20 bg-[#d5ae79]/10 text-[#d5ae79]'}`}>
+                      <span className={`border px-2.5 py-1 text-[9px] uppercase tracking-widest ${request.status === 'DRAFT' ? 'border-border bg-muted text-muted-foreground' : 'border-gold/20 bg-gold/10 text-gold-text'}`}>
                         {request.status === 'DRAFT' ? 'Draft' : request.status.replaceAll('_', ' ').toLowerCase()}
                       </span>
                       <Link href={request.status === 'DRAFT' ? `/plan-event?id=${request.id}` : `/event-requests/${request.id}`} className="flex items-center gap-1.5 text-xs text-gold-text hover:underline">
@@ -368,7 +368,7 @@ export default function CustomerDashboard() {
                       </Link>
                     </div>
                   ))}
-                </div> : <div className="border border-border px-5 py-8 text-center"><p className="text-sm text-foreground">No event requests yet</p><p className="mt-1 text-xs text-muted-foreground">Tell us what you are planning and our event team will shape a custom proposal.</p><Link href="/plan-event" className="mt-4 inline-flex items-center gap-2 bg-[#d5ae79] px-4 py-2.5 text-xs text-[#17151d]">Plan an event <ArrowRight className="size-3.5" /></Link></div>}
+                </div> : <div className="border border-border px-5 py-8 text-center"><p className="text-sm text-foreground">No event requests yet</p><p className="mt-1 text-xs text-muted-foreground">Tell us what you are planning and our event team will shape a custom proposal.</p><Link href="/plan-event" className="mt-4 inline-flex items-center gap-2 bg-gold px-4 py-2.5 text-xs text-gold-foreground">Plan an event <ArrowRight className="size-3.5" /></Link></div>}
               </section>
             )}
 
@@ -381,7 +381,7 @@ export default function CustomerDashboard() {
                     <Link href="?tab=home" className="text-[10px] uppercase tracking-[0.15em] text-gold-text hover:underline" onClick={() => selectTab('home')}>View all</Link>
                   </div>
                 )}
-                <div className="flex flex-col divide-y divide-white/8 border border-border">
+                <div className="flex flex-col divide-y divide-border-subtle border border-border">
                   {(tab === 'overview' ? filteredTech.slice(0, 3) : filteredTech).map(b => (
                     <Link key={b.id} href={`/dashboard/booking/${b.id}`}
                       className="group flex items-center gap-4 px-5 py-4 transition hover:bg-muted/60">
@@ -393,7 +393,7 @@ export default function CustomerDashboard() {
                         <p className="mt-0.5 text-xs text-muted-foreground">
                           {b.bookingNumber} · {fmtDate(b.scheduledDate)} · {b.timeSlotStart}–{b.timeSlotEnd}
                         </p>
-                        <p className="text-xs text-muted-foreground/80">{b.addressCity}</p>
+                        <p className="text-xs text-muted-foreground">{b.addressCity}</p>
                       </div>
                       <div className="flex flex-shrink-0 flex-col items-end gap-1.5">
                         <span className={`px-2 py-0.5 text-[9px] uppercase tracking-[0.1em] ${TECH_STATUS_COLOR[b.status]}`}>
@@ -401,7 +401,7 @@ export default function CustomerDashboard() {
                         </span>
                         <span className="text-xs text-muted-foreground">{fmt(b.totalAmount)}</span>
                       </div>
-                      <ArrowRight className="size-4 flex-shrink-0 text-muted-foreground/80 transition group-hover:text-gold-text" />
+                      <ArrowRight className="size-4 flex-shrink-0 text-muted-foreground transition group-hover:text-gold-text" />
                     </Link>
                   ))}
                 </div>
@@ -417,14 +417,14 @@ export default function CustomerDashboard() {
                     <Link href="?tab=events" className="text-[10px] uppercase tracking-[0.15em] text-gold-text hover:underline" onClick={() => selectTab('events')}>View all</Link>
                   </div>
                 )}
-                <div className="flex flex-col divide-y divide-white/8 border border-border">
+                <div className="flex flex-col divide-y divide-border-subtle border border-border">
                   {(tab === 'overview' ? filteredEvent.slice(0, 3) : filteredEvent).map(b => (
                     <Link key={b.id} href={`/bookings/${b.id}`}
                       className="group flex items-center gap-4 px-5 py-4 transition hover:bg-muted/60">
                       <div className="size-10 flex-shrink-0 overflow-hidden border border-border bg-muted/60">
                         {b.event?.heroImages?.[0]
                           ? <img src={b.event.heroImages[0]} alt="" className="h-full w-full object-cover" />
-                          : <div className="flex h-full items-center justify-center"><Sparkles className="size-4 text-muted-foreground/80" /></div>}
+                          : <div className="flex h-full items-center justify-center"><Sparkles className="size-4 text-muted-foreground" /></div>}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="truncate text-sm text-foreground">{b.event?.title ?? 'Event'}</p>
@@ -436,7 +436,7 @@ export default function CustomerDashboard() {
                         </span>
                         {b.totalAmount > 0 && <span className="text-xs text-muted-foreground">{fmt(b.totalAmount)}</span>}
                       </div>
-                      <ArrowRight className="size-4 flex-shrink-0 text-muted-foreground/80 transition group-hover:text-gold-text" />
+                      <ArrowRight className="size-4 flex-shrink-0 text-muted-foreground transition group-hover:text-gold-text" />
                     </Link>
                   ))}
                 </div>
@@ -449,11 +449,11 @@ export default function CustomerDashboard() {
               filteredEvent.length === 0 &&
               (tab === 'events' ? eventRequests.length === 0 : true) && (
                 <div className="flex flex-col items-center border border-border-subtle py-16 text-center">
-                  <CalendarDays className="mb-4 size-10 text-muted-foreground/80" />
+                  <CalendarDays className="mb-4 size-10 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">
                     {tab === 'home' ? 'No home service bookings yet' : tab === 'events' ? 'No event bookings yet' : 'No bookings yet'}
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground/80">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {tab === 'home'
                       ? 'Pick a service and choose a slot — you will see the booking here straight away.'
                       : tab === 'events'
@@ -464,7 +464,7 @@ export default function CustomerDashboard() {
                     <Link href="/book/technician" className="flex items-center gap-2 bg-primary px-5 py-2.5 text-[11px] uppercase tracking-[0.18em] text-primary-foreground hover:bg-primary-hover">
                       <Wrench className="size-3.5" /> Book a Home Service
                     </Link>
-                    <Link href="/plan-event" className="flex items-center gap-2 border border-border px-5 py-2.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:border-[#d5ae79]">
+                    <Link href="/plan-event" className="flex items-center gap-2 border border-border px-5 py-2.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:border-gold">
                       <Sparkles className="size-3.5" /> Plan an Event
                     </Link>
                   </div>
@@ -480,21 +480,21 @@ export default function CustomerDashboard() {
               <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Recent notifications</p>
               <Link href="/notifications" className="text-[10px] uppercase tracking-[0.15em] text-gold-text hover:underline">View all</Link>
             </div>
-            <div className="flex flex-col divide-y divide-white/8 border border-border">
+            <div className="flex flex-col divide-y divide-border-subtle border border-border">
               {notifications.slice(0, 5).map(n => (
                 <div key={n.id} className="flex items-start gap-3 px-5 py-3.5">
                   <Bell className="mt-0.5 size-4 flex-shrink-0 text-gold-text" />
                   <div>
                     <p className="text-sm text-foreground/90">{n.title}</p>
                     <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">{n.message}</p>
-                    <p className="mt-0.5 text-[10px] text-muted-foreground/80">{fmtDate(n.createdAt)}</p>
+                    <p className="mt-0.5 text-[10px] text-muted-foreground">{fmtDate(n.createdAt)}</p>
                   </div>
                 </div>
               ))}
             </div>
           </section>
         )}
-      </main>
+      </div>
     </SiteShell>
   )
 }

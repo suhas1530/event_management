@@ -10,13 +10,13 @@ import {
 } from 'lucide-react'
 
 const STATUS_COLORS: Record<string, string> = {
-  REQUESTED: 'text-blue-300 bg-blue-500/10',
-  PENDING_REVIEW: 'text-yellow-300 bg-yellow-500/10',
-  QUOTED: 'text-purple-300 bg-purple-500/10',
-  PAYMENT_PENDING: 'text-red-300 bg-red-500/10',
-  CONFIRMED: 'text-[#d5ae79] bg-[#d5ae79]/10',
-  COMPLETED: 'text-green-400 bg-green-500/15',
-  CANCELLED: 'text-muted-foreground/80 bg-muted/60',
+  REQUESTED: 'text-info bg-info-muted',
+  PENDING_REVIEW: 'text-warning bg-warning-muted',
+  QUOTED: 'text-primary bg-primary-muted',
+  PAYMENT_PENDING: 'text-destructive bg-destructive-muted',
+  CONFIRMED: 'text-gold-text bg-gold/10',
+  COMPLETED: 'text-success bg-success-muted',
+  CANCELLED: 'text-muted-foreground bg-muted/60',
 }
 const STATUS_LABELS: Record<string, string> = {
   REQUESTED: 'Requested', PENDING_REVIEW: 'Under Review', QUOTED: 'Quoted',
@@ -62,7 +62,7 @@ export default function AdminDashboard() {
     <div className="flex items-center justify-center py-24"><Loader2 className="size-8 animate-spin text-gold-text" /></div>
   )
   if (error) return (
-    <div className="py-20 text-center"><p className="text-red-400">{error}</p></div>
+    <div className="py-20 text-center"><p className="text-destructive">{error}</p></div>
   )
 
   const maxRevenue = Math.max(...revenue.map(r => r.amount), 1)
@@ -85,10 +85,10 @@ export default function AdminDashboard() {
           <div key={label} className="border border-border bg-card p-5">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
-              <Icon className={`size-4 ${accent ? 'text-gold-text' : 'text-muted-foreground/80'}`} />
+              <Icon className={`size-4 ${accent ? 'text-gold-text' : 'text-muted-foreground'}`} />
             </div>
             <p className={`text-3xl font-light ${accent ? 'text-gold-text' : 'text-foreground'}`}>{value}</p>
-            <p className="mt-1 text-xs text-muted-foreground/80">{sub}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
           </div>
         ))}
       </div>
@@ -96,16 +96,16 @@ export default function AdminDashboard() {
       {/* Status breakdown */}
       <div className="mb-8 grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
         {[
-          { label: 'Requested', value: stats?.bookings.pending ?? 0, color: 'text-blue-300' },
+          { label: 'Requested', value: stats?.bookings.pending ?? 0, color: 'text-info' },
           { label: 'Confirmed', value: stats?.bookings.confirmed ?? 0, color: 'text-gold-text' },
-          { label: 'Completed', value: stats?.bookings.completed ?? 0, color: 'text-green-400' },
-          { label: 'Cancelled', value: stats?.bookings.cancelled ?? 0, color: 'text-muted-foreground/80' },
-          { label: 'AI Designs', value: stats?.aiDesigns ?? 0, color: 'text-purple-300' },
+          { label: 'Completed', value: stats?.bookings.completed ?? 0, color: 'text-success' },
+          { label: 'Cancelled', value: stats?.bookings.cancelled ?? 0, color: 'text-muted-foreground' },
+          { label: 'AI Designs', value: stats?.aiDesigns ?? 0, color: 'text-primary' },
           { label: 'This Month', value: fmt(stats?.revenue.thisMonth ?? 0), color: 'text-gold-text' },
         ].map(({ label, value, color }) => (
           <div key={label} className="border border-border-subtle p-4 text-center">
             <p className={`text-2xl font-light ${color}`}>{value}</p>
-            <p className="mt-1 text-[9px] uppercase tracking-[0.15em] text-muted-foreground/80">{label}</p>
+            <p className="mt-1 text-[9px] uppercase tracking-[0.15em] text-muted-foreground">{label}</p>
           </div>
         ))}
       </div>
@@ -122,7 +122,7 @@ export default function AdminDashboard() {
               {revenue.slice(-20).map((r, i) => (
                 <div key={i} className="group relative flex-1">
                   <div
-                    className="w-full bg-[#d5ae79]/40 transition-all hover:bg-[#d5ae79]"
+                    className="w-full bg-gold/40 transition-all hover:bg-gold"
                     style={{ height: `${Math.max(4, (r.amount / maxRevenue) * 120)}px` }}
                   />
                   <div className="absolute bottom-full left-1/2 mb-1 hidden -translate-x-1/2 whitespace-nowrap bg-background px-2 py-1 text-[9px] text-foreground group-hover:block">
@@ -132,7 +132,7 @@ export default function AdminDashboard() {
               ))}
             </div>
           ) : (
-            <p className="py-10 text-center text-xs text-muted-foreground/80">No revenue data yet</p>
+            <p className="py-10 text-center text-xs text-muted-foreground">No revenue data yet</p>
           )}
         </div>
 
@@ -141,9 +141,9 @@ export default function AdminDashboard() {
           <p className="mb-5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Booking status</p>
           <div className="space-y-3">
             {[
-              { label: 'Pending review', count: stats?.bookings.pending ?? 0, color: 'bg-yellow-500' },
-              { label: 'Confirmed', count: stats?.bookings.confirmed ?? 0, color: 'bg-[#d5ae79]' },
-              { label: 'Completed', count: stats?.bookings.completed ?? 0, color: 'bg-green-500' },
+              { label: 'Pending review', count: stats?.bookings.pending ?? 0, color: 'bg-warning' },
+              { label: 'Confirmed', count: stats?.bookings.confirmed ?? 0, color: 'bg-gold' },
+              { label: 'Completed', count: stats?.bookings.completed ?? 0, color: 'bg-success' },
               { label: 'Cancelled', count: stats?.bookings.cancelled ?? 0, color: '' },
             ].map(({ label, count, color }) => {
               const total = stats?.bookings.total || 1
@@ -174,12 +174,12 @@ export default function AdminDashboard() {
         </div>
 
         {recentBookings.length === 0 ? (
-          <p className="py-10 text-center text-xs text-muted-foreground/80">No bookings yet</p>
+          <p className="py-10 text-center text-xs text-muted-foreground">No bookings yet</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border-subtle text-[10px] uppercase tracking-[0.15em] text-muted-foreground/80">
+                <tr className="border-b border-border-subtle text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
                   <th className="px-5 py-3 text-left">Booking ID</th>
                   <th className="px-5 py-3 text-left">Customer</th>
                   <th className="px-5 py-3 text-left">Event</th>
@@ -189,7 +189,7 @@ export default function AdminDashboard() {
                   <th className="px-3 py-3" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border-subtle">
                 {recentBookings.map(b => (
                   <tr key={b.id} className="transition hover:bg-muted/60">
                     <td className="px-5 py-3.5 font-mono text-xs text-muted-foreground">{b.bookingNumber}</td>
@@ -198,7 +198,7 @@ export default function AdminDashboard() {
                     <td className="px-5 py-3.5 text-muted-foreground">{fmtDate(b.eventDate)}</td>
                     <td className="px-5 py-3.5 text-right text-muted-foreground">{b.totalAmount > 0 ? fmt(b.totalAmount) : '—'}</td>
                     <td className="px-5 py-3.5">
-                      <span className={`px-2 py-1 text-[9px] uppercase tracking-[0.1em] ${STATUS_COLORS[b.status] ?? 'text-muted-foreground/80 bg-muted/60'}`}>
+                      <span className={`px-2 py-1 text-[9px] uppercase tracking-[0.1em] ${STATUS_COLORS[b.status] ?? 'text-muted-foreground bg-muted/60'}`}>
                         {STATUS_LABELS[b.status] ?? b.status}
                       </span>
                     </td>

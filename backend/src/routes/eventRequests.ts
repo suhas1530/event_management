@@ -1,8 +1,11 @@
+import { randomInt } from 'node:crypto';
 import { Router } from 'express';
 import { z } from 'zod';
-import { asyncHandler, NotFoundError, AuthorizationError, ValidationError } from '../middleware/errorHandler';
+import { Prisma } from '@prisma/client';
+import { asyncHandler, NotFoundError, AuthorizationError, ValidationError, ConflictError } from '../middleware/errorHandler';
 import { authMiddleware, requireRole } from '../middleware/auth';
 import { validateBody, validateParams } from '../middleware/validate';
+import { validateSubmittedEventRequest } from '../validators/eventRequest';
 import prisma from '../utils/database';
 
 const router = Router();
@@ -103,26 +106,70 @@ function validateRequestConstraints(req: import('express').Request, _res: import
 
 function createRequestNumber() {
   const year = new Date().getFullYear();
-  const suffix = Math.floor(10000 + Math.random() * 90000);
-  return `EVT-REQ-${year}-${suffix}`;
+  const time = Date.now().toString(36).toUpperCase();
+  const random = randomInt(0, 0x100000000).toString(36).toUpperCase().padStart(7, '0');
+  return `EVT-REQ-${year}-${time}-${random}`;
 }
 
-router.post('/', authMiddleware, validateBody(requestSchema.extend({ status: z.enum(EVENT_REQUEST_STATUSES) })), validateRequestConstraints, asyncHandler(async (req, res) => {
+router.post('/', authMiddleware, validateBody(requestSchema.extend({
+  // Customers may open a draft or submit requirements. They must never be
+  // able to create a request already marked as reviewed, confirmed or paid.
+  status: z.enum(['DRAFT', 'REQUIREMENT_SUBMITTED']),
+})), validateRequestConstraints, asyncHandler(async (req, res) => {
   const data = req.body;
-  const eventRequest = await prisma.eventRequest.create({
-    data: {
-      requestNumber: createRequestNumber(),
-      customerId: req.user!.id,
-      eventType: data.eventType,
-      eventDate: data.eventDate ? new Date(data.eventDate) : undefined,
-      guestCount: data.guestCount ?? undefined,
-      city: data.city,
-      budgetLabel: data.budgetLabel,
-      requirements: data.requirements,
-      referenceImages: data.referenceImages ?? [],
-      status: data.status,
-    },
-  });
+
+  if (data.status === 'REQUIREMENT_SUBMITTED') {
+    const completeness = validateSubmittedEventRequest(data);
+    if (completeness) throw new ValidationError(completeness);
+
+    const recent = await prisma.eventRequest.findFirst({
+      where: {
+        customerId: req.user!.id,
+        eventType: data.eventType,
+        eventDate: data.eventDate ? new Date(data.eventDate) : null,
+        status: { notIn: ['CANCELLED'] },
+        createdAt: { gte: new Date(Date.now() - 5 * 60 * 1000) },
+      },
+      select: { requestNumber: true },
+    });
+    if (recent) {
+      throw new ConflictError(
+        `A matching event request (${recent.requestNumber}) was just submitted. Check your dashboard before trying again.`,
+      );
+    }
+  }
+
+  let eventRequest: Awaited<ReturnType<typeof prisma.eventRequest.create>> | undefined;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      eventRequest = await prisma.eventRequest.create({
+        data: {
+          requestNumber: createRequestNumber(),
+          customerId: req.user!.id,
+          eventType: data.eventType,
+          eventDate: data.eventDate ? new Date(data.eventDate) : undefined,
+          guestCount: data.guestCount ?? undefined,
+          city: data.city,
+          budgetLabel: data.budgetLabel,
+          requirements: data.requirements,
+          referenceImages: data.referenceImages ?? [],
+          status: data.status,
+        },
+      });
+      break;
+    } catch (error) {
+      const collision =
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002' &&
+        attempt < 4;
+      if (!collision) throw error;
+    }
+  }
+
+  if (!eventRequest) {
+    throw new ConflictError('Could not allocate a request number. Please try again.');
+  }
+
   res.status(201).json(eventRequest);
 }));
 
@@ -198,6 +245,11 @@ router.patch('/:id', authMiddleware, validateParams(paramsSchema), validateBody(
   }
 
   const data = req.body;
+  if (['REQUIREMENT_SUBMITTED', 'UNDER_REVIEW'].includes(existing.status)) {
+    const completeness = validateSubmittedEventRequest(data);
+    if (completeness) throw new ValidationError(completeness);
+  }
+
   const eventRequest = await prisma.eventRequest.update({
     where: { id: existing.id },
     data: {
@@ -216,8 +268,38 @@ router.patch('/:id', authMiddleware, validateParams(paramsSchema), validateBody(
 router.post('/:id/submit', authMiddleware, validateParams(paramsSchema), asyncHandler(async (req, res) => {
   const existing = await prisma.eventRequest.findUnique({ where: { id: req.params.id } });
   if (!existing) throw new NotFoundError('Event request not found');
-  if (existing.customerId !== req.user!.id) throw new AuthorizationError('This event request has already been submitted');
-  if (existing.status !== 'DRAFT') throw new AuthorizationError('Only DRAFT requests can be submitted');
+  if (existing.customerId !== req.user!.id) throw new AuthorizationError('Access denied');
+
+  // A retried submit is not an error: the first request already did the work.
+  if (existing.status === 'REQUIREMENT_SUBMITTED') {
+    res.json(existing);
+    return;
+  }
+  if (existing.status !== 'DRAFT') {
+    throw new ValidationError('Only draft event requests can be submitted.');
+  }
+  const completeness = validateSubmittedEventRequest(existing);
+  if (completeness) throw new ValidationError(completeness);
+
+  // A retried submit for the same draft is idempotent above. This guard stops
+  // a second draft with the same event from being submitted moments later
+  // (for example from two tabs).
+  const duplicate = await prisma.eventRequest.findFirst({
+    where: {
+      id: { not: existing.id },
+      customerId: req.user!.id,
+      eventType: existing.eventType,
+      eventDate: existing.eventDate,
+      status: 'REQUIREMENT_SUBMITTED',
+      createdAt: { gte: new Date(Date.now() - 5 * 60 * 1000) },
+    },
+    select: { requestNumber: true },
+  });
+  if (duplicate) {
+    throw new ConflictError(
+      `A matching event request (${duplicate.requestNumber}) was just submitted. Check your dashboard before trying again.`,
+    );
+  }
 
   const eventRequest = await prisma.eventRequest.update({
     where: { id: existing.id },

@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: 'Contact',
   description:
     'Talk to the Heptome team about home services, event planning, billing or partnerships. We reply within one business day.',
+  alternates: { canonical: '/contact' },
 }
 
 export default function ContactPage() {

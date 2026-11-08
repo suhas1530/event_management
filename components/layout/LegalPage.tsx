@@ -47,7 +47,7 @@ export default function LegalPage({ eyebrow, title, updated, intro, sections }: 
           <h1 className="mt-4 text-balance font-serif text-[clamp(2rem,5vw,3rem)] leading-[1.05] tracking-tight text-foreground">
             {title}
           </h1>
-          <p className="mt-3 text-sm text-muted-foreground/80">Last updated {lastUpdated}</p>
+          <p className="mt-3 text-sm text-muted-foreground">Last updated {lastUpdated}</p>
           <p className="mt-6 text-pretty text-[0.9375rem] leading-7 text-muted-foreground">{intro}</p>
         </header>
 
@@ -56,7 +56,7 @@ export default function LegalPage({ eyebrow, title, updated, intro, sections }: 
           <ol className="mt-4 space-y-2.5">
             {sections.map((section, i) => (
               <li key={section.heading} className="flex gap-3 text-sm">
-                <span className="text-muted-foreground/80 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+                <span className="text-muted-foreground tabular-nums">{String(i + 1).padStart(2, '0')}</span>
                 <a
                   href={`#section-${i + 1}`}
                   className="text-muted-foreground transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:text-primary"

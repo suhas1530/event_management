@@ -13,6 +13,23 @@ const CITY_FACET_LIMIT = 100
 const formatINR = (value: number) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value)
 
+const VENUE_FALLBACKS = [
+  '/images/venues/banquet-hall.webp',
+  '/images/venues/garden-lawn.webp',
+  '/images/venues/resort.webp',
+  '/images/hero/banquet-hall.webp',
+]
+
+function venueImageSrc(venue: Venue): string | null {
+  const src = venue.images?.[0]
+  if (!src) return null
+  if (src.startsWith('/')) return src
+  const key = `${venue.name}|${venue.city}|${venue.id}`
+  let hash = 0
+  for (let i = 0; i < key.length; i += 1) hash = (hash * 31 + key.charCodeAt(i)) >>> 0
+  return VENUE_FALLBACKS[hash % VENUE_FALLBACKS.length]
+}
+
 /**
  * Venue browser.
  *
@@ -95,11 +112,11 @@ export default function VenuesBrowser() {
   }
 
   return (
-    <div className="immersive bg-ink-950">
-      <section className="border-b border-hairline/60 bg-ink-900/40 px-5 py-14 sm:px-10 lg:py-16">
+    <div className="bg-background">
+      <section className="border-b border-border/60 bg-surface-muted/50 px-5 py-14 sm:px-10 lg:py-16">
         <div className="mx-auto max-w-[1380px]">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-champagne">Venues & banquet halls</p>
-          <h1 className="mt-4 max-w-3xl font-display text-[clamp(2rem,4.6vw,3.5rem)] font-semibold leading-[1.06] tracking-[-0.02em] text-slate-50">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-gold-text">Venues & banquet halls</p>
+          <h1 className="mt-4 max-w-3xl font-display text-[clamp(2rem,4.6vw,3.5rem)] font-semibold leading-[1.06] tracking-[-0.02em] text-foreground">
             Find the room your celebration deserves.
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-fg-dim">
@@ -123,12 +140,12 @@ export default function VenuesBrowser() {
                 value={search}
                 onChange={event => setSearch(event.target.value)}
                 placeholder="Search by venue name or address"
-                className="w-full border border-border bg-muted/50 py-3.5 pl-11 pr-4 text-sm text-foreground placeholder:text-fg-mute focus:border-champagne focus:outline-none"
+                className="w-full border border-border bg-muted/50 py-3.5 pl-11 pr-4 text-sm text-foreground placeholder:text-fg-mute focus:border-gold focus:outline-none"
               />
             </label>
             <button
               type="submit"
-              className="inline-flex min-h-12 items-center gap-2 border border-champagne bg-champagne/15 px-6 text-xs font-semibold uppercase tracking-[0.18em] text-champagne-light transition-colors hover:bg-champagne hover:text-ink-950"
+              className="inline-flex min-h-12 items-center gap-2 border border-gold bg-gold/15 px-6 text-xs font-semibold uppercase tracking-[0.18em] text-gold-text transition-colors hover:bg-gold hover:text-gold-foreground"
             >
               Search
             </button>
@@ -140,7 +157,7 @@ export default function VenuesBrowser() {
                 type="button"
                 onClick={() => applyCity('')}
                 className={`min-h-9 border px-3.5 py-1.5 text-xs transition-colors ${
-                  city === '' ? 'border-champagne bg-champagne/15 text-champagne-light' : 'border-white/12 text-fg-dim hover:text-white'
+                  city === '' ? 'border-gold bg-gold/15 text-gold-text' : 'border-border text-muted-foreground hover:text-foreground'
                 }`}
               >
                 All cities
@@ -151,7 +168,7 @@ export default function VenuesBrowser() {
                   type="button"
                   onClick={() => applyCity(name)}
                   className={`min-h-9 border px-3.5 py-1.5 text-xs transition-colors ${
-                    city === name ? 'border-champagne bg-champagne/15 text-champagne-light' : 'border-white/12 text-fg-dim hover:text-white'
+                    city === name ? 'border-gold bg-gold/15 text-gold-text' : 'border-border text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   {name}
@@ -162,7 +179,7 @@ export default function VenuesBrowser() {
         </div>
       </section>
 
-      <main className="bg-ink-950 px-5 py-14 sm:px-10 lg:py-16">
+      <div className="bg-background px-5 py-14 sm:px-10 lg:py-16">
         <div className="mx-auto max-w-[1380px]">
           {loading && (
             <div className="flex items-center gap-3 text-sm text-fg-dim">
@@ -172,9 +189,9 @@ export default function VenuesBrowser() {
           )}
 
           {!loading && venues.length === 0 && (
-            <div className="border border-white/8 bg-ink-900/50 p-10 text-center">
+            <div className="border border-border bg-card p-10 text-center">
               <Building2 className="mx-auto size-10 text-fg-mute" aria-hidden="true" />
-              <h2 className="mt-4 font-display text-xl font-semibold text-slate-50">
+              <h2 className="mt-4 font-display text-xl font-semibold text-foreground">
                 {failed ? 'The venue catalogue is unavailable right now' : 'No venues match these filters yet'}
               </h2>
               <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-fg-dim">
@@ -185,7 +202,7 @@ export default function VenuesBrowser() {
               <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
                 <Link
                   href="/plan-event"
-                  className="gradient-cta inline-flex min-h-12 items-center gap-2.5 px-6 py-3.5 text-sm font-semibold text-foreground"
+                  className="gradient-cta inline-flex min-h-12 items-center gap-2.5 px-6 py-3.5 text-sm font-semibold text-primary-foreground"
                 >
                   Plan an event
                   <ArrowRight className="size-4" aria-hidden="true" />
@@ -201,13 +218,15 @@ export default function VenuesBrowser() {
             <>
               <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {venues.map(venue => (
-                  <li key={venue.id} className="group flex flex-col border border-white/8 bg-ink-900/50 transition-colors hover:border-champagne/40">
-                    <div className="relative aspect-[4/3] overflow-hidden bg-ink-800">
-                      {venue.images?.[0] ? (
+                  <li key={venue.id} className="group flex flex-col border border-border bg-card transition-colors hover:border-gold/50">
+                    <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                      {venueImageSrc(venue) ? (
                         <Image
-                          src={venue.images[0]}
+                          src={venueImageSrc(venue)!}
                           alt={venue.name}
                           fill
+                          loading="lazy"
+                          decoding="async"
                           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                           className="object-cover transition-transform duration-700 group-hover:scale-105"
                         />
@@ -219,7 +238,7 @@ export default function VenuesBrowser() {
                     </div>
 
                     <div className="flex flex-1 flex-col p-5">
-                      <h2 className="font-display text-lg font-semibold text-slate-50">{venue.name}</h2>
+                      <h2 className="font-display text-lg font-semibold text-foreground">{venue.name}</h2>
                       <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-fg-dim">
                         <span className="inline-flex items-center gap-1.5">
                           <MapPin className="size-3.5" aria-hidden="true" />
@@ -248,12 +267,12 @@ export default function VenuesBrowser() {
                           {venue.pricePerDay ? (
                             <>
                               <p className="text-[10px] uppercase tracking-[0.16em] text-fg-mute">Per day from</p>
-                              <p className="text-base font-medium text-champagne-light">{formatINR(venue.pricePerDay)}</p>
+                              <p className="text-base font-medium text-gold-text">{formatINR(venue.pricePerDay)}</p>
                             </>
                           ) : venue.pricePerHour ? (
                             <>
                               <p className="text-[10px] uppercase tracking-[0.16em] text-fg-mute">Per hour from</p>
-                              <p className="text-base font-medium text-champagne-light">{formatINR(venue.pricePerHour)}</p>
+                              <p className="text-base font-medium text-gold-text">{formatINR(venue.pricePerHour)}</p>
                             </>
                           ) : (
                             <p className="text-xs text-fg-dim">Pricing on request</p>
@@ -261,7 +280,7 @@ export default function VenuesBrowser() {
                         </div>
                         <Link
                           href={`/plan-event?venueName=${encodeURIComponent(venue.name)}${venue.city ? `&venueCity=${encodeURIComponent(venue.city)}` : ''}`}
-                          className="inline-flex min-h-11 items-center gap-2 border border-champagne/40 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-champagne transition-colors hover:bg-champagne hover:text-ink-950"
+                          className="inline-flex min-h-11 items-center gap-2 border border-gold/50 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-text transition-colors hover:bg-gold hover:text-gold-foreground"
                         >
                           Plan here
                           <ArrowRight className="size-3.5" aria-hidden="true" />
@@ -303,7 +322,7 @@ export default function VenuesBrowser() {
             </>
           )}
         </div>
-      </main>
+      </div>
     </div>
   )
 }

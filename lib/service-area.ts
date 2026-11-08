@@ -10,10 +10,9 @@
  * list is the only change needed to open or close an area; nothing else in the
  * booking flow hard-codes a locality.
  *
- * Server-side note: the technician booking API does not yet validate coverage
- * (it stores whatever address the customer submits). Until a coverage table
- * exists server-side this check runs in the client, and every booking created
- * from an unsupported area is surfaced to the admin dashboard for review.
+ * Server-side note: the technician booking API enforces the same coverage
+ * table in `backend/src/utils/serviceArea.ts`. Keep the two copies in sync when
+ * the served pincodes change.
  */
 
 export interface ServiceArea {

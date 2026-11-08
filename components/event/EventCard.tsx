@@ -44,7 +44,7 @@ export default function EventCard({ event, onFavoriteToggle, initialFavorited = 
   const categoryLabel = event.category?.name ?? TYPE_LABELS[event.type] ?? event.type
 
   return (
-    <article className="group relative flex flex-col overflow-hidden border border-border bg-card transition-all duration-300 hover:border-[#d5ae79]/30 hover:shadow-[0_0_30px_rgba(213,174,121,0.06)]">
+    <article className="group relative flex flex-col overflow-hidden border border-border bg-card transition-all duration-300 hover:border-gold/30 hover:shadow-[0_0_30px_rgba(213,174,121,0.06)]">
       {/* Image */}
       <Link href={`/events/${event.slug}`} className="relative block aspect-[1.15] overflow-hidden" tabIndex={-1} aria-hidden="true">
         {event.heroImages?.[0] ? (
@@ -56,7 +56,7 @@ export default function EventCard({ event, onFavoriteToggle, initialFavorited = 
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-muted/60">
-            <span className="text-xs uppercase tracking-widest text-muted-foreground/80">No image</span>
+            <span className="text-xs uppercase tracking-widest text-muted-foreground">No image</span>
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#111114]/70 via-transparent to-transparent" />
@@ -64,12 +64,12 @@ export default function EventCard({ event, onFavoriteToggle, initialFavorited = 
         {/* Badges */}
         <div className="absolute left-3 top-3 flex flex-col gap-1.5">
           {event.isFeatured && (
-            <span className="bg-[#d5ae79] px-2 py-0.5 text-[8px] uppercase tracking-[0.2em] text-[#17151d]">
+            <span className="bg-gold px-2 py-0.5 text-[8px] uppercase tracking-[0.2em] text-gold-foreground">
               Featured
             </span>
           )}
           {event.isLuxury && (
-            <span className="border border-[#d5ae79]/50 bg-black/50 px-2 py-0.5 text-[8px] uppercase tracking-[0.18em] text-[#d5ae79] backdrop-blur-sm">
+            <span className="border border-gold/50 bg-black/50 px-2 py-0.5 text-[8px] uppercase tracking-[0.18em] text-gold-text backdrop-blur-sm">
               Luxury
             </span>
           )}
@@ -78,7 +78,7 @@ export default function EventCard({ event, onFavoriteToggle, initialFavorited = 
         {/* Rating */}
         {event.averageRating > 0 && (
           <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-background/75 px-2 py-1 backdrop-blur-sm">
-            <Star className="size-3 fill-[#d5ae79] text-gold-text" />
+            <Star className="size-3 fill-gold text-gold-text" />
             <span className="text-xs text-foreground">{event.averageRating.toFixed(1)}</span>
             {event.totalReviews > 0 && (
               <span className="text-[10px] text-muted-foreground">({event.totalReviews})</span>
@@ -93,8 +93,8 @@ export default function EventCard({ event, onFavoriteToggle, initialFavorited = 
           aria-pressed={favorited}
           className={`absolute right-3 top-3 flex size-8 items-center justify-center border backdrop-blur-sm transition ${
             favorited
-              ? 'border-[#d5ae79] bg-[#d5ae79]/20 text-[#d5ae79]'
-              : 'border-white/25 bg-black/40 text-white hover:border-[#d5ae79] hover:text-[#d5ae79]'
+              ? 'border-gold bg-gold/20 text-gold-text'
+              : 'border-white/25 bg-black/40 text-white hover:border-gold hover:text-gold-text'
           } ${toggling ? 'opacity-60' : ''}`}
         >
           <Heart className={`size-3.5 ${favorited ? 'fill-current' : ''}`} />
@@ -111,7 +111,7 @@ export default function EventCard({ event, onFavoriteToggle, initialFavorited = 
         </Link>
 
         {/* Meta */}
-        <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-muted-foreground/80">
+        <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-muted-foreground">
           {event.city && (
             <span className="flex items-center gap-1">
               <MapPin className="size-3 flex-shrink-0" />{event.city}
@@ -136,7 +136,7 @@ export default function EventCard({ event, onFavoriteToggle, initialFavorited = 
         {/* Price + CTA */}
         <div className="mt-auto flex items-end justify-between border-t border-border-subtle pt-3.5">
           <div>
-            <p className="text-[9px] uppercase tracking-[0.15em] text-muted-foreground/80">Starting from</p>
+            <p className="text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Starting from</p>
             <p className="mt-0.5 text-base font-medium text-foreground">{fmt(event.startingPrice)}</p>
           </div>
           <Link

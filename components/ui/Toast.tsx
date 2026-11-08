@@ -1,10 +1,8 @@
 'use client'
 
 import { useEffect, useState, type ReactNode } from 'react'
-import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { motion, AnimatePresence } from 'framer-motion'
 
 interface ToastProps {
   id: string
@@ -58,13 +56,9 @@ export function Toast({ id, message, type, onClose, duration = 5000 }: ToastProp
   if (!visible) return null
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -20, scale: 0.95 }}
-      transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+    <div
       className={cn(
-        'flex items-center gap-3 min-w-[280px] max-w-md px-5 py-3.5 text-sm font-medium rounded-xl shadow-2xl',
+        'animate-slide-up flex min-w-[280px] max-w-md items-center gap-3 rounded-xl px-5 py-3.5 text-sm font-medium shadow-2xl',
         typeStyles[type]
       )}
       role="alert"
@@ -82,7 +76,7 @@ export function Toast({ id, message, type, onClose, duration = 5000 }: ToastProp
       >
         <X className="size-4" />
       </button>
-    </motion.div>
+    </div>
   )
 }
 
@@ -94,11 +88,9 @@ interface ToastContainerProps {
 export function ToastContainer({ toasts, onClose }: ToastContainerProps) {
   return (
     <div className="fixed bottom-6 left-1/2 z-[var(--z-toast)] flex -translate-x-1/2 flex-col gap-2" aria-live="polite">
-      <AnimatePresence>
-        {toasts.map(toast => (
-          <Toast key={toast.id} {...toast} onClose={onClose} />
-        ))}
-      </AnimatePresence>
+      {toasts.map(toast => (
+        <Toast key={toast.id} {...toast} onClose={onClose} />
+      ))}
     </div>
   )
 }

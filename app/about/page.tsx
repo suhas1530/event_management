@@ -21,6 +21,7 @@ export const metadata: Metadata = {
   title: 'About Us',
   description:
     'Heptome is a service platform for the things that matter at home and at your biggest moments — verified technicians and thoughtful event planning.',
+  alternates: { canonical: '/about' },
 }
 
 const PILLARS = [
@@ -147,7 +148,7 @@ export default function AboutPage() {
         className="border-t border-border-subtle bg-muted/50"
       >
         <ol className="relative mx-auto max-w-3xl">
-          <span className="absolute left-[15px] top-2 bottom-2 w-px bg-gradient-to-b from-primary/40 via-white/10 to-transparent" aria-hidden="true" />
+          <span className="absolute left-[15px] top-2 bottom-2 w-px bg-gradient-to-b from-primary/40 via-border to-transparent" aria-hidden="true" />
           {TIMELINE.map(entry => (
             <li key={entry.title} className="relative pl-12 pb-10 last:pb-0">
               <span className="absolute left-0 top-1 grid size-8 place-items-center rounded-full border border-primary/30 bg-background">

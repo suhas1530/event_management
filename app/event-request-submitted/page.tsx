@@ -31,8 +31,8 @@ export default function EventRequestSubmittedPage() {
     <SiteShell>
       <div className="mx-auto w-full max-w-2xl px-5 py-12 lg:py-16">
         <section className="border-y border-border py-10">
-          <div className="flex size-14 items-center justify-center border border-green-400/30 bg-green-400/10">
-            <Check className="size-7 text-green-300" aria-hidden="true" />
+          <div className="flex size-14 items-center justify-center border border-success/30 bg-success-muted">
+            <Check className="size-7 text-success" aria-hidden="true" />
           </div>
           <p className="mt-7 text-[10px] uppercase tracking-[0.25em] text-gold-text">Request received</p>
           <h1 className="mt-2 font-serif text-4xl text-foreground">Event request submitted</h1>
@@ -50,7 +50,7 @@ export default function EventRequestSubmittedPage() {
             <div className="mt-8 border border-border bg-card p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80">Request ID</p>
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Request ID</p>
                   <p className="mt-1 font-mono text-lg text-gold-text">{request.requestNumber}</p>
                 </div>
                 <StatusBadge status={request.status} size="sm" />
@@ -63,6 +63,7 @@ export default function EventRequestSubmittedPage() {
                       day: 'numeric',
                       month: 'long',
                       year: 'numeric',
+                      timeZone: 'Asia/Kolkata',
                     })}
                   </span>
                 )}
@@ -83,11 +84,11 @@ export default function EventRequestSubmittedPage() {
               {NEXT_STEPS.map((item, index) => (
                 <li key={item} className="flex items-center gap-3 text-sm">
                   {index === 0 ? (
-                    <Check className="size-4 shrink-0 text-green-300" aria-hidden="true" />
+                    <Check className="size-4 shrink-0 text-success" aria-hidden="true" />
                   ) : (
-                    <Circle className="size-4 shrink-0 text-muted-foreground/80" aria-hidden="true" />
+                    <Circle className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                   )}
-                  <span className={index === 0 ? 'text-foreground/90' : 'text-muted-foreground/80'}>{item}</span>
+                  <span className={index === 0 ? 'text-foreground/90' : 'text-muted-foreground'}>{item}</span>
                 </li>
               ))}
             </ol>
@@ -96,13 +97,13 @@ export default function EventRequestSubmittedPage() {
           <div className="mt-9 flex flex-wrap gap-3">
             <Link
               href="/event-requests"
-              className="inline-flex min-h-12 items-center gap-2 bg-[#d5ae79] px-5 text-sm font-medium text-[#17151d] transition-colors duration-200 hover:bg-[#e8cfa9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex min-h-12 items-center gap-2 bg-gold px-5 text-sm font-medium text-gold-foreground transition-colors duration-200 hover:bg-gold-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               View my event requests <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
             <Link
               href="/"
-              className="inline-flex min-h-12 items-center border border-border px-5 text-sm text-foreground/90 transition-colors duration-200 h focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex min-h-12 items-center border border-border px-5 text-sm text-foreground/90 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Back to home
             </Link>

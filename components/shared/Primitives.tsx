@@ -1,8 +1,5 @@
-'use client'
-
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { motion, useReducedMotion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { buttonClass, type ButtonSize, type ButtonVariant } from '@/lib/button-styles'
 
@@ -32,13 +29,8 @@ export function PageHeader({
   align = 'left',
   className,
 }: PageHeaderProps) {
-  const reduceMotion = useReducedMotion()
-
   return (
-    <motion.header
-      initial={reduceMotion ? false : { opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={reduceMotion ? { duration: 0 } : { duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+    <header
       className={cn(
         'flex flex-col gap-5',
         align === 'center' && 'items-center text-center',
@@ -58,7 +50,7 @@ export function PageHeader({
         <p className="max-w-2xl text-pretty text-base leading-7 text-muted-foreground">{description}</p>
       )}
       {actions && <div className="mt-1 flex flex-wrap items-center gap-3">{actions}</div>}
-    </motion.header>
+    </header>
   )
 }
 
@@ -95,16 +87,10 @@ export function Section({
   className,
   spacing = 'md',
 }: SectionProps) {
-  const reduceMotion = useReducedMotion()
-
   return (
     <section id={id} className={cn(SPACING[spacing], className)}>
       <div className="mx-auto w-full max-w-[1380px] px-5 sm:px-8 lg:px-10">
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={reduceMotion ? { duration: 0 } : { duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        <div
           className={cn(
             'flex flex-col gap-4',
             align === 'center' ? 'mx-auto max-w-2xl items-center text-center' : 'max-w-2xl'
@@ -119,7 +105,7 @@ export function Section({
           {description && (
             <p className="text-pretty text-base leading-7 text-muted-foreground">{description}</p>
           )}
-        </motion.div>
+        </div>
 
         <div className="mt-12 sm:mt-16">{children}</div>
       </div>

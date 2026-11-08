@@ -1,8 +1,14 @@
-'use client'
-
 import Link from 'next/link'
-import { motion, useReducedMotion } from 'framer-motion'
-import { Mail, Phone, MessageCircle, MapPin, ArrowUpRight } from 'lucide-react'
+import {
+  ArrowUp,
+  ArrowUpRight,
+  ChevronDown,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Sparkles,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   siteConfig,
@@ -14,8 +20,8 @@ import {
 } from '@/lib/site-config'
 import Logo from '@/components/brand/Logo'
 import { SOCIAL_ICONS } from '@/components/brand/SocialIcons'
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/Accordion'
 import { Separator } from '@/components/ui/Separator'
+import FooterNewsletter from './FooterNewsletter'
 
 /* ------------------------------------------------------------------ */
 /* Social row                                                          */
@@ -33,12 +39,9 @@ function SocialRow({ className }: { className?: string }) {
         if (!href) {
           return (
             <li key={key}>
-              <span
-                className="flex size-10 cursor-default items-center justify-center rounded-lg border border-border-subtle bg-muted/50 text-muted-foreground/80"
-                title={`${label} — coming soon`}
-                aria-label={`${label} (coming soon)`}
-              >
-                <Icon className="size-[18px]" />
+              <span className="flex size-10 cursor-default items-center justify-center rounded-xl border border-footer-border bg-white/[0.02] text-footer-subtle" title={`${label} — coming soon`}>
+                <Icon className="size-[18px]" aria-hidden="true" />
+                <span className="sr-only">{label} (coming soon)</span>
               </span>
             </li>
           )
@@ -51,7 +54,7 @@ function SocialRow({ className }: { className?: string }) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`${label} (opens in a new tab)`}
-              className="flex size-10 items-center justify-center rounded-lg border border-border-subtle bg-muted/50 text-muted-foreground transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex size-10 items-center justify-center rounded-xl border border-footer-border bg-white/[0.04] text-footer-muted transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-footer-accent/50 hover:bg-footer-accent/15 hover:text-footer-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-footer-accent focus-visible:ring-offset-2 focus-visible:ring-offset-footer"
             >
               <Icon className="size-[18px]" />
             </a>
@@ -63,204 +66,253 @@ function SocialRow({ className }: { className?: string }) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Contact row                                                         */
+/* ------------------------------------------------------------------ */
+
+const contactLinkClass =
+  'group flex items-start gap-3 rounded-xl p-2 transition-colors duration-200 hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-footer-accent focus-visible:ring-offset-2 focus-visible:ring-offset-footer'
+
+const contactIconClass =
+  'mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg border border-footer-border bg-white/[0.04] text-footer-accent transition-colors duration-200 group-hover:border-footer-accent/40'
+
+function ContactLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="block text-[10px] font-medium uppercase tracking-[0.18em] text-footer-subtle">
+      {children}
+    </span>
+  )
+}
+
+/* ------------------------------------------------------------------ */
 /* Footer                                                              */
 /* ------------------------------------------------------------------ */
 
 export default function Footer() {
-  const reduceMotion = useReducedMotion()
-
-  const reveal = (delay = 0) => ({
-    initial: reduceMotion ? false : { opacity: 0, y: 18 },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, margin: '-60px' },
-    transition: reduceMotion ? { duration: 0 } : { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] as const },
-  })
-
   return (
-    <footer className="relative mt-auto overflow-hidden border-t border-border bg-card" role="contentinfo">
-      {/* Ambient brand glow — purple (brand) meeting champagne (celebrations) */}
+    <footer className="relative mt-auto overflow-hidden bg-footer text-footer-foreground" role="contentinfo">
+      {/* Copper hairline + a restrained evergreen/copper atmosphere. */}
       <div
-        className="pointer-events-none absolute inset-x-0 -top-40 h-80 opacity-60"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-footer-accent/70 to-transparent"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-70"
         style={{
           background:
-            'radial-gradient(50% 100% at 35% 100%, rgba(109,54,216,0.16), transparent 70%), radial-gradient(45% 100% at 70% 100%, rgba(213,174,121,0.10), transparent 70%)',
+            'radial-gradient(50% 70% at 12% 0%, color-mix(in srgb, var(--footer-accent) 20%, transparent), transparent 70%), radial-gradient(45% 60% at 86% 8%, color-mix(in srgb, var(--primary) 22%, transparent), transparent 72%)',
         }}
         aria-hidden="true"
       />
 
-      <div className="relative mx-auto w-full max-w-[1380px] px-5 sm:px-8 lg:px-10">
+      <div className="relative">
+        {/* ── Newsletter band ────────────────────────────────────────────── */}
+        <div className="border-b border-footer-border">
+          <div className="mx-auto grid w-full max-w-[1380px] gap-8 px-5 py-12 sm:px-8 lg:grid-cols-[minmax(0,1fr)_32rem] lg:items-end lg:gap-16 lg:px-10 lg:py-14">
+            <div>
+              <p className="flex items-center gap-2.5 text-[10px] font-medium uppercase tracking-[0.28em] text-footer-accent">
+                <Sparkles className="size-3.5" aria-hidden="true" />
+                The Heptome Edit
+              </p>
+              <h2 className="mt-4 max-w-xl text-balance font-serif text-[clamp(1.75rem,3.4vw,2.6rem)] leading-[1.08] tracking-tight text-footer-foreground">
+                Good things, worth the occasional inbox.
+              </h2>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-footer-muted">
+                New venues, seasonal table ideas and practical home-care notes from the team.
+                Considered, never noisy.
+              </p>
+            </div>
+
+            <FooterNewsletter />
+          </div>
+        </div>
+
         {/* ── Brand + navigation ─────────────────────────────────────────── */}
-        <div className="grid gap-12 py-16 sm:py-20 lg:grid-cols-12 lg:gap-10">
+        <div className="mx-auto grid w-full max-w-[1380px] gap-12 px-5 py-14 sm:px-8 lg:grid-cols-12 lg:gap-10 lg:px-10 lg:py-16">
           {/* Brand area */}
-          <motion.div className="lg:col-span-4" {...reveal()}>
+          <div className="lg:col-span-4">
             <Logo size="md" tone="dark" />
 
-            <p className="mt-6 max-w-sm text-[0.9375rem] leading-7 text-muted-foreground">
+            <p className="mt-6 max-w-sm text-[0.9375rem] leading-7 text-footer-muted">
               {siteConfig.description}
             </p>
 
-            <ul className="mt-7 space-y-3 text-sm text-muted-foreground" role="list">
-              <li className="flex items-center gap-3">
-                <Mail className="size-4 shrink-0 text-primary/70" aria-hidden="true" />
-                <a
-                  href={`mailto:${siteConfig.contact.email}`}
-                  className="rounded transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:text-primary"
-                >
-                  {siteConfig.contact.email}
+            <ul className="mt-7 space-y-1.5" role="list">
+              <li>
+                <a href={`mailto:${siteConfig.contact.email}`} className={contactLinkClass}>
+                  <span className={contactIconClass} aria-hidden="true">
+                    <Mail className="size-4" />
+                  </span>
+                  <span className="min-w-0">
+                    <ContactLabel>Email</ContactLabel>
+                    <span className="block break-all text-sm text-footer-foreground transition-colors group-hover:text-footer-accent">
+                      {siteConfig.contact.email}
+                    </span>
+                  </span>
                 </a>
               </li>
-              <li className="flex items-center gap-3">
-                <Phone className="size-4 shrink-0 text-primary/70" aria-hidden="true" />
-                <a
-                  href={siteConfig.contact.phoneHref}
-                  className="rounded transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:text-primary"
-                >
-                  {siteConfig.contact.phone}
+              <li>
+                <a href={siteConfig.contact.phoneHref} className={contactLinkClass}>
+                  <span className={contactIconClass} aria-hidden="true">
+                    <Phone className="size-4" />
+                  </span>
+                  <span>
+                    <ContactLabel>Call</ContactLabel>
+                    <span className="block text-sm text-footer-foreground transition-colors group-hover:text-footer-accent">
+                      {siteConfig.contact.phone}
+                    </span>
+                  </span>
                 </a>
               </li>
-              <li className="flex items-center gap-3">
-                <MessageCircle className="size-4 shrink-0 text-primary/70" aria-hidden="true" />
+              <li>
                 <a
                   href={siteConfig.contact.whatsappHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:text-primary"
+                  className={contactLinkClass}
                 >
-                  WhatsApp
+                  <span className={contactIconClass} aria-hidden="true">
+                    <MessageCircle className="size-4" />
+                  </span>
+                  <span>
+                    <ContactLabel>WhatsApp</ContactLabel>
+                    <span className="block text-sm text-footer-foreground transition-colors group-hover:text-footer-accent">
+                      Chat with the team
+                    </span>
+                  </span>
                 </a>
               </li>
-              <li className="flex items-start gap-3">
-                <MapPin className="mt-0.5 size-4 shrink-0 text-primary/70" aria-hidden="true" />
-                <span>
-                  Doorstep home services in {siteConfig.coverage.city}
-                  <br />
-                  Event partners across India
-                </span>
+              <li>
+                <div className="flex items-start gap-3 p-2">
+                  <span className={cn(contactIconClass, 'group-hover:border-footer-border')} aria-hidden="true">
+                    <MapPin className="size-4" />
+                  </span>
+                  <span>
+                    <ContactLabel>Where we work</ContactLabel>
+                    <span className="block text-sm leading-6 text-footer-muted">
+                      Doorstep home services in {siteConfig.coverage.city}
+                      <br />
+                      Event partners across India
+                    </span>
+                  </span>
+                </div>
               </li>
             </ul>
-          </motion.div>
+
+            <div className="mt-8">
+              <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-footer-subtle">
+                Follow along
+              </p>
+              <SocialRow className="mt-3" />
+            </div>
+          </div>
 
           {/* Desktop navigation columns */}
-          <div className="hidden lg:col-span-8 lg:grid lg:grid-cols-4 lg:gap-10">
-            {footerColumns.map((column, i) => (
-              <motion.nav key={column.title} aria-label={column.title} {...reveal(0.08 * (i + 1))}>
-                <h2 className="text-label text-foreground/90">{column.title}</h2>
-                <ul className="mt-5 space-y-3.5" role="list">
+          <div className="hidden lg:col-span-8 lg:grid lg:grid-cols-4 lg:gap-8">
+            {footerColumns.map(column => (
+              <nav key={column.title} aria-label={column.title}>
+                <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-footer-foreground">
+                  {column.title}
+                </h2>
+                <ul className="mt-5 space-y-3" role="list">
                   {column.links.map(link => (
                     <li key={link.href + link.label}>
                       <Link
                         href={link.href}
-                        className="group inline-flex items-center gap-1 rounded text-[0.9375rem] text-muted-foreground transition-colors duration-200 ease-out hover:text-primary focus-visible:outline-none focus-visible:text-primary"
+                        className="group inline-flex items-start gap-1.5 rounded text-sm leading-6 text-footer-muted transition-colors duration-200 ease-out hover:text-footer-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-footer-accent focus-visible:ring-offset-2 focus-visible:ring-offset-footer"
                       >
                         {link.label}
                         <ArrowUpRight
-                          className="size-3.5 -translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100"
+                          className="mt-0.5 size-3.5 shrink-0 -translate-x-1 text-footer-accent opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100"
                           aria-hidden="true"
                         />
                       </Link>
                     </li>
                   ))}
                 </ul>
-              </motion.nav>
+              </nav>
             ))}
-
-            {/* Follow Us */}
-            <motion.nav aria-label="Follow Us" {...reveal(0.08 * (footerColumns.length + 1))}>
-              <h2 className="text-label text-foreground/90">Follow Us</h2>
-              <p className="mt-5 max-w-[15rem] text-[0.9375rem] leading-6 text-muted-foreground">
-                Occasional updates on new services, design ideas and offers.
-              </p>
-              <SocialRow className="mt-5" />
-            </motion.nav>
           </div>
 
           {/* Mobile: accordion navigation */}
           <div className="lg:hidden">
-            <Accordion className="border-t border-border-subtle">
+            <div className="border-t border-footer-border">
               {footerColumns.map(column => (
-                <AccordionItem key={column.title} value={column.title}>
-                  <AccordionTrigger>{column.title}</AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-1" role="list">
-                      {column.links.map(link => (
-                        <li key={link.href + link.label}>
-                          <Link
-                            href={link.href}
-                            className="block rounded py-2 text-[0.9375rem] text-muted-foreground transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:text-primary"
-                          >
-                            {link.label}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
+                <details key={column.title} className="group border-b border-footer-border">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-sm font-medium text-footer-foreground transition-colors hover:text-footer-accent [&::-webkit-details-marker]:hidden">
+                    {column.title}
+                    <ChevronDown
+                      className="size-4 shrink-0 text-footer-subtle transition-transform duration-300 group-open:rotate-180 group-open:text-footer-accent"
+                      aria-hidden="true"
+                    />
+                  </summary>
+                  <ul className="space-y-1 pb-4" role="list">
+                    {column.links.map(link => (
+                      <li key={link.href + link.label}>
+                        <Link
+                          href={link.href}
+                          className="block rounded py-2 text-sm text-footer-muted transition-colors duration-200 hover:text-footer-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-footer-accent"
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
               ))}
-
-              {/* Follow Us */}
-              <AccordionItem value="Follow Us">
-                <AccordionTrigger>Follow Us</AccordionTrigger>
-                <AccordionContent>
-                  <p className="text-[0.9375rem] leading-6 text-muted-foreground">
-                    Occasional updates on new services, design ideas and offers.
-                  </p>
-                  <SocialRow className="mt-4" />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+            </div>
           </div>
         </div>
 
-        {/* ── Divider ────────────────────────────────────────────────────── */}
-        <motion.div
-          className="h-px w-full origin-left bg-gradient-to-r from-transparent via-border to-transparent"
-          initial={reduceMotion ? false : { scaleX: 0, opacity: 0 }}
-          whileInView={{ scaleX: 1, opacity: 1 }}
-          viewport={{ once: true }}
-          transition={reduceMotion ? { duration: 0 } : { duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          aria-hidden="true"
-        />
-
         {/* ── Bottom bar ─────────────────────────────────────────────────── */}
-        <div className="flex flex-col gap-8 py-9 lg:flex-row lg:items-center lg:justify-between">
-          {/* Copyright + legal */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
-            <p className="text-[0.8125rem] text-muted-foreground/80">
-              © {new Date().getFullYear()} {siteConfig.legalName}. All rights reserved.
-            </p>
-            <Separator orientation="vertical" className="hidden h-4 bg-muted sm:block" />
-            <ul className="flex flex-wrap items-center gap-x-5 gap-y-2" role="list">
-              {legalLinks.map(link => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="rounded text-[0.8125rem] text-muted-foreground/80 transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:text-primary"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+        <div className="border-t border-footer-border">
+          <div className="mx-auto flex w-full max-w-[1380px] flex-col gap-6 px-5 py-8 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:px-10">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
+              <p className="text-xs text-footer-subtle">
+                © {new Date().getFullYear()} {siteConfig.legalName}. All rights reserved.
+              </p>
+              <Separator
+                orientation="vertical"
+                className="hidden h-4 bg-footer-border sm:block"
+              />
+              <ul className="flex flex-wrap items-center gap-x-5 gap-y-2" role="list">
+                {legalLinks.map(link => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="rounded text-xs text-footer-subtle transition-colors duration-200 hover:text-footer-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-footer-accent"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Developer credit */}
-          <motion.div
-            className="text-[0.8125rem] text-muted-foreground"
-            initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-40px' }}
-            transition={reduceMotion ? { duration: 0 } : { duration: 0.5, delay: 0.15 }}
-          >
-            Designed by{' '}
-            <a
-              href="https://softixtech.in"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-foreground/90 transition-colors hover:text-primary focus-visible:outline-none focus-visible:text-primary"
-            >
-              softixtech.in
-            </a>
-          </motion.div>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-3 text-xs text-footer-subtle">
+              <p>
+                Designed &amp; built by{' '}
+                {siteConfig.developer.url ? (
+                  <a
+                    href={siteConfig.developer.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded text-footer-muted transition-colors hover:text-footer-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-footer-accent"
+                  >
+                    {siteConfig.developer.name}
+                  </a>
+                ) : (
+                  <span className="text-footer-muted">{siteConfig.developer.name}</span>
+                )}
+              </p>
+              <a
+                href="#main"
+                className="inline-flex items-center gap-1.5 rounded text-footer-muted transition-colors hover:text-footer-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-footer-accent"
+              >
+                Back to top
+                <ArrowUp className="size-3.5" aria-hidden="true" />
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

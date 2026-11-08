@@ -12,12 +12,12 @@ import { apiIsUp, clickUntil } from './helpers'
  * reported as "Slot requested", never "confirmed".
  */
 test.describe('event planning wizard', () => {
-  test('opens on the services step with the requested group highlighted', async ({ page }) => {
+  test('opens on the single brief screen with the requested group highlighted', async ({ page }) => {
     await page.goto('/plan-event?service=Catering')
 
     await expect(page.getByRole('heading', { name: 'What do you need for your event?' })).toBeVisible()
     await expect(page.getByText(/You arrived asking about/)).toContainText('Catering')
-    await expect(page.getByText('Step 5 of 8')).toBeVisible()
+    await expect(page.getByText('Step 1 of 2')).toBeVisible()
   })
 
   test('prefills a venue shortlisted from the venues page', async ({ page }) => {
@@ -25,48 +25,42 @@ test.describe('event planning wizard', () => {
 
     await expect(page.getByRole('heading', { name: 'What type of event are you planning?' })).toBeVisible()
 
-    await page.getByRole('button', { name: 'Wedding' }).click()
-    await clickUntil(page.getByRole('button', { name: /Continue/ }), () =>
-      expect(page.getByText('Step 2 of 8')).toBeVisible({ timeout: 3_000 })
-    )
-    await clickUntil(page.getByRole('button', { name: /Continue/ }), () =>
-      expect(page.getByText('Step 3 of 8')).toBeVisible({ timeout: 3_000 })
-    )
-
-    await expect(page.getByRole('heading', { name: 'Where will it happen?' })).toBeVisible()
-
     // "Venue already arranged" is selected and the name is carried through.
-    const venueName = page.getByLabel('Venue name')
+    const venueName = page.getByLabel('Venue name *')
     await expect(venueName).toHaveValue('The Grand Hall')
-    await expect(page.getByLabel('City')).toHaveValue('Bengaluru')
+    await expect(page.getByLabel(/City \*/)).toHaveValue('Bengaluru')
   })
 
-  test('a wrong or missing event type is caught before the wizard advances', async ({ page }) => {
+  test('a missing event type is caught before the brief can be reviewed', async ({ page }) => {
     await page.goto('/plan-event')
 
-    await clickUntil(page.getByRole('button', { name: /Continue/ }), () =>
+    await clickUntil(page.getByRole('button', { name: /Review request/ }), () =>
       expect(page.getByText('Choose an event type to continue.')).toBeVisible({ timeout: 3_000 })
     )
-    await expect(page.getByText('Step 1 of 8')).toBeVisible()
+    await expect(page.getByText('Step 1 of 2')).toBeVisible()
   })
 })
 
 test.describe('home-service booking wizard', () => {
-  test('receives the category from a service card and advances on one click', async ({ page }) => {
+  test('receives the category from a service card and keeps one details screen', async ({ page }) => {
     await page.goto('/book/technician?category=CLEANING')
 
-    // The category is already answered, so the wizard opens on the service step.
-    await expect(page.getByText('Step 2 of 9')).toBeVisible()
+    // The category is already answered, so the service list is visible on the
+    // first (and only) details screen.
+    await expect(page.getByText('Step 1 of 2')).toBeVisible()
+    const cleaning = page.getByRole('button', { name: /Full Home & Deep Cleaning/ }).first()
+    await expect(cleaning).toHaveAttribute('aria-pressed', 'true')
 
-    // Choosing a category must advance immediately — the previous build needed
-    // two clicks because validation ran against stale state. The wizard keeps a
-    // session draft (a returning customer resumes where they left off), so the
-    // draft is cleared first to guarantee a genuine step-1 start.
+    // Choosing a category on a fresh visit takes effect immediately — the
+    // previous build needed two clicks because validation ran against stale
+    // state. The wizard keeps a session draft, so clear it first.
     await page.evaluate(() => window.sessionStorage.clear())
     await page.goto('/book/technician')
-    await expect(page.getByText('Step 1 of 9')).toBeVisible()
-    await clickUntil(page.getByRole('button', { name: /Cleaning/ }).first(), () =>
-      expect(page.getByText('Step 2 of 9')).toBeVisible({ timeout: 3_000 })
+    await expect(page.getByText('Step 1 of 2')).toBeVisible()
+
+    const freshCleaning = page.getByRole('button', { name: /Full Home & Deep Cleaning/ }).first()
+    await clickUntil(freshCleaning, () =>
+      expect(freshCleaning).toHaveAttribute('aria-pressed', 'true', { timeout: 3_000 })
     )
   })
 
@@ -81,7 +75,7 @@ test.describe('home-service booking wizard', () => {
 
     await expect(page.getByText(/no bookable services listed yet/i)).toBeVisible()
     // No invented price and no dead "next": the honest route is a human.
-    await expect(page.getByText(/starting from/i)).toHaveCount(0)
+    await expect(page.getByText(/₹/)).toHaveCount(0)
     await expect(page.getByRole('link', { name: 'Ask the team' })).toHaveAttribute('href', '/contact')
     await expect(page.getByRole('link', { name: 'Browse other categories' })).toHaveAttribute('href', '/services')
   })

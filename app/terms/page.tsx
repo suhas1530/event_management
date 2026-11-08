@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: 'Terms & Conditions',
   description:
     'The terms that govern your use of Heptome — bookings, event requests, payments, cancellations and responsibilities for customers and technicians.',
+  alternates: { canonical: '/terms' },
 }
 
 export default function TermsPage() {

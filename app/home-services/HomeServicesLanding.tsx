@@ -104,8 +104,8 @@ export default function HomeServicesLanding() {
       <section className="surface-ivory px-5 pb-16 pt-14 sm:px-10 sm:pt-20 lg:pb-20">
         <div className="mx-auto grid max-w-[1380px] gap-12 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.3em] text-accent">Home services</p>
-            <h1 className="mt-4 font-display text-[clamp(2.25rem,5vw,3.75rem)] font-semibold leading-[1.05] tracking-[-0.02em] text-hept-charcoal">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-gold-text">Home services</p>
+            <h1 className="mt-4 font-display text-[clamp(2.25rem,5vw,3.75rem)] font-semibold leading-[1.05] tracking-[-0.02em] text-foreground">
               Expert help at your doorstep.
             </h1>
             <p className="surface-ivory-muted mt-5 max-w-xl text-base leading-7">
@@ -117,14 +117,14 @@ export default function HomeServicesLanding() {
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Link
                 href="/book/technician"
-                className="btn-heptome inline-flex min-h-12 items-center gap-2.5 px-7 py-3.5 text-sm font-semibold text-foreground shadow-[0_12px_34px_-16px_rgba(109,54,216,0.95)] focus-ring-ivory"
+                className="btn-heptome inline-flex min-h-12 items-center gap-2.5 px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg focus-ring-ivory"
               >
                 Book a Home Service
                 <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
               <Link
                 href="/contact"
-                className="surface-ivory-muted inline-flex min-h-12 items-center gap-2 text-sm font-medium transition-colors hover:text-accent focus-ring-ivory"
+                className="surface-ivory-muted inline-flex min-h-12 items-center gap-2 text-sm font-medium transition-colors hover:text-primary focus-ring-ivory"
               >
                 Talk to the team
               </Link>
@@ -133,25 +133,25 @@ export default function HomeServicesLanding() {
             <dl className="mt-10 flex flex-wrap gap-x-10 gap-y-4 text-sm">
               <div>
                 <dt className="surface-ivory-muted text-xs uppercase tracking-[0.16em]">Professionals listed</dt>
-                <dd className="mt-1 font-display text-2xl text-hept-charcoal">
-                  {proCount === null ? '—' : proCount.toLocaleString('en-IN')}
+                <dd className="mt-1 font-display text-2xl text-foreground">
+                  {proCount === null ? '—' : proCount > 0 ? proCount.toLocaleString('en-IN') : 'Verified network'}
                 </dd>
               </div>
               <div>
                 <dt className="surface-ivory-muted text-xs uppercase tracking-[0.16em]">Service lines</dt>
-                <dd className="mt-1 font-display text-2xl text-hept-charcoal">{HOME_CATALOG.length}</dd>
+                <dd className="mt-1 font-display text-2xl text-foreground">{HOME_CATALOG.length}</dd>
               </div>
               <div>
                 <dt className="surface-ivory-muted text-xs uppercase tracking-[0.16em]">Doorstep city</dt>
-                <dd className="mt-1 font-display text-2xl text-hept-charcoal">{SUPPORTED_CITY}</dd>
+                <dd className="mt-1 font-display text-2xl text-foreground">{SUPPORTED_CITY}</dd>
               </div>
             </dl>
           </div>
 
           {/* Coverage checker */}
-          <aside className="panel-ivory p-6 sm:p-7">
-            <h2 className="flex items-center gap-2 text-base font-semibold text-hept-charcoal">
-              <MapPin className="size-4 text-accent" aria-hidden="true" />
+          <div className="panel-ivory p-6 sm:p-7">
+            <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+              <MapPin className="size-4 text-primary" aria-hidden="true" />
               Do we serve your address?
             </h2>
             <p className="surface-ivory-muted mt-2 text-sm leading-6">
@@ -159,7 +159,7 @@ export default function HomeServicesLanding() {
               the booking step.
             </p>
 
-            <label className="mt-5 block text-xs font-medium text-hept-charcoal">
+            <label className="mt-5 block text-xs font-medium text-foreground">
               Pincode
               <input
                 value={pincode}
@@ -167,7 +167,7 @@ export default function HomeServicesLanding() {
                 inputMode="numeric"
                 placeholder="560034"
                 aria-describedby="coverage-result"
-                className="mt-2 w-full border border-hept-line bg-card px-4 py-3 text-sm text-hept-charcoal outline-none transition focus:border-hept-purple focus-ring-ivory"
+                className="mt-2 w-full rounded-lg border border-border bg-input px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-subtle-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </label>
 
@@ -176,50 +176,50 @@ export default function HomeServicesLanding() {
                 <span className="surface-ivory-muted">Enter your 6-digit pincode.</span>
               )}
               {coverage?.supported === true && (
-                <span className="font-medium text-[#2f6b3a]">
+                <span className="font-medium text-success">
                   Covered — {coverage.area?.name}. Slots can be booked for this pincode.
                 </span>
               )}
-              {coverage?.supported === false && <span className="font-medium text-[#a4341f]">{coverage.reason}</span>}
+              {coverage?.supported === false && <span className="font-medium text-destructive">{coverage.reason}</span>}
             </p>
 
             {coverage?.supported === true && (
               <Link
                 href={`/book/technician?pincode=${pincode}`}
-                className="btn-heptome mt-4 inline-flex min-h-11 items-center gap-2 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-foreground focus-ring-ivory"
+                className="btn-heptome mt-4 inline-flex min-h-11 items-center gap-2 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-primary-foreground focus-ring-ivory"
               >
                 Start a booking
                 <ArrowRight className="size-3.5" aria-hidden="true" />
               </Link>
             )}
 
-            <div className="mt-6 border-t border-hept-line pt-5">
+            <div className="mt-6 border-t border-border pt-5">
               <p className="surface-ivory-muted text-xs uppercase tracking-[0.16em]">Localities we cover</p>
               <ul className="mt-3 flex flex-wrap gap-1.5">
                 {SERVICE_AREA_NAMES.map(area => (
-                  <li key={area} className="bg-hept-lavender px-2.5 py-1 text-[11px] font-medium text-[#4c1d95]">
+                  <li key={area} className="bg-primary-muted px-2.5 py-1 text-[11px] font-medium text-primary">
                     {area}
                   </li>
                 ))}
               </ul>
               <p className="surface-ivory-muted mt-3 text-[11px] leading-5">
                 Outside {SUPPORTED_CITY}?{' '}
-                <Link href="/contact" className="font-medium text-accent underline underline-offset-2">
+                <Link href="/contact" className="font-medium text-gold-text underline underline-offset-2">
                   Tell us where to expand next
                 </Link>
                 .
               </p>
             </div>
-          </aside>
+          </div>
         </div>
       </section>
 
       {/* ── Catalogue ─────────────────────────────────────────────── */}
       <section className="surface-ivory px-5 pb-20 sm:px-10" aria-labelledby="catalogue-heading">
         <div className="mx-auto max-w-[1380px]">
-          <div className="flex flex-wrap items-end justify-between gap-4 border-t border-hept-line pt-12">
+          <div className="flex flex-wrap items-end justify-between gap-4 border-t border-border pt-12">
             <div>
-              <h2 id="catalogue-heading" className="font-display text-2xl font-semibold text-hept-charcoal sm:text-3xl">
+              <h2 id="catalogue-heading" className="font-display text-2xl font-semibold text-foreground sm:text-3xl">
                 What we do at home
               </h2>
               <p className="surface-ivory-muted mt-2 max-w-2xl text-sm leading-6">
@@ -229,7 +229,7 @@ export default function HomeServicesLanding() {
             </div>
             <Link
               href="/book/technician"
-              className="surface-ivory-muted inline-flex items-center gap-2 text-sm font-medium transition-colors hover:text-accent"
+              className="surface-ivory-muted inline-flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary"
             >
               Open the booking wizard
               <ArrowRight className="size-4" aria-hidden="true" />
@@ -246,16 +246,16 @@ export default function HomeServicesLanding() {
 
       {/* ── How it works ──────────────────────────────────────────── */}
       <section className="surface-ivory px-5 pb-20 sm:px-10" aria-labelledby="home-steps-heading">
-        <div className="mx-auto max-w-[1380px] border-t border-hept-line pt-12">
-          <h2 id="home-steps-heading" className="font-display text-2xl font-semibold text-hept-charcoal sm:text-3xl">
+        <div className="mx-auto max-w-[1380px] border-t border-border pt-12">
+          <h2 id="home-steps-heading" className="font-display text-2xl font-semibold text-foreground sm:text-3xl">
             How a Heptome visit runs
           </h2>
 
           <ol className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {HOME_STEPS.map(step => (
               <li key={step.step} className="panel-ivory p-6">
-                <p className="font-display text-3xl font-semibold text-accent/25">{step.step}</p>
-                <h3 className="mt-3 text-base font-semibold text-hept-charcoal">{step.title}</h3>
+                <p aria-hidden="true" className="font-display text-3xl font-semibold text-primary/60">{step.step}</p>
+                <h3 className="mt-3 text-base font-semibold text-foreground">{step.title}</h3>
                 <p className="surface-ivory-muted mt-2 text-sm leading-6">{step.description}</p>
               </li>
             ))}
@@ -271,7 +271,7 @@ export default function HomeServicesLanding() {
               const Icon = item.icon
               return (
                 <li key={item.text} className="flex items-start gap-3 text-sm leading-6">
-                  <Icon className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden="true" />
+                  <Icon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
                   <span className="surface-ivory-muted">{item.text}</span>
                 </li>
               )
@@ -281,15 +281,15 @@ export default function HomeServicesLanding() {
       </section>
 
       {/* ── Closing CTA ───────────────────────────────────────────── */}
-      <section className="bg-hept-charcoal px-5 py-16 sm:px-10" aria-labelledby="home-cta-heading">
+      <section className="border-t border-border bg-primary px-5 py-16 text-primary-foreground sm:px-10" aria-labelledby="home-cta-heading">
         <div className="mx-auto flex max-w-[1380px] flex-wrap items-center justify-between gap-6">
           <div>
-            <h2 id="home-cta-heading" className="font-display text-2xl font-semibold text-foreground sm:text-3xl">
+            <h2 id="home-cta-heading" className="font-display text-2xl font-semibold text-primary-foreground sm:text-3xl">
               Ready when your home is.
             </h2>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+            <p className="mt-2 max-w-xl text-sm leading-6 text-primary-foreground/75">
               Slots across {SUPPORTED_CITY}. Questions first? Call{' '}
-              <a href={siteConfig.contact.phoneHref} className="font-medium text-foreground underline underline-offset-2">
+              <a href={siteConfig.contact.phoneHref} className="font-medium text-primary-foreground underline underline-offset-2">
                 {siteConfig.contact.phone}
               </a>{' '}
               — {siteConfig.contact.supportHours}.
@@ -297,7 +297,7 @@ export default function HomeServicesLanding() {
           </div>
           <Link
             href="/book/technician"
-            className="btn-heptome inline-flex min-h-12 items-center gap-2.5 px-7 py-3.5 text-sm font-semibold text-foreground"
+            className="inline-flex min-h-12 items-center gap-2.5 rounded-lg bg-background px-7 py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-surface-secondary"
           >
             Book a Home Service
             <ArrowRight className="size-4" aria-hidden="true" />
@@ -322,42 +322,42 @@ function ServiceGroupCard({ group, price }: { group: HomeCatalogGroup; price?: C
   const awaitingCatalogue = Boolean(group.bookingCategory) && (price === undefined || price === 'empty')
 
   return (
-    <article className="panel-ivory flex flex-col p-6">
+    <article id={group.id} className="panel-ivory flex scroll-mt-28 flex-col p-6">
       <div className="flex items-start justify-between gap-4">
-        <span className="flex size-11 items-center justify-center bg-hept-lavender text-accent">
+        <span className="flex size-11 items-center justify-center bg-primary/10 text-primary">
           <Icon className="size-5" aria-hidden="true" />
         </span>
         {typeof price === 'number' && (
           <span className="text-right">
             <span className="surface-ivory-muted block text-[10px] uppercase tracking-[0.16em]">From</span>
-            <span className="font-display text-lg font-semibold text-hept-charcoal">{formatINR(price)}</span>
+            <span className="font-display text-lg font-semibold text-foreground">{formatINR(price)}</span>
           </span>
         )}
         {price === null && group.bookingCategory && (
           <span className="surface-ivory-muted text-[10px] uppercase tracking-[0.16em]">Checking price…</span>
         )}
         {price === 'error' && (
-          <span className="text-[10px] uppercase tracking-[0.16em] text-[#a4341f]">Price unavailable</span>
+          <span className="text-[10px] uppercase tracking-[0.16em] text-destructive">Price unavailable</span>
         )}
         {!group.bookingCategory && (
-          <span className="bg-hept-lavender px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-[#4c1d95]">
+          <span className="bg-primary-muted px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-primary">
             On request
           </span>
         )}
         {awaitingCatalogue && (
-          <span className="border border-hept-line px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-[#8a5a2b]">
+          <span className="border border-border px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-gold-text">
             Booking opening soon
           </span>
         )}
       </div>
 
-      <h3 className="mt-5 text-lg font-semibold text-hept-charcoal">{group.name}</h3>
+      <h3 className="mt-5 text-lg font-semibold text-foreground">{group.name}</h3>
       <p className="surface-ivory-muted mt-2 text-sm leading-6">{group.blurb}</p>
 
       <ul className="surface-ivory-muted mt-4 flex flex-col gap-1.5 text-xs leading-5">
         {group.services.map(service => (
           <li key={service.name} className="flex items-start gap-2">
-            <span aria-hidden="true" className="mt-[7px] size-1 shrink-0 rounded-full bg-hept-purple/60" />
+            <span aria-hidden="true" className="mt-[7px] size-1 shrink-0 rounded-full bg-primary/60" />
             {service.name}
           </li>
         ))}
@@ -367,7 +367,7 @@ function ServiceGroupCard({ group, price }: { group: HomeCatalogGroup; price?: C
         {bookable ? (
           <Link
             href={`/book/technician?category=${group.bookingCategory}`}
-            className="btn-heptome inline-flex min-h-11 items-center gap-2 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-foreground focus-ring-ivory"
+            className="btn-heptome inline-flex min-h-11 items-center gap-2 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-primary-foreground focus-ring-ivory"
           >
             Book a slot
             <ArrowRight className="size-3.5" aria-hidden="true" />
@@ -375,7 +375,7 @@ function ServiceGroupCard({ group, price }: { group: HomeCatalogGroup; price?: C
         ) : (
           <Link
             href="/contact"
-            className="inline-flex min-h-11 items-center gap-2 border border-hept-purple px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-accent transition-colors hover:bg-hept-purple hover:text-white focus-ring-ivory"
+            className="inline-flex min-h-11 items-center gap-2 border border-primary px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-primary transition-colors hover:bg-primary hover:text-primary-foreground focus-ring-ivory"
           >
             Enquire
             <ArrowRight className="size-3.5" aria-hidden="true" />
@@ -383,7 +383,7 @@ function ServiceGroupCard({ group, price }: { group: HomeCatalogGroup; price?: C
         )}
         <Link
           href="/book/technician"
-          className="surface-ivory-muted inline-flex min-h-11 items-center text-xs font-medium transition-colors hover:text-accent focus-ring-ivory"
+          className="surface-ivory-muted inline-flex min-h-11 items-center text-xs font-medium transition-colors hover:text-primary focus-ring-ivory"
         >
           See all services
         </Link>

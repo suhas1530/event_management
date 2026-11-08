@@ -93,7 +93,7 @@ export default function AdminTechBookingDetailPage() {
     <div>
       {/* Header */}
       <div className="mb-6">
-        <Link href="/admin/technicians" className="inline-flex items-center gap-2 text-xs text-muted-foreground/80 hover:text-gold-text">
+        <Link href="/admin/technicians" className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-gold-text">
           <ArrowLeft className="size-3" /> All technician bookings
         </Link>
         <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
@@ -105,14 +105,14 @@ export default function AdminTechBookingDetailPage() {
           <div className="flex flex-wrap gap-3">
             {nextStatus && (
               <button type="button" onClick={() => handleStatusUpdate(nextStatus)} disabled={updating}
-                className="flex items-center gap-2 bg-[#d5ae79] px-5 py-2.5 text-[11px] uppercase tracking-[0.18em] text-[#17151d] hover:bg-[#e8cfa9] disabled:opacity-50">
+                className="flex items-center gap-2 bg-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.18em] text-gold-foreground hover:bg-gold-soft disabled:opacity-50">
                 <CheckCircle2 className="size-4" />
                 {updating ? 'Updating…' : `Mark: ${STATUS_LABEL[nextStatus]}`}
               </button>
             )}
             {!['CANCELLED','REJECTED','PAYMENT_COMPLETED','REVIEW_SUBMITTED'].includes(booking.status) && (
               <button type="button" onClick={() => handleStatusUpdate('CANCELLED')} disabled={updating}
-                className="flex items-center gap-2 border border-red-500/30 px-4 py-2.5 text-[11px] uppercase tracking-[0.18em] text-red-400 hover:bg-red-500/10 disabled:opacity-50">
+                className="flex items-center gap-2 border border-destructive/30 px-4 py-2.5 text-[11px] uppercase tracking-[0.18em] text-destructive hover:bg-destructive-muted disabled:opacity-50">
                 <X className="size-4" /> Cancel
               </button>
             )}
@@ -132,7 +132,7 @@ export default function AdminTechBookingDetailPage() {
                 ['Phone', booking.customer?.phone],
               ].map(([k, v]) => v && (
                 <div key={k as string}>
-                  <dt className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/80">{k}</dt>
+                  <dt className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{k}</dt>
                   <dd className="mt-1 text-foreground/90">{v}</dd>
                 </div>
               ))}
@@ -151,14 +151,14 @@ export default function AdminTechBookingDetailPage() {
                 ['Payment method', booking.paymentMethod ?? '—'],
               ].map(([k, v]) => v && (
                 <div key={k as string}>
-                  <dt className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/80">{k}</dt>
+                  <dt className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{k}</dt>
                   <dd className="mt-1 text-foreground/90">{v}</dd>
                 </div>
               ))}
             </dl>
             {booking.customerNotes && (
               <div className="mt-4 border-t border-border-subtle pt-4">
-                <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/80">Customer description</p>
+                <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Customer description</p>
                 <p className="mt-1 text-sm leading-6 text-muted-foreground">{booking.customerNotes}</p>
               </div>
             )}
@@ -170,32 +170,32 @@ export default function AdminTechBookingDetailPage() {
               <MapPin className="mt-0.5 size-4 flex-shrink-0 text-gold-text" />
               {[booking.addressLine1, booking.addressLine2, booking.addressCity, booking.addressState, booking.addressPincode].filter(Boolean).join(', ')}
             </p>
-            <p className="mt-1 ml-6 text-xs text-muted-foreground/80">{booking.addressLabel}</p>
+            <p className="mt-1 ml-6 text-xs text-muted-foreground">{booking.addressLabel}</p>
           </AdminSection>
 
           {/* Assign technician */}
           <AdminSection title="Assign technician">
             {booking.technician ? (
-              <div className="mb-4 flex items-center gap-4 border border-[#d5ae79]/20 bg-[#d5ae79]/5 p-4">
+              <div className="mb-4 flex items-center gap-4 border border-gold/20 bg-gold/5 p-4">
                 <div className="relative size-12 overflow-hidden rounded-full border border-border bg-muted/60">
                   {booking.technician.avatar
                     ? <img src={booking.technician.avatar} alt="" className="h-full w-full object-cover" />
                     : <div className="flex h-full items-center justify-center text-muted-foreground">{booking.technician.name?.[0]}</div>}
                   {booking.technician.isVerified && (
-                    <div className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-[#d5ae79]">
-                      <Check className="size-2.5 text-[#0b0b0d]" />
+                    <div className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-gold">
+                      <Check className="size-2.5 text-gold-foreground" />
                     </div>
                   )}
                 </div>
                 <div>
                   <p className="text-sm font-medium text-foreground">{booking.technician.name}</p>
                   <div className="mt-0.5 flex items-center gap-3 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><Star className="size-3 fill-[#d5ae79] text-gold-text" />{booking.technician.rating.toFixed(1)}</span>
+                    <span className="flex items-center gap-1"><Star className="size-3 fill-gold text-gold-text" />{booking.technician.rating.toFixed(1)}</span>
                     <span>{booking.technician.completedJobs} jobs</span>
                   </div>
                 </div>
                 <a href={`tel:${booking.technician.phone}`}
-                  className="ml-auto flex items-center gap-1.5 border border-border px-3 py-1.5 text-xs text-muted-foreground hover:border-[#d5ae79] hover:text-gold-text">
+                  className="ml-auto flex items-center gap-1.5 border border-border px-3 py-1.5 text-xs text-muted-foreground hover:border-gold hover:text-gold-text">
                   <Phone className="size-3.5" /> Call
                 </a>
               </div>
@@ -204,7 +204,7 @@ export default function AdminTechBookingDetailPage() {
             )}
             <div className="flex gap-3">
               <select value={selectedTech} onChange={e => setSelectedTech(e.target.value)}
-                className="flex-1 border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:border-[#d5ae79] focus:outline-none">
+                className="flex-1 border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:border-gold focus:outline-none">
                 <option value="">Select technician…</option>
                 {technicians.map(t => (
                   <option key={t.id} value={t.id} className="bg-card">
@@ -213,7 +213,7 @@ export default function AdminTechBookingDetailPage() {
                 ))}
               </select>
               <button onClick={handleAssignTechnician} disabled={!selectedTech || updating}
-                className="flex items-center gap-1.5 bg-[#d5ae79] px-5 py-2.5 text-[11px] uppercase tracking-[0.18em] text-[#17151d] hover:bg-[#e8cfa9] disabled:opacity-40" type="button">
+                className="flex items-center gap-1.5 bg-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.18em] text-gold-foreground hover:bg-gold-soft disabled:opacity-40" type="button">
                 {updating ? <Loader2 className="size-4 animate-spin" /> : <User className="size-4" />}
                 Assign
               </button>
@@ -228,7 +228,7 @@ export default function AdminTechBookingDetailPage() {
             <div className="flex flex-col gap-1.5">
               {Object.entries(STATUS_LABEL).filter(([k]) => k && k !== booking.status).map(([k, label]) => (
                 <button type="button" key={k} onClick={() => handleStatusUpdate(k)} disabled={updating}
-                  className="flex items-center justify-between border border-border px-3 py-2.5 text-sm text-muted-foreground transition hover:border-[#d5ae79]/40 hover:text-gold-text disabled:opacity-40">
+                  className="flex items-center justify-between border border-border px-3 py-2.5 text-sm text-muted-foreground transition hover:border-gold/40 hover:text-gold-text disabled:opacity-40">
                   <span>{label}</span>
                   <Check className="size-3.5 opacity-0 hover:opacity-100" />
                 </button>
@@ -257,7 +257,7 @@ export default function AdminTechBookingDetailPage() {
                 <span className="text-gold-text">{fmt(booking.totalAmount)}</span>
               </div>
               <div className="mt-1">
-                <span className={`text-[9px] uppercase tracking-[0.1em] px-2 py-0.5 ${booking.paymentStatus === 'COMPLETED' ? 'text-green-400 bg-green-500/15' : 'text-yellow-300 bg-yellow-500/10'}`}>
+                <span className={`text-[9px] uppercase tracking-[0.1em] px-2 py-0.5 ${booking.paymentStatus === 'COMPLETED' ? 'text-success bg-success-muted' : 'text-warning bg-warning-muted'}`}>
                   Payment: {booking.paymentStatus}
                 </span>
               </div>
@@ -272,16 +272,16 @@ export default function AdminTechBookingDetailPage() {
                   const isLast = i === (booking.timeline?.length ?? 0) - 1
                   return (
                     <li key={entry.id}>
-                      <div className={`absolute -left-2 flex size-4 items-center justify-center rounded-full border ${isLast ? 'border-[#d5ae79] bg-[#d5ae79]' : 'border-border bg-background'}`} />
+                      <div className={`absolute -left-2 flex size-4 items-center justify-center rounded-full border ${isLast ? 'border-gold bg-gold' : 'border-border bg-background'}`} />
                       <p className="text-[10px] uppercase tracking-[0.15em] text-gold-text">{entry.title}</p>
                       {entry.description && <p className="mt-0.5 text-xs text-muted-foreground">{entry.description}</p>}
-                      <p className="mt-0.5 text-[10px] text-muted-foreground/80">{fmtDt(entry.createdAt)}</p>
+                      <p className="mt-0.5 text-[10px] text-muted-foreground">{fmtDt(entry.createdAt)}</p>
                     </li>
                   )
                 })}
               </ol>
             ) : (
-              <p className="text-xs text-muted-foreground/80">No timeline entries</p>
+              <p className="text-xs text-muted-foreground">No timeline entries</p>
             )}
           </AdminSection>
 
@@ -290,7 +290,7 @@ export default function AdminTechBookingDetailPage() {
             <AdminSection title="Customer review">
               <div className="flex gap-0.5 mb-2">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className={`size-4 ${i < booking.review!.rating ? 'fill-[#d5ae79] text-gold-text' : 'text-muted-foreground/80'}`} />
+                  <Star key={i} className={`size-4 ${i < booking.review!.rating ? 'fill-gold text-gold-text' : 'text-muted-foreground'}`} />
                 ))}
               </div>
               {booking.review.comment && (
@@ -307,7 +307,7 @@ export default function AdminTechBookingDetailPage() {
 function AdminSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="border border-border bg-card p-5">
-      <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-muted-foreground/80">{title}</p>
+      <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{title}</p>
       {children}
     </div>
   )

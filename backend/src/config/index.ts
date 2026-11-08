@@ -63,15 +63,29 @@ export const config = {
   },
 
   // AI Service (abstraction)
+  //
+  // Text and image generation are separate capabilities on purpose: a provider
+  // may support one but not the other. Text is optional; the design assistant
+  // has a catalog-based fallback when it is not configured. Image generation is
+  // never required — catalog reference images are used first.
   ai: {
+    enabled: (process.env.AI_FEATURE_ENABLED || 'true').toLowerCase() !== 'false',
     provider: process.env.AI_PROVIDER || 'openai',
     apiKey: process.env.AI_API_KEY || '',
     model: process.env.AI_MODEL || 'gpt-4-turbo-preview',
     baseUrl: process.env.AI_BASE_URL || 'https://api.openai.com/v1',
+    timeoutMs: parseInt(process.env.AI_TIMEOUT_MS || '20000', 10),
+    maxOutputTokens: parseInt(process.env.AI_MAX_OUTPUT_TOKENS || '2500', 10),
+    imageProvider: (process.env.AI_IMAGE_PROVIDER || 'catalog').toLowerCase(),
+    imageApiKey: process.env.AI_IMAGE_API_KEY || '',
+    imageModel: process.env.AI_IMAGE_MODEL || '',
   },
 
-  // Payment (abstraction)
+  // Payment (provider-isolated; only server-side credentials live here)
   payment: {
+    provider: (process.env.PAYMENT_PROVIDER || 'razorpay').toLowerCase(),
+    mode: (process.env.PAYMENT_MODE || 'test').toLowerCase(),
+    currency: (process.env.PAYMENT_CURRENCY || 'INR').toUpperCase(),
     razorpay: {
       keyId: process.env.RAZORPAY_KEY_ID || '',
       keySecret: process.env.RAZORPAY_KEY_SECRET || '',
@@ -84,6 +98,9 @@ export const config = {
     },
   },
 
+  // Public backend origin used when documenting webhook URLs
+  backendPublicUrl: process.env.BACKEND_PUBLIC_URL || `http://localhost:${parseInt(process.env.PORT || '5000', 10)}`,
+
   // Frontend URL (for email links, etc.)
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
 
@@ -92,3 +109,57 @@ export const config = {
   supportPhone: process.env.SUPPORT_PHONE || '+91 80501 71547',
   supportHours: process.env.SUPPORT_HOURS || 'Mon – Sat · 9:00 AM – 8:00 PM IST',
 };
+
+export interface PaymentConfigStatus {
+  provider: string;
+  mode: string;
+  configured: boolean;
+  webhookConfigured: boolean;
+}
+
+/**
+ * Validates payment configuration at startup without ever printing a secret.
+ *
+ * Development is allowed to run without gateway credentials so the rest of the
+ * app remains usable; payment endpoints then return 503. Production fails fast
+ * because silently accepting bookings without a working payment gateway is
+ * worse than refusing to boot.
+ */
+export function validatePaymentConfig(): PaymentConfigStatus {
+  const { provider, mode, razorpay } = config.payment;
+  const configured = Boolean(razorpay.keyId && razorpay.keySecret);
+  const webhookConfigured = Boolean(razorpay.webhookSecret);
+  const problems: string[] = [];
+
+  if (!['razorpay', 'disabled'].includes(provider)) {
+    problems.push(`Unsupported PAYMENT_PROVIDER "${provider}". Use "razorpay" or "disabled".`);
+  }
+  if (!['test', 'live'].includes(mode)) {
+    problems.push(`PAYMENT_MODE must be "test" or "live", received "${mode}".`);
+  }
+
+  if (provider === 'razorpay') {
+    if (!configured) {
+      problems.push('RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are required when PAYMENT_PROVIDER=razorpay.');
+    } else if (mode === 'live' && !razorpay.keyId.startsWith('rzp_live_')) {
+      problems.push('PAYMENT_MODE=live requires a live Razorpay key (rzp_live_...).');
+    } else if (mode === 'test' && !razorpay.keyId.startsWith('rzp_test_')) {
+      problems.push('PAYMENT_MODE=test requires a test Razorpay key (rzp_test_...).');
+    }
+    if (!webhookConfigured) {
+      problems.push('RAZORPAY_WEBHOOK_SECRET is required to verify Razorpay webhooks.');
+    }
+  }
+
+  if (problems.length > 0) {
+    const message = `Payment configuration error:\n- ${problems.join('\n- ')}`;
+    if (config.env === 'production') throw new Error(message);
+    console.warn(`⚠️  ${message}\n   Payment endpoints will return 503 until this is fixed.`);
+  } else if (provider === 'razorpay') {
+    console.log(`✅ Razorpay configured in ${mode} mode (webhooks verified)`);
+  } else {
+    console.log('ℹ️  Online payments are disabled (PAYMENT_PROVIDER=disabled)');
+  }
+
+  return { provider, mode, configured, webhookConfigured };
+}

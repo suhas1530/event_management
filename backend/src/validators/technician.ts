@@ -51,6 +51,26 @@ export const createTechnicianBookingSchema = z.object({
   paymentMethod: z.enum(['CASH','UPI','CARD','ONLINE','BANK_TRANSFER']).optional(),
   customerNotes: z.string().max(1000).optional(),
   attachments: z.array(z.string().url()).default([]),
+}).superRefine((value, ctx) => {
+  // A slot must move forward in time. The service layer additionally checks
+  // that the pair is one of the published two-hour windows and that the date
+  // is in the future in the platform's timezone.
+  if (value.timeSlotEnd <= value.timeSlotStart) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['timeSlotEnd'],
+      message: 'The slot end time must be after the start time',
+    });
+  }
+
+  const requested = new Date(value.scheduledDate);
+  if (Number.isNaN(requested.getTime())) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['scheduledDate'],
+      message: 'Invalid scheduled date',
+    });
+  }
 });
 
 export const updateTechnicianBookingSchema = z.object({

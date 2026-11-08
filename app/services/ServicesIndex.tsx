@@ -168,11 +168,11 @@ function ServicesIndexInner() {
   }
 
   return (
-    <div className="immersive bg-ink-950">
-      <section className="border-b border-hairline/60 bg-ink-900/40 px-5 py-14 sm:px-10 lg:py-16">
+    <div className="bg-background">
+      <section className="border-b border-border/60 bg-surface-muted/50 px-5 py-14 sm:px-10 lg:py-16">
         <div className="mx-auto max-w-[1380px]">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-champagne">All services</p>
-          <h1 className="mt-4 font-display text-[clamp(2rem,4.6vw,3.5rem)] font-semibold leading-[1.06] tracking-[-0.02em] text-slate-50">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-gold-text">All services</p>
+          <h1 className="mt-4 font-display text-[clamp(2rem,4.6vw,3.5rem)] font-semibold leading-[1.06] tracking-[-0.02em] text-foreground">
             Every service, one place.
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-fg-dim">
@@ -188,7 +188,7 @@ function ServicesIndexInner() {
                 value={query}
                 onChange={event => setQuery(event.target.value)}
                 placeholder="Try “plumber”, “catering”, “wedding”…"
-                className="w-full border border-border bg-muted/50 py-3.5 pl-11 pr-10 text-sm text-foreground placeholder:text-fg-mute focus:border-champagne focus:outline-none"
+                className="w-full border border-border bg-muted/50 py-3.5 pl-11 pr-10 text-sm text-foreground placeholder:text-fg-mute focus:border-gold focus:outline-none"
               />
               {query && (
                 <button
@@ -203,7 +203,7 @@ function ServicesIndexInner() {
             </label>
             <button
               type="submit"
-              className="inline-flex min-h-12 items-center border border-champagne bg-champagne/15 px-6 text-xs font-semibold uppercase tracking-[0.18em] text-champagne-light transition-colors hover:bg-champagne hover:text-ink-950"
+              className="inline-flex min-h-12 items-center border border-gold bg-gold/15 px-6 text-xs font-semibold uppercase tracking-[0.18em] text-gold-text transition-colors hover:bg-gold hover:text-gold-foreground"
             >
               Search
             </button>
@@ -219,8 +219,8 @@ function ServicesIndexInner() {
                 type="button"
                 onClick={() => setSection(id)}
                 aria-pressed={section === id}
-                className={`inline-flex min-h-11 items-center gap-2 px-4 py-2 text-xs font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-pale ${
-                  section === id ? 'bg-hept-purple text-white' : 'text-white/60 hover:text-white'
+                className={`inline-flex min-h-11 items-center gap-2 px-4 py-2 text-xs font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                  section === id ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 <Icon className="size-3.5" aria-hidden="true" />
@@ -231,13 +231,13 @@ function ServicesIndexInner() {
         </div>
       </section>
 
-      <main className="bg-ink-950 px-5 py-14 sm:px-10 lg:py-16">
+      <div className="bg-background px-5 py-14 sm:px-10 lg:py-16">
         <div className="mx-auto max-w-[1380px]">
           {section === 'home' && (
             <>
               <header className="flex flex-wrap items-end justify-between gap-4">
                 <div>
-                  <h2 className="font-display text-2xl font-semibold text-slate-50">Home services</h2>
+                  <h2 className="font-display text-2xl font-semibold text-foreground">Home services</h2>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-fg-dim">
                     Prices shown are the cheapest active service in each category, read live from the booking
                     catalogue. The visit charge and taxes are itemised before you confirm.
@@ -271,7 +271,7 @@ function ServicesIndexInner() {
             <>
               <header className="flex flex-wrap items-end justify-between gap-4">
                 <div>
-                  <h2 className="font-display text-2xl font-semibold text-slate-50">Event services</h2>
+                  <h2 className="font-display text-2xl font-semibold text-foreground">Event services</h2>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-fg-dim">
                     Event work is quoted per brief, so nothing here carries a price. Each line opens the
                     planning wizard with that area of interest highlighted.
@@ -293,14 +293,14 @@ function ServicesIndexInner() {
                       <Link
                         key={service.id}
                         href={`/plan-event?service=${encodeURIComponent(service.wizardGroup)}`}
-                        className="group flex flex-col border border-white/8 bg-ink-900/50 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-champagne/40 hover:bg-ink-800/70"
+                        className="group flex flex-col border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-gold/50 hover:bg-muted/70"
                       >
-                        <span className="flex size-11 items-center justify-center border border-champagne/25 bg-champagne/10 text-champagne">
+                        <span className="flex size-11 items-center justify-center border border-gold/30 bg-gold/10 text-gold-text">
                           <Icon className="size-5" aria-hidden="true" />
                         </span>
-                        <h3 className="mt-5 text-base font-medium text-slate-50">{service.name}</h3>
+                        <h3 className="mt-5 text-base font-medium text-foreground">{service.name}</h3>
                         <p className="mt-2 text-sm leading-6 text-fg-dim">{service.blurb}</p>
-                        <span className="mt-5 inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.16em] text-champagne">
+                        <span className="mt-5 inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.16em] text-gold-text">
                           Open the planner
                           <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
                         </span>
@@ -310,14 +310,14 @@ function ServicesIndexInner() {
                 </div>
               )}
 
-              <div className="mt-12 border-t border-hairline/60 pt-8">
-                <h3 className="text-sm font-semibold text-slate-50">Browse by occasion</h3>
+              <div className="mt-12 border-t border-border/60 pt-8">
+                <h3 className="text-sm font-semibold text-foreground">Browse by occasion</h3>
                 <ul className="mt-4 flex flex-wrap gap-2">
                   {EVENT_TYPES.map(type => (
                     <li key={type.type}>
                       <Link
                         href={`/events?type=${type.type}`}
-                        className="inline-flex min-h-9 items-center border border-border px-3.5 py-1.5 text-xs text-fg-dim transition-colors hover:border-champagne/40 hover:text-champagne"
+                        className="inline-flex min-h-9 items-center border border-border px-3.5 py-1.5 text-xs text-fg-dim transition-colors hover:border-gold/50 hover:text-gold-text"
                       >
                         {type.label}
                       </Link>
@@ -328,21 +328,21 @@ function ServicesIndexInner() {
             </>
           )}
         </div>
-      </main>
+      </div>
     </div>
   )
 }
 
 function NoMatch({ query, onClear }: { query: string; onClear: () => void }) {
   return (
-    <div className="mt-8 border border-white/8 bg-ink-900/50 p-10 text-center">
+    <div className="mt-8 border border-border bg-card p-10 text-center">
       <Search className="mx-auto size-9 text-fg-mute" aria-hidden="true" />
-      <h3 className="mt-4 font-display text-lg font-semibold text-slate-50">No match for “{query}”</h3>
+      <h3 className="mt-4 font-display text-lg font-semibold text-foreground">No match for “{query}”</h3>
       <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-fg-dim">
         Try a shorter word, or tell us what you need and the team will point you the right way.
       </p>
       <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
-        <button type="button" onClick={onClear} className="text-sm font-medium text-champagne underline underline-offset-2">
+        <button type="button" onClick={onClear} className="text-sm font-medium text-gold-text underline underline-offset-2">
           Clear the search
         </button>
         <Link href="/contact" className="text-sm font-medium text-fg-dim transition-colors hover:text-foreground">
@@ -376,23 +376,23 @@ function HomeServiceCard({
   const openingSoon = Boolean(group.bookingCategory) && (price === undefined || price === 'empty')
 
   return (
-    <article className="flex flex-col border border-white/10 bg-ink-900/50 p-6 transition-colors hover:border-hept-purple/50">
+    <article className="flex flex-col border border-border bg-card p-6 transition-colors hover:border-primary/50">
       <div className="flex items-start justify-between gap-4">
-        <span className="flex size-11 items-center justify-center bg-hept-purple/15 text-violet-pale">
+        <span className="flex size-11 items-center justify-center bg-primary-muted text-primary">
           <Icon className="size-5" aria-hidden="true" />
         </span>
         {typeof price === 'number' && (
           <span className="text-right">
             <span className="block text-[10px] uppercase tracking-[0.16em] text-fg-mute">From</span>
-            <span className="font-display text-lg font-semibold text-champagne-light">{formatINR(price)}</span>
+            <span className="font-display text-lg font-semibold text-gold-text">{formatINR(price)}</span>
           </span>
         )}
         {price === null && group.bookingCategory && (
           <span className="text-[10px] uppercase tracking-[0.16em] text-fg-mute">Checking price…</span>
         )}
-        {price === 'error' && <span className="text-[10px] uppercase tracking-[0.16em] text-[#e7a48c]">Price unavailable</span>}
+        {price === 'error' && <span className="text-[10px] uppercase tracking-[0.16em] text-destructive">Price unavailable</span>}
         {!group.bookingCategory && (
-          <span className="rounded-none bg-hept-lavender px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-[#4c1d95]">
+          <span className="rounded-none bg-primary-muted px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-primary">
             On request
           </span>
         )}
@@ -403,14 +403,14 @@ function HomeServiceCard({
         )}
       </div>
 
-      <h3 className="mt-5 text-base font-medium text-slate-50">{group.name}</h3>
+      <h3 className="mt-5 text-base font-medium text-foreground">{group.name}</h3>
       <p className="mt-2 text-sm leading-6 text-fg-dim">{group.blurb}</p>
 
       <div className="mt-5 flex flex-wrap items-center gap-3">
         {bookable ? (
           <Link
             href={`/book/technician?category=${group.bookingCategory}`}
-            className="btn-heptome inline-flex min-h-11 items-center gap-2 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-foreground"
+            className="btn-heptome inline-flex min-h-11 items-center gap-2 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-primary-foreground"
           >
             Book
             <ArrowRight className="size-3.5" aria-hidden="true" />
@@ -418,7 +418,7 @@ function HomeServiceCard({
         ) : (
           <Link
             href="/contact"
-            className="inline-flex min-h-11 items-center gap-2 border border-hept-purple px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-violet-pale transition-colors hover:bg-hept-purple hover:text-white"
+            className="inline-flex min-h-11 items-center gap-2 border border-primary px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
           >
             Enquire
             <ArrowRight className="size-3.5" aria-hidden="true" />
@@ -439,7 +439,7 @@ function HomeServiceCard({
         <ul className="mt-4 flex flex-col gap-1.5 border-t border-border-subtle pt-4 text-xs leading-5 text-fg-dim">
           {group.services.map(service => (
             <li key={service.name} className="flex items-start gap-2">
-              <span aria-hidden="true" className="mt-[7px] size-1 shrink-0 rounded-full bg-hept-purple/70" />
+              <span aria-hidden="true" className="mt-[7px] size-1 shrink-0 rounded-full bg-primary" />
               {service.name}
             </li>
           ))}

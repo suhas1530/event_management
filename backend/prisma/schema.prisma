@@ -34,10 +34,16 @@ enum BookingStatus {
 
 enum PaymentStatus {
   PENDING
+  PROCESSING
+  AUTHORIZED
   PARTIAL
   COMPLETED
   FAILED
+  CANCELLED
+  REFUND_PENDING
+  PARTIALLY_REFUNDED
   REFUNDED
+  REVIEW_REQUIRED
 }
 
 enum PaymentMethod {
@@ -150,7 +156,11 @@ enum NotificationChannel {
 model User {
   id                  String    @id @default(auto()) @map("_id") @db.ObjectId
   email               String    @unique
-  phone               String?   @unique
+  // MongoDB treats every missing value as a duplicate, so a plain @unique on an
+  // optional phone breaks databases that contain more than one phone-less user.
+  // Uniqueness is enforced by the app and by a partial unique index documented
+  // in docs/payments/razorpay.md and created by scripts/backfill-payment-fields.ts.
+  phone               String?
   passwordHash        String?
   name                String
   avatar              String?
@@ -165,17 +175,17 @@ model User {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
-  bookings              Booking[]
-  technicianBookings    TechnicianBooking[]  @relation("CustomerTechnicianBookings")
-  technicianProfile     Technician?
-  technicianReviews     TechnicianReview[]   @relation("CustomerTechnicianReviews")
-  favorites             Favorite[]
-  aiDesigns             AIDesign[]
-  notifications         Notification[]
-  messages              Message[]            @relation("UserMessages")
-  reviews               Review[]
-  addresses             Address[]
-  eventRequests         EventRequest[]
+  bookings           Booking[]
+  technicianBookings TechnicianBooking[] @relation("CustomerTechnicianBookings")
+  technicianProfile  Technician?
+  technicianReviews  TechnicianReview[]  @relation("CustomerTechnicianReviews")
+  favorites          Favorite[]
+  aiDesigns          AIDesign[]
+  notifications      Notification[]
+  messages           Message[]           @relation("UserMessages")
+  reviews            Review[]
+  addresses          Address[]
+  eventRequests      EventRequest[]
 }
 
 model Admin {
@@ -192,7 +202,7 @@ model Admin {
   updatedAt    DateTime  @updatedAt
 
   auditLogs        AuditLog[]
-  assignedBookings Booking[] @relation("AssignedBookings")
+  assignedBookings Booking[]  @relation("AssignedBookings")
 }
 
 // ─── Event models ─────────────────────────────────────────────────────────────
@@ -405,6 +415,9 @@ model Booking {
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
 
+  // Payment records already reflected in paidAmount/balanceAmount.
+  appliedPaymentIds String[] @default([])
+
   items     BookingItem[]
   payments  Payment[]
   quotes    Quote[]
@@ -419,22 +432,29 @@ model Booking {
 }
 
 model EventRequest {
-  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
-  requestNumber      String   @unique
-  customerId         String   @db.ObjectId
-  customer           User     @relation(fields: [customerId], references: [id])
-  eventType          String
-  eventDate          DateTime?
-  guestCount         Int?
-  city               String?
-  budgetLabel        String?
-  requirements       Json
-  referenceImages    String[] @default([])
-  status             String   @default("DRAFT")
-  assignedManagerId  String?  @db.ObjectId
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-  proposals          EventProposal[]
+  id                String                @id @default(auto()) @map("_id") @db.ObjectId
+  requestNumber     String                @unique
+  customerId        String                @db.ObjectId
+  customer          User                  @relation(fields: [customerId], references: [id])
+  eventType         String
+  eventDate         DateTime?
+  guestCount        Int?
+  city              String?
+  budgetLabel       String?
+  requirements      Json
+  referenceImages   String[]              @default([])
+  status            String                @default("DRAFT")
+  assignedManagerId String?               @db.ObjectId
+  // Payment state is deliberately separate from `status`. An approved
+  // proposal being paid moves this to ADVANCE_PAYMENT_RECEIVED; it never
+  // confirms the event by itself.
+  paymentStatus     PaymentStatus         @default(PENDING)
+  advancePaidAmount Float                 @default(0)
+  appliedPaymentIds String[]              @default([])
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  proposals         EventProposal[]
+  payments          EventRequestPayment[]
 
   @@index([customerId])
   @@index([status])
@@ -477,26 +497,89 @@ model BookingItem {
   @@index([bookingId])
 }
 
+model EventRequestPayment {
+  id                String        @id @default(auto()) @map("_id") @db.ObjectId
+  requestId         String        @db.ObjectId
+  request           EventRequest  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  amount            Float
+  currency          String        @default("INR")
+  method            PaymentMethod @default(RAZORPAY)
+  status            PaymentStatus @default(PENDING)
+  provider          String        @default("razorpay")
+  transactionId     String?
+  gatewayOrderId    String?
+  gatewayPaymentId  String?
+  gatewayResponse   Json?
+  idempotencyKey    String?
+  failureCode       String?
+  failureReason     String?
+  paidAt            DateTime?
+  verifiedAt        DateTime?
+  appliedAt         DateTime?
+  refundId          String?
+  refundStatus      String?
+  refundAmount      Float         @default(0)
+  refundedAt        DateTime?
+  refundRequestedAt DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([requestId])
+  @@index([gatewayOrderId])
+  @@index([gatewayPaymentId])
+  @@index([idempotencyKey])
+}
+
 model Payment {
-  id              String        @id @default(auto()) @map("_id") @db.ObjectId
-  bookingId       String        @db.ObjectId
-  booking         Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  amount          Float
-  currency        String        @default("INR")
-  method          PaymentMethod
-  status          PaymentStatus @default(PENDING)
-  transactionId   String?
-  gatewayOrderId  String?
-  gatewayResponse Json?
-  paidAt          DateTime?
-  refundedAt      DateTime?
-  refundAmount    Float         @default(0)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id                String        @id @default(auto()) @map("_id") @db.ObjectId
+  bookingId         String        @db.ObjectId
+  booking           Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amount            Float
+  currency          String        @default("INR")
+  method            PaymentMethod
+  status            PaymentStatus @default(PENDING)
+  provider          String        @default("razorpay")
+  transactionId     String?
+  gatewayOrderId    String?
+  gatewayPaymentId  String?
+  gatewayResponse   Json?
+  idempotencyKey    String?
+  failureCode       String?
+  failureReason     String?
+  paidAt            DateTime?
+  verifiedAt        DateTime?
+  appliedAt         DateTime?
+  refundId          String?
+  refundStatus      String?
+  refundedAt        DateTime?
+  refundAmount      Float         @default(0)
+  refundRequestedAt DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 
   @@index([bookingId])
   @@index([transactionId])
   @@index([gatewayOrderId])
+  @@index([gatewayPaymentId])
+  @@index([idempotencyKey])
+}
+
+model PaymentWebhookEvent {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  provider          String    @default("razorpay")
+  eventId           String    @unique
+  eventType         String
+  providerOrderId   String?
+  providerPaymentId String?
+  status            String    @default("RECEIVED")
+  error             String?
+  processedAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([providerOrderId])
+  @@index([providerPaymentId])
+  @@index([createdAt])
 }
 
 model Quote {
@@ -695,35 +778,35 @@ model AuditLog {
 // ─── Technician models ────────────────────────────────────────────────────────
 
 model Technician {
-  id                String             @id @default(auto()) @map("_id") @db.ObjectId
-  userId            String             @unique @db.ObjectId
-  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name              String
-  phone             String
-  email             String
-  avatar            String?
-  bio               String?
-  category          TechnicianCategory
-  experience        Int                @default(0)
-  rating            Float              @default(0)
-  totalReviews      Int                @default(0)
-  completedJobs     Int                @default(0)
-  isVerified        Boolean            @default(false)
-  isActive          Boolean            @default(true)
-  isAvailable       Boolean            @default(true)
-  serviceAreas      String[]           @default([])
-  skills            String[]           @default([])
-  certifications    String[]           @default([])
-  documents         String[]           @default([])
-  latitude          Float?
-  longitude         Float?
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  id             String             @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String             @unique @db.ObjectId
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  phone          String
+  email          String
+  avatar         String?
+  bio            String?
+  category       TechnicianCategory
+  experience     Int                @default(0)
+  rating         Float              @default(0)
+  totalReviews   Int                @default(0)
+  completedJobs  Int                @default(0)
+  isVerified     Boolean            @default(false)
+  isActive       Boolean            @default(true)
+  isAvailable    Boolean            @default(true)
+  serviceAreas   String[]           @default([])
+  skills         String[]           @default([])
+  certifications String[]           @default([])
+  documents      String[]           @default([])
+  latitude       Float?
+  longitude      Float?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
 
   services     TechnicianService[]
-  bookings     TechnicianBooking[]     @relation("TechnicianAssignedBookings")
+  bookings     TechnicianBooking[]      @relation("TechnicianAssignedBookings")
   availability TechnicianAvailability[]
-  reviews      TechnicianReview[]      @relation("TechnicianReviews")
+  reviews      TechnicianReview[]       @relation("TechnicianReviews")
 
   @@index([category])
   @@index([isActive, isAvailable])
@@ -805,6 +888,8 @@ model TechnicianBooking {
   balanceAmount      Float
   paymentStatus      PaymentStatus           @default(PENDING)
   paymentMethod      PaymentMethodType?
+  // Payment records already reflected in paidAmount/balanceAmount.
+  appliedPaymentIds  String[]                @default([])
   status             TechnicianBookingStatus @default(PENDING)
   customerNotes      String?
   technicianNotes    String?
@@ -844,24 +929,37 @@ model TechnicianBookingTimeline {
 }
 
 model TechnicianPayment {
-  id              String            @id @default(auto()) @map("_id") @db.ObjectId
-  bookingId       String            @db.ObjectId
-  booking         TechnicianBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  amount          Float
-  currency        String            @default("INR")
-  method          PaymentMethodType
-  status          PaymentStatus     @default(PENDING)
-  transactionId   String?
-  gatewayOrderId  String?
-  gatewayResponse Json?
-  paidAt          DateTime?
-  refundedAt      DateTime?
-  refundAmount    Float             @default(0)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  id                String            @id @default(auto()) @map("_id") @db.ObjectId
+  bookingId         String            @db.ObjectId
+  booking           TechnicianBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amount            Float
+  currency          String            @default("INR")
+  method            PaymentMethodType
+  status            PaymentStatus     @default(PENDING)
+  provider          String            @default("razorpay")
+  transactionId     String?
+  gatewayOrderId    String?
+  gatewayPaymentId  String?
+  gatewayResponse   Json?
+  idempotencyKey    String?
+  failureCode       String?
+  failureReason     String?
+  paidAt            DateTime?
+  verifiedAt        DateTime?
+  appliedAt         DateTime?
+  refundId          String?
+  refundStatus      String?
+  refundedAt        DateTime?
+  refundAmount      Float             @default(0)
+  refundRequestedAt DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
   @@index([bookingId])
   @@index([transactionId])
+  @@index([gatewayOrderId])
+  @@index([gatewayPaymentId])
+  @@index([idempotencyKey])
 }
 
 model TechnicianReview {
@@ -916,5 +1014,19 @@ model ContactMessage {
 
   @@index([status])
   @@index([topic])
+  @@index([createdAt])
+}
+
+// ─── Newsletter ───────────────────────────────────────────────────────────────
+
+model NewsletterSubscriber {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  status    String   @default("SUBSCRIBED")
+  source    String   @default("footer")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
   @@index([createdAt])
 }

@@ -29,9 +29,7 @@ const JOURNEYS: { id: Journey; label: string; steps: HomeStep[]; blurb: string }
  *
  * The two verticals run genuinely different processes (a quoted event enquiry
  * versus a slot booking), so they get separate timelines behind a switcher
- * instead of one blended list that would describe neither honestly. The active
- * timeline drives the same scroll-scrubbed progress line as before
- * (`data-progress-line` / `data-step` are consumed by `useHomeAnimations`).
+ * instead of one blended list that would describe neither honestly.
  */
 export default function HowItWorks() {
   const [journey, setJourney] = useState<Journey>('events')
@@ -41,22 +39,22 @@ export default function HowItWorks() {
   return (
     <section
       id="how"
-      className="scroll-mt-20 border-y border-hairline/60 bg-ink-900/40 px-5 py-24 sm:px-10 lg:py-32"
+      className="scroll-mt-20 border-b border-border bg-background px-5 py-20 sm:px-8 lg:py-24"
     >
       <div className="mx-auto max-w-[1380px]">
-        <div data-reveal className="mb-12 flex flex-wrap items-end justify-between gap-6">
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
           <div className="max-w-2xl">
-            <p className="mb-4 text-[10px] uppercase tracking-[0.3em] text-violet-pale">How it works</p>
-            <h2 className="font-display text-[clamp(2rem,4.5vw,3.25rem)] font-semibold tracking-[-0.02em] text-slate-50">
+            <p className="mb-4 text-[10px] uppercase tracking-[0.3em] text-gold-text">How it works</p>
+            <h2 className="font-display text-[clamp(2rem,4.5vw,3.25rem)] font-semibold tracking-[-0.02em] text-foreground">
               Two journeys, both this simple.
             </h2>
-            <p className="mt-5 text-sm leading-7 text-fg-dim">{active.blurb}</p>
+            <p className="mt-4 text-sm leading-7 text-muted-foreground">{active.blurb}</p>
           </div>
 
           <div
             role="group"
             aria-label="Choose a journey"
-            className="inline-flex border border-border bg-muted/50 p-1"
+            className="inline-flex rounded-xl border border-border bg-muted/50 p-1"
           >
             {JOURNEYS.map(item => {
               const Icon = item.id === 'events' ? CalendarHeart : Wrench
@@ -68,8 +66,10 @@ export default function HowItWorks() {
                   onClick={() => setJourney(item.id)}
                   aria-pressed={selected}
                   className={cn(
-                    'inline-flex min-h-11 items-center gap-2 px-4 py-2 text-xs font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-pale',
-                    selected ? 'bg-hept-purple text-white' : 'text-white/60 hover:text-white',
+                    'inline-flex min-h-11 items-center gap-2 rounded-lg px-4 py-2 text-xs font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    selected
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:bg-background/70 hover:text-foreground',
                   )}
                 >
                   <Icon className="size-3.5" aria-hidden="true" />
@@ -80,33 +80,32 @@ export default function HowItWorks() {
           </div>
         </div>
 
-        {/* `key` restarts the reveal/progress measurements when the timeline swaps. */}
         <div key={journey} className="relative">
-          <span aria-hidden="true" className="absolute left-[5px] top-1 h-[calc(100%-0.5rem)] w-px bg-hairline lg:hidden" />
+          <span aria-hidden="true" className="absolute left-[5px] top-1 h-[calc(100%-0.5rem)] w-px bg-border lg:hidden" />
           <span
             aria-hidden="true"
-            data-progress-line="y"
-            className="absolute left-[5px] top-1 h-[calc(100%-0.5rem)] w-px origin-top bg-gradient-to-b from-violet to-violet/30 lg:hidden"
+           
+            className="absolute left-[5px] top-1 h-[calc(100%-0.5rem)] w-px origin-top bg-gradient-to-b from-primary to-primary/30 lg:hidden"
           />
-          <span aria-hidden="true" className="absolute left-0 right-0 top-[5px] hidden h-px bg-hairline lg:block" />
+          <span aria-hidden="true" className="absolute left-0 right-0 top-[5px] hidden h-px bg-border lg:block" />
           <span
             aria-hidden="true"
-            data-progress-line="x"
-            className="absolute left-0 right-0 top-[5px] hidden h-px origin-left bg-gradient-to-r from-violet via-violet/70 to-champagne lg:block"
+           
+            className="absolute left-0 right-0 top-[5px] hidden h-px origin-left bg-gradient-to-r from-primary via-primary/70 to-gold lg:block"
           />
 
           <ol className="grid gap-10 lg:grid-cols-4 lg:gap-8">
             {steps.map(step => (
-              <li key={step.step} data-step="false" className="relative pl-8 lg:pl-0 lg:pt-10">
+              <li key={step.step} className="relative pl-8 lg:pl-0 lg:pt-10">
                 <span
                   aria-hidden="true"
-                  className="absolute left-0 top-1 flex size-[11px] items-center justify-center rounded-full border border-violet/50 bg-ink-950 lg:top-0"
+                  className="absolute left-0 top-1 flex size-[11px] items-center justify-center rounded-full border border-primary/50 bg-background lg:top-0"
                 >
-                  <span className="size-[5px] rounded-full bg-violet" />
+                  <span className="size-[5px] rounded-full bg-primary" />
                 </span>
-                <p className="font-display text-4xl font-semibold text-violet/35">{step.step}</p>
-                <h3 className="mt-3 text-lg font-medium text-slate-50">{step.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-fg-dim">{step.description}</p>
+                <p aria-hidden="true" className="font-display text-4xl font-semibold text-primary/60">{step.step}</p>
+                <h3 className="mt-3 text-lg font-medium text-foreground">{step.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{step.description}</p>
               </li>
             ))}
           </ol>

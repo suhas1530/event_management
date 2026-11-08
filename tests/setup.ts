@@ -19,9 +19,9 @@ if (!window.matchMedia) {
   })) as unknown as typeof window.matchMedia
 }
 
-if (!window.scrollTo) {
-  window.scrollTo = vi.fn() as unknown as typeof window.scrollTo
-}
+// jsdom defines scrollTo but throws "Not implemented"; the components use it
+// only for a smooth scroll, so a no-op is the correct test double.
+window.scrollTo = vi.fn() as unknown as typeof window.scrollTo
 
 afterEach(() => {
   cleanup()

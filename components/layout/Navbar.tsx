@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { AnimatePresence, motion } from 'framer-motion'
 import {
   Bell,
   ChevronDown,
@@ -135,6 +134,12 @@ export default function Navbar({ transparentAtTop = false }: NavbarProps) {
 
   const isSolid = scrolled || !transparentAtTop
 
+  /** Over a full-bleed photo the chrome is white in both themes. */
+  const quietLink = isSolid
+    ? 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+    : 'text-white/75 hover:bg-white/10 hover:text-white'
+  const activeLink = isSolid ? 'text-primary' : 'text-white'
+
   const isActive = (href: string) => {
     const base = href.split('?')[0].split('#')[0]
     if (base === '/') return pathname === '/'
@@ -156,16 +161,25 @@ export default function Navbar({ transparentAtTop = false }: NavbarProps) {
       <header
         className={cn(
           'fixed inset-x-0 top-0 z-[var(--z-fixed)] transition-all duration-300 ease-out',
-          // While transparent it sits on the statically-dark hero, so its own
-          // tokens must resolve to the immersive dark palette in both themes.
-          !isSolid && 'immersive',
           isSolid
             ? 'border-b border-border bg-background/85 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70'
             : 'border-b border-transparent bg-transparent'
         )}
       >
-        <div className="mx-auto flex h-16 w-full max-w-[1380px] items-center justify-between gap-3 px-5 sm:px-6 sm:h-[72px] lg:px-6 xl:px-10">
-          <Logo size="sm" tone="dark" />
+        {/* A transparent header sits on photography, whose brightness changes
+            from slide to slide. This scrim guarantees the white chrome keeps
+            its contrast without turning the header into an opaque bar. */}
+        {transparentAtTop && (
+          <div
+            aria-hidden="true"
+            className={cn(
+              'pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/90 via-black/65 to-transparent transition-opacity duration-300',
+              isSolid ? 'opacity-0' : 'opacity-100',
+            )}
+          />
+        )}
+        <div className="relative z-10 mx-auto flex h-16 w-full max-w-[1380px] items-center justify-between gap-3 px-5 sm:px-6 sm:h-[72px] lg:px-6 xl:px-10">
+          <Logo size="sm" tone={isSolid ? 'auto' : 'dark'} />
 
           {/* Desktop nav */}
           <nav className="hidden lg:block" aria-label="Main">
@@ -185,7 +199,7 @@ export default function Navbar({ transparentAtTop = false }: NavbarProps) {
                       aria-haspopup="menu"
                       className={cn(
                         'inline-flex items-center gap-1 whitespace-nowrap rounded-lg px-2.5 py-2 text-[0.8125rem] font-medium transition-colors duration-200 ease-out outline-none focus-visible:ring-2 focus-visible:ring-ring xl:px-3.5',
-                        isItemActive(item) ? 'text-primary' : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+                        isItemActive(item) ? activeLink : quietLink
                       )}
                     >
                       {item.label}
@@ -195,34 +209,28 @@ export default function Navbar({ transparentAtTop = false }: NavbarProps) {
                       />
                     </button>
 
-                    <AnimatePresence>
-                      {openMenu === item.label && (
-                        <motion.div
-                          role="menu"
-                          initial={{ opacity: 0, y: -6 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -6 }}
-                          transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
-                          className="absolute left-0 top-full z-[var(--z-popover)] mt-2 w-72 overflow-hidden rounded-xl border border-border bg-popover p-1.5 shadow-2xl"
-                        >
-                          {item.children.map(child => (
-                            <Link
-                              key={child.href}
-                              href={child.href}
-                              role="menuitem"
-                              className="flex flex-col gap-0.5 rounded-lg px-3 py-2.5 transition-colors duration-150 hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none"
-                            >
-                              <span className="text-sm text-foreground/90">{child.label}</span>
-                              <span className="text-xs text-muted-foreground">
-                                {child.href === '/become-a-professional'
-                                  ? 'Join as a vetted home-service professional'
-                                  : 'List and run events with Heptome'}
-                              </span>
-                            </Link>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    {openMenu === item.label && (
+                      <div
+                        role="menu"
+                        className="animate-fade-in absolute left-0 top-full z-[var(--z-popover)] mt-2 w-72 overflow-hidden rounded-xl border border-border bg-popover p-1.5 shadow-2xl"
+                      >
+                        {item.children.map(child => (
+                          <Link
+                            key={child.href}
+                            href={child.href}
+                            role="menuitem"
+                            className="flex flex-col gap-0.5 rounded-lg px-3 py-2.5 transition-colors duration-150 hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none"
+                          >
+                            <span className="text-sm text-foreground/90">{child.label}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {child.href === '/become-a-professional'
+                                ? 'Join as a vetted home-service professional'
+                                : 'List and run events with Heptome'}
+                            </span>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
                   </li>
                 ) : (
                   <li key={item.href}>
@@ -231,7 +239,7 @@ export default function Navbar({ transparentAtTop = false }: NavbarProps) {
                       aria-current={isActive(item.href) ? 'page' : undefined}
                       className={cn(
                         'relative inline-flex items-center whitespace-nowrap rounded-lg px-2.5 py-2 text-[0.8125rem] font-medium transition-colors duration-200 ease-out outline-none focus-visible:ring-2 focus-visible:ring-ring xl:px-3.5',
-                        isActive(item.href) ? 'text-primary' : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+                        isActive(item.href) ? activeLink : quietLink
                       )}
                     >
                       {item.label}
@@ -248,12 +256,15 @@ export default function Navbar({ transparentAtTop = false }: NavbarProps) {
             <LocationSelector className="hidden xl:block" />
 
             {/* Theme switcher — visible at every breakpoint that shows actions. */}
-            <ThemeToggle />
+            <ThemeToggle className={isSolid ? undefined : 'text-white/75 hover:bg-white/10 hover:text-white'} />
 
             {isAuthenticated && (
               <Link
                 href="/notifications"
-                className="relative rounded-lg p-2 text-muted-foreground transition-colors duration-200 hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className={cn(
+                  'relative rounded-lg p-2 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  isSolid ? 'text-muted-foreground hover:bg-muted/60 hover:text-foreground' : 'text-white/75 hover:bg-white/10 hover:text-white',
+                )}
                 aria-label={unread > 0 ? `Notifications, ${unread} unread` : 'Notifications'}
               >
                 <Bell className="size-[18px]" aria-hidden="true" />
@@ -280,60 +291,57 @@ export default function Navbar({ transparentAtTop = false }: NavbarProps) {
                   <span className="max-w-[7rem] truncate">{user?.name?.split(' ')[0]}</span>
                 </button>
 
-                <AnimatePresence>
-                  {profileOpen && (
-                    <motion.div
-                      role="menu"
-                      initial={{ opacity: 0, y: -6, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -6, scale: 0.98 }}
-                      transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-                      className="absolute right-0 top-full z-[var(--z-popover)] mt-2 w-64 overflow-hidden rounded-xl border border-border bg-popover shadow-2xl"
-                    >
-                      <div className="border-b border-border-subtle px-4 py-3">
-                        <p className="truncate text-sm font-medium text-foreground">{user?.name}</p>
-                        <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
-                      </div>
-                      <div className="p-1.5">
-                        {ACCOUNT_LINKS.map(({ href, label, icon: Icon }) => (
-                          <Link
-                            key={href}
-                            href={href}
-                            role="menuitem"
-                            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground/90 transition-colors duration-150 hover:bg-muted/60 hover:text-foreground focus-visible:bg-muted/60 focus-visible:text-foreground focus-visible:outline-none"
-                          >
-                            <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                            {label}
-                          </Link>
-                        ))}
-                      </div>
-                      <Separator />
-                      <div className="p-1.5">
-                        <button
-                          type="button"
+                {profileOpen && (
+                  <div
+                    role="menu"
+                    className="animate-fade-in absolute right-0 top-full z-[var(--z-popover)] mt-2 w-64 overflow-hidden rounded-xl border border-border bg-popover shadow-2xl"
+                  >
+                    <div className="border-b border-border-subtle px-4 py-3">
+                      <p className="truncate text-sm font-medium text-foreground">{user?.name}</p>
+                      <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
+                    </div>
+                    <div className="p-1.5">
+                      {ACCOUNT_LINKS.map(({ href, label, icon: Icon }) => (
+                        <Link
+                          key={href}
+                          href={href}
                           role="menuitem"
-                          onClick={() => void logout()}
-                          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-destructive transition-colors duration-150 hover:bg-destructive/10 focus-visible:bg-destructive/10 focus-visible:outline-none"
+                          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground/90 transition-colors duration-150 hover:bg-muted/60 hover:text-foreground focus-visible:bg-muted/60 focus-visible:text-foreground focus-visible:outline-none"
                         >
-                          <LogOut className="size-4 shrink-0" aria-hidden="true" />
-                          Sign out
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                          <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                          {label}
+                        </Link>
+                      ))}
+                    </div>
+                    <Separator />
+                    <div className="p-1.5">
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => void logout()}
+                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-destructive transition-colors duration-150 hover:bg-destructive/10 focus-visible:bg-destructive/10 focus-visible:outline-none"
+                      >
+                        <LogOut className="size-4 shrink-0" aria-hidden="true" />
+                        Sign out
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <>
                 <Link
                   href="/login"
-                  className="rounded-lg px-2.5 py-2.5 text-[0.8125rem] font-medium text-foreground/90 transition-colors duration-200 hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className={cn(
+                    'rounded-lg px-2.5 py-2.5 text-[0.8125rem] font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    isSolid ? 'text-foreground/90 hover:bg-muted/60 hover:text-foreground' : 'text-white/80 hover:bg-white/10 hover:text-white',
+                  )}
                 >
                   Log in
                 </Link>
                 <Link
                   href={verticals.home.planHref}
-                  className="inline-flex items-center gap-2 whitespace-nowrap rounded-lg bg-primary px-4 py-2.5 text-[0.8125rem] font-semibold text-primary-foreground transition-all duration-200 ease-out hover:-translate-y-px hover:bg-primary-hover hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b0b0d]"
+                  className="inline-flex items-center gap-2 whitespace-nowrap rounded-lg bg-primary px-4 py-2.5 text-[0.8125rem] font-semibold text-primary-foreground transition-all duration-200 ease-out hover:-translate-y-px hover:bg-primary-hover hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   <Wrench className="size-3.5" aria-hidden="true" />
                   Book a Home Service
@@ -349,7 +357,10 @@ export default function Navbar({ transparentAtTop = false }: NavbarProps) {
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
             aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-            className="-mr-1 rounded-lg p-2 text-foreground/90 transition-colors duration-200 hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+            className={cn(
+              '-mr-1 rounded-lg p-2 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden',
+              isSolid ? 'text-foreground/90 hover:bg-muted/60 hover:text-foreground' : 'text-white hover:bg-white/10',
+            )}
           >
             {mobileOpen ? <X className="size-6" aria-hidden="true" /> : <Menu className="size-6" aria-hidden="true" />}
           </button>
@@ -357,48 +368,37 @@ export default function Navbar({ transparentAtTop = false }: NavbarProps) {
       </header>
 
       {/* Mobile drawer */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <>
-            <motion.div
-              className="fixed inset-0 z-[var(--z-dropdown)] bg-black/65 backdrop-blur-sm lg:hidden"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setMobileOpen(false)}
-              aria-hidden="true"
-            />
-            <motion.nav
-              id="mobile-nav"
-              aria-label="Mobile"
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 320 }}
-              className="fixed inset-y-0 right-0 z-[var(--z-modal)] flex w-full max-w-sm flex-col border-l border-border bg-card shadow-2xl lg:hidden"
-            >
-              <div className="flex h-16 shrink-0 items-center justify-between border-b border-border-subtle px-5 sm:h-[72px]">
-                <Logo size="sm" tone="dark" />
-                <button
-                  type="button"
-                  onClick={() => setMobileOpen(false)}
-                  aria-label="Close menu"
-                  className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <X className="size-5" aria-hidden="true" />
-                </button>
-              </div>
+      {mobileOpen && (
+        <>
+          <div
+            className="animate-fade-in fixed inset-0 z-[var(--z-dropdown)] bg-black/65 backdrop-blur-sm lg:hidden"
+            onClick={() => setMobileOpen(false)}
+            aria-hidden="true"
+          />
+          <div
+            id="mobile-nav"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile menu"
+            className="animate-drawer-in fixed inset-y-0 right-0 z-[var(--z-modal)] flex w-full max-w-sm flex-col border-l border-border bg-card shadow-2xl lg:hidden"
+          >
+            <div className="flex h-16 shrink-0 items-center justify-between border-b border-border-subtle px-5 sm:h-[72px]">
+              <Logo size="sm" />
+              <button
+                type="button"
+                onClick={() => setMobileOpen(false)}
+                aria-label="Close menu"
+                className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <X className="size-5" aria-hidden="true" />
+              </button>
+            </div>
 
+            <nav aria-label="Mobile" className="flex min-h-0 flex-1 flex-col">
               <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-5">
                 {/* Where the customer is — stated up-front so home-service
                     coverage is never a surprise mid-booking. */}
-                <LocationList
-                  location={location}
-                  onSelect={setLocation}
-                  tone="dark"
-                  variant="flat"
-                />
+                <LocationList location={location} onSelect={setLocation} variant="flat" />
 
                 <Separator className="my-5" />
 
@@ -410,14 +410,14 @@ export default function Navbar({ transparentAtTop = false }: NavbarProps) {
                         aria-current={isActive(link.href) ? 'page' : undefined}
                         className={cn(
                           'block rounded-lg px-4 py-3 transition-colors duration-200',
-                          isActive(link.href) ? 'bg-primary/10 text-accent' : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+                          isActive(link.href) ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
                         )}
                       >
                         <span className="flex items-center gap-2 text-[0.9375rem] font-medium">
                           {link.href === '/' && <Home className="size-4" aria-hidden="true" />}
                           {link.label}
                         </span>
-                        {link.hint && <span className="mt-0.5 block text-xs leading-5 text-muted-foreground/80">{link.hint}</span>}
+                        {link.hint && <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">{link.hint}</span>}
                       </Link>
                     </li>
                   ))}
@@ -426,7 +426,7 @@ export default function Navbar({ transparentAtTop = false }: NavbarProps) {
                 {isAuthenticated && (
                   <>
                     <Separator className="my-5" />
-                    <p className="mb-2 px-4 text-label text-muted-foreground/80">Your account</p>
+                    <p className="mb-2 px-4 text-label text-muted-foreground">Your account</p>
                     <ul className="space-y-1" role="list">
                       {ACCOUNT_LINKS.map(({ href, label, icon: Icon }) => (
                         <li key={href}>
@@ -497,14 +497,14 @@ export default function Navbar({ transparentAtTop = false }: NavbarProps) {
                     </Link>
                   </div>
                 )}
-                <p className="mt-3 text-center text-xs text-muted-foreground/80">
+                <p className="mt-3 text-center text-xs text-muted-foreground">
                   {siteConfig.coverage.city} · doorstep services
                 </p>
               </div>
-            </motion.nav>
-          </>
-        )}
-      </AnimatePresence>
+            </nav>
+          </div>
+        </>
+      )}
     </>
   )
 }

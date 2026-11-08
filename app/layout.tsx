@@ -10,6 +10,7 @@ const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
   variable: '--font-cormorant',
   weight: ['300', '400', '500', '600', '700'],
+  preload: false,
 })
 const inter = Inter({
   subsets: ['latin'],
@@ -20,6 +21,7 @@ const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   variable: '--font-space',
   weight: ['400', '500', '600', '700'],
+  preload: false,
 })
 
 export const metadata: Metadata = {
@@ -56,21 +58,27 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#17151D',
+  colorScheme: 'light dark',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f8f5ef' },
+    { media: '(prefers-color-scheme: dark)', color: '#101613' },
+  ],
 }
 
-/** Runs before first paint: applies the stored theme (or dark default).
- *  The key is inlined because the provider is a client module and its
- *  constant cannot be referenced as a value from a server component. */
-const themeBootstrap = `(function(){try{var t=localStorage.getItem('heptome-theme');if(t!=='light'&&t!=='dark'){t='dark';}var r=document.documentElement;r.classList.toggle('dark',t==='dark');r.dataset.theme=t;}catch(e){}})();`
+/** Runs before first paint: stored choice first, otherwise the OS preference.
+ *  `system` is a real persisted mode, so the inline script resolves it against
+ *  `prefers-color-scheme` and records both the resolved theme and the mode.
+ *  The key is inlined because the provider is a client module and its constant
+ *  cannot be referenced as a value from a server component. */
+const themeBootstrap = `(function(){var stored=null;try{stored=localStorage.getItem('heptome-theme');}catch(e){}var mode=stored==='light'||stored==='dark'||stored==='system'?stored:'system';var dark=mode==='dark';if(mode==='system'){try{dark=!!(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);}catch(e){dark=false;}}var r=document.documentElement;r.classList.toggle('dark',dark);r.dataset.theme=dark?'dark':'light';r.dataset.themeMode=mode;})();`
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning data-scroll-behavior="smooth">
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>
-      <body className={`${cormorant.variable} ${inter.variable} ${spaceGrotesk.variable} antialiased`}>
+      <body className={`${cormorant.variable} ${inter.variable} ${spaceGrotesk.variable} bg-background text-foreground antialiased`}>
         <Providers>
           {children}
         </Providers>

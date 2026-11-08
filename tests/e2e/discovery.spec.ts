@@ -57,11 +57,18 @@ test.describe('home services landing', () => {
      * rather than a wizard that cannot be completed. If services are seeded
      * later, the bookable branch takes over — the spec reads whichever is true
      * and asserts that *a* real action exists, with no fabricated ₹ price.
+     *
+     * Prices are fetched after the cards render, so wait for the catalogue to
+     * settle instead of sampling the first paint.
      */
-    const openingSoon = await page.getByText('Booking opening soon').count()
-    const prices = await page.getByText(/^From$/).count()
-
-    expect(openingSoon + prices).toBeGreaterThan(0)
+    await expect
+      .poll(
+        async () =>
+          (await page.getByText('Booking opening soon').count()) +
+          (await page.getByText(/^From$/).count()),
+        { timeout: 20_000 },
+      )
+      .toBeGreaterThan(0)
 
     for (let index = 0; index < cardCount; index++) {
       const card = cards.nth(index)
@@ -143,16 +150,9 @@ test.describe('venues', () => {
 
     await clickUntil(planLink, () => expect(page).toHaveURL(/\/plan-event\?venueName=/, { timeout: 3_000 }))
 
-    // The wizard must remember the venue rather than asking for it again.
-    const wedding = page.getByRole('button', { name: 'Wedding' })
+    // The brief is one screen now, so the venue answers must already be there.
+    const wedding = page.locator('#event-type').getByRole('button', { name: 'Wedding' })
     await clickUntil(wedding, () => expect(wedding).toHaveAttribute('aria-pressed', 'true', { timeout: 3_000 }))
-    await clickUntil(page.getByRole('button', { name: /Continue/ }), () =>
-      expect(page.getByText('Step 2 of 8')).toBeVisible({ timeout: 3_000 })
-    )
-    await clickUntil(page.getByRole('button', { name: /Continue/ }), () =>
-      expect(page.getByText('Step 3 of 8')).toBeVisible({ timeout: 3_000 })
-    )
-    await expect(page.getByRole('heading', { name: 'Where will it happen?' })).toBeVisible()
-    await expect(page.getByLabel('Venue name')).not.toHaveValue('')
+    await expect(page.getByLabel('Venue name *')).not.toHaveValue('')
   })
 })

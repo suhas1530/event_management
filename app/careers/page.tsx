@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: 'Careers',
   description:
     'Join Heptome as a technician, event planner or platform engineer. Work on real problems with real customers.',
+  alternates: { canonical: '/careers' },
 }
 
 const ROLES = [
@@ -107,7 +108,7 @@ export default function CareersPage() {
             secondaryAction={{ label: 'Explore the platform', href: '/services' }}
           />
         </div>
-        <p className="mt-8 text-center text-sm text-muted-foreground/80">
+        <p className="mt-8 text-center text-sm text-muted-foreground">
           Prefer email?{' '}
           <a
             href={`mailto:${siteConfig.contact.email}`}

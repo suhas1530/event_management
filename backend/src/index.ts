@@ -1,9 +1,11 @@
 import app from './app';
-import { config } from './config';
+import { config, validatePaymentConfig } from './config';
 import prisma from './utils/database';
 
 async function startServer() {
   try {
+    validatePaymentConfig();
+
     // Connect to database
     await prisma.$connect();
     console.log('✅ Database connected successfully');

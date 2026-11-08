@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: 'Become a Professional',
   description:
     'Join Heptome as a home-services professional in Bengaluru — cleaning crews, electricians, plumbers, carpenters, appliance technicians, CCTV and computer technicians.',
+  alternates: { canonical: '/become-a-professional' },
 }
 
 const ROLES: string[] = [
@@ -66,8 +67,8 @@ export default function BecomeAProfessionalPage() {
       <section className="surface-ivory px-5 py-14 sm:px-10 lg:py-20">
         <div className="mx-auto grid max-w-[1380px] gap-12 lg:grid-cols-[minmax(0,1fr)_560px]">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.3em] text-accent">For professionals</p>
-            <h1 className="mt-4 font-display text-[clamp(2.25rem,4.8vw,3.5rem)] font-semibold leading-[1.06] tracking-[-0.02em] text-hept-charcoal">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-gold-text">For professionals</p>
+            <h1 className="mt-4 font-display text-[clamp(2.25rem,4.8vw,3.5rem)] font-semibold leading-[1.06] tracking-[-0.02em] text-foreground">
               Work with Heptome.
             </h1>
             <p className="surface-ivory-muted mt-5 max-w-xl text-base leading-7">
@@ -80,17 +81,17 @@ export default function BecomeAProfessionalPage() {
                 const Icon = item.icon
                 return (
                   <li key={item.title} className="panel-ivory p-5">
-                    <Icon className="size-5 text-accent" aria-hidden="true" />
-                    <h2 className="mt-3 text-sm font-semibold text-hept-charcoal">{item.title}</h2>
+                    <Icon className="size-5 text-primary" aria-hidden="true" />
+                    <h2 className="mt-3 text-sm font-semibold text-foreground">{item.title}</h2>
                     <p className="surface-ivory-muted mt-1.5 text-sm leading-6">{item.body}</p>
                   </li>
                 )
               })}
             </ul>
 
-            <div className="mt-10 border-t border-hept-line pt-8">
-              <h2 className="flex items-center gap-2 text-sm font-semibold text-hept-charcoal">
-                <Wrench className="size-4 text-accent" aria-hidden="true" />
+            <div className="mt-10 border-t border-border pt-8">
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <Wrench className="size-4 text-primary" aria-hidden="true" />
                 Service lines we are recruiting for
               </h2>
               <ul className="mt-4 flex flex-wrap gap-2">
@@ -109,11 +110,11 @@ export default function BecomeAProfessionalPage() {
 
             <p className="surface-ivory-muted mt-8 text-sm leading-6">
               Questions first?{' '}
-              <Link href="/contact" className="font-medium text-accent underline underline-offset-2">
+              <Link href="/contact" className="font-medium text-gold-text underline underline-offset-2">
                 Contact the team
               </Link>{' '}
               or read{' '}
-              <Link href="/help#faqs" className="font-medium text-accent underline underline-offset-2">
+              <Link href="/help#faqs" className="font-medium text-gold-text underline underline-offset-2">
                 how Heptome works
               </Link>
               .

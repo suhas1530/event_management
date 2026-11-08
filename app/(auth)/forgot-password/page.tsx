@@ -30,7 +30,7 @@ export default function ForgotPasswordPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-6">
       <div className="w-full max-w-[380px]">
-        <Logo size="md" tone="dark" className="mb-10" />
+        <Logo size="md" tone="auto" className="mb-10" />
 
         {sent ? (
           <div className="text-center">
@@ -53,13 +53,13 @@ export default function ForgotPasswordPage() {
               Enter your email and we'll send you a reset link.
             </p>
 
-            {error && <div className="mb-4 border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</div>}
+            {error && <div className="mb-4 border border-destructive/30 bg-destructive-muted px-4 py-3 text-sm text-destructive">{error}</div>}
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <div className="flex flex-col gap-2">
                 <label htmlFor="reset-email" className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Email address</label>
                 <input id="reset-email" type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@example.com"
-                  className="border border-border bg-muted/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/80 focus:border-ring focus:outline-none" />
+                  className="border border-border bg-muted/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none" />
               </div>
               <button type="submit" disabled={loading}
                 className="group flex items-center justify-center gap-3 bg-primary py-3.5 text-[10px] uppercase tracking-[0.2em] text-primary-foreground transition hover:bg-primary-hover disabled:opacity-50">

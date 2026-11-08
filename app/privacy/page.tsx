@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: 'Privacy Policy',
   description:
     'How Heptome collects, uses, stores and protects your personal data — account details, bookings, event requirements and payment records.',
+  alternates: { canonical: '/privacy' },
 }
 
 export default function PrivacyPage() {

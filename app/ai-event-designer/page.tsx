@@ -140,7 +140,7 @@ function AIEventDesignerResults() {
               <RotateCcw className="size-3" aria-hidden="true" /> New design
             </button>
             <button type="button" onClick={handleSave} disabled={saving || saved}
-              className={`flex items-center gap-1.5 border px-4 py-2 text-[10px] uppercase tracking-[0.18em] transition ${saved ? 'border-green-400 text-green-400' : 'border-[#d5ae79] text-[#d5ae79] hover:bg-[#d5ae79] hover:text-[#17151d]'}`}>
+              className={`flex items-center gap-1.5 border px-4 py-2 text-[10px] uppercase tracking-[0.18em] transition ${saved ? 'border-success text-success' : 'border-gold text-gold-text hover:bg-gold hover:text-gold-foreground'}`}>
               {saved ? <><Check className="size-3" aria-hidden="true" /> Saved</> : saving ? 'Saving…' : <><Save className="size-3" aria-hidden="true" /> Save</>}
             </button>
           </div>
@@ -149,9 +149,9 @@ function AIEventDesignerResults() {
 
       {/* ── INPUT PHASE ── */}
       {phase === 'input' && (
-        <main className="mx-auto max-w-3xl px-5 py-16">
+        <div className="mx-auto max-w-3xl px-5 py-16">
           <div className="text-center mb-12">
-            <div className="mx-auto mb-6 flex size-16 items-center justify-center border border-[#d5ae79]/30 bg-[#d5ae79]/10">
+            <div className="mx-auto mb-6 flex size-16 items-center justify-center border border-gold/30 bg-gold/10">
               <Sparkles className="size-7 text-gold-text" />
             </div>
             <p className="mb-3 text-[10px] uppercase tracking-[0.3em] text-gold-text">AI event designer</p>
@@ -164,6 +164,19 @@ function AIEventDesignerResults() {
             </p>
           </div>
 
+          <Link
+            href="/event-design-assistant"
+            className="mb-6 flex flex-wrap items-center justify-between gap-3 border border-gold/25 bg-gold/5 px-4 py-3 text-sm text-muted-foreground transition hover:border-gold/50"
+          >
+            <span className="flex items-start gap-2">
+              <Sparkles className="mt-0.5 size-4 shrink-0 text-gold-text" aria-hidden="true" />
+              Prefer a guided start? Explore three personalised design directions with images and real catalog services.
+            </span>
+            <span className="flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-gold-text">
+              Open the design assistant <ArrowRight className="size-3.5" aria-hidden="true" />
+            </span>
+          </Link>
+
           <div className="border border-border bg-card p-6">
             <textarea
               ref={textareaRef}
@@ -172,13 +185,13 @@ function AIEventDesignerResults() {
               onKeyDown={e => { if (e.key === 'Enter' && e.ctrlKey) handleGenerate() }}
               placeholder="e.g. I want a luxury black and gold birthday party for 40 guests with a ₹1,00,000 budget. Include decoration, photography, cake, and DJ. Outdoor venue in Mumbai."
               rows={5}
-              className="w-full bg-transparent text-sm leading-7 text-foreground placeholder:text-muted-foreground/80 focus:outline-none resize-none"
+              className="w-full bg-transparent text-sm leading-7 text-foreground placeholder:text-muted-foreground focus:outline-none resize-none"
               aria-label="Describe your event"
             />
             <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
-              <p className="text-[10px] text-muted-foreground/80">Ctrl+Enter to generate</p>
+              <p className="text-[10px] text-muted-foreground">Ctrl+Enter to generate</p>
               <button type="button" onClick={handleGenerate} disabled={!prompt.trim()}
-                className="group flex items-center gap-2 bg-[#d5ae79] px-6 py-3 text-[10px] uppercase tracking-[0.2em] text-[#17151d] transition hover:bg-[#e8cfa9] disabled:opacity-40">
+                className="group flex items-center gap-2 bg-gold px-6 py-3 text-[10px] uppercase tracking-[0.2em] text-gold-foreground transition hover:bg-gold-soft disabled:opacity-40">
                 <Sparkles className="size-4" /> Generate design <ArrowRight className="size-3.5 transition group-hover:translate-x-1" />
               </button>
             </div>
@@ -186,34 +199,34 @@ function AIEventDesignerResults() {
 
           {/* Quick prompts */}
           <div className="mt-8">
-            <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground/80">Try these</p>
+            <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Try these</p>
             <div className="flex flex-col gap-2">
               {QUICK_PROMPTS.map((p, i) => (
                 <button type="button" key={i} onClick={() => setPrompt(p)}
-                  className="border border-border-subtle bg-muted/60 px-4 py-3 text-left text-sm text-muted-foreground transition hover:border-[#d5ae79]/30 hover:text-foreground/90">
+                  className="border border-border-subtle bg-muted/60 px-4 py-3 text-left text-sm text-muted-foreground transition hover:border-gold/30 hover:text-foreground/90">
                   {p}
                 </button>
               ))}
             </div>
           </div>
-        </main>
+        </div>
       )}
 
       {/* ── GENERATING PHASE ── */}
       {phase === 'generating' && (
-        <main className="flex min-h-[80vh] flex-col items-center justify-center px-5">
+        <div className="flex min-h-[80vh] flex-col items-center justify-center px-5">
           <Loader2 className="mb-6 size-12 animate-spin text-gold-text" />
           <p className="font-serif text-3xl text-foreground">Designing your event…</p>
           <p className="mt-3 text-sm text-muted-foreground">Our AI is crafting a complete concept just for you</p>
           <div className="mt-8 max-w-sm text-center">
-            <p className="text-xs italic text-muted-foreground/80">&ldquo;{prompt.slice(0, 120)}{prompt.length > 120 ? '…' : ''}&rdquo;</p>
+            <p className="text-xs italic text-muted-foreground">&ldquo;{prompt.slice(0, 120)}{prompt.length > 120 ? '…' : ''}&rdquo;</p>
           </div>
-        </main>
+        </div>
       )}
 
       {/* ── RESULT PHASE ── */}
       {phase === 'result' && design && (
-        <main className="mx-auto max-w-6xl px-5 py-10 lg:px-10">
+        <div className="mx-auto max-w-6xl px-5 py-10 lg:px-10">
           {/* Header */}
           <div className="mb-10 flex flex-wrap items-start justify-between gap-6">
             <div>
@@ -228,11 +241,11 @@ function AIEventDesignerResults() {
             </div>
             <div className="flex flex-wrap gap-3">
               <button type="button" onClick={handleBookDesign}
-                className="flex items-center gap-2 bg-[#d5ae79] px-6 py-3 text-[10px] uppercase tracking-[0.2em] text-[#17151d] hover:bg-[#e8cfa9]">
+                className="flex items-center gap-2 bg-gold px-6 py-3 text-[10px] uppercase tracking-[0.2em] text-gold-foreground hover:bg-gold-soft">
                 <BookOpen className="size-4" /> Book this design
               </button>
               <button type="button" onClick={handleSave} disabled={saving || saved}
-                className={`flex items-center gap-2 border px-5 py-3 text-[10px] uppercase tracking-[0.18em] transition ${saved ? 'border-green-400 text-green-400' : 'border-[#d5ae79] text-[#d5ae79] hover:bg-[#d5ae79]/10'}`}>
+                className={`flex items-center gap-2 border px-5 py-3 text-[10px] uppercase tracking-[0.18em] transition ${saved ? 'border-success text-success' : 'border-gold text-gold-text hover:bg-gold/10'}`}>
                 {saved ? <><Check className="size-3" /> Saved</> : <><Save className="size-3" /> {saving ? 'Saving…' : 'Save design'}</>}
               </button>
             </div>
@@ -249,7 +262,7 @@ function AIEventDesignerResults() {
                       <div key={i} className="flex flex-col items-center gap-2">
                         <div className="size-14 border border-border shadow-lg" style={{ background: c.hex }} />
                         <p className="text-[9px] uppercase tracking-[0.1em] text-muted-foreground">{c.name}</p>
-                        <p className="text-[9px] text-muted-foreground/80">{c.hex}</p>
+                        <p className="text-[9px] text-muted-foreground">{c.hex}</p>
                       </div>
                     ))}
                   </div>
@@ -262,7 +275,7 @@ function AIEventDesignerResults() {
                   <ul className="grid gap-2 sm:grid-cols-2">
                     {decor.map((d, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-foreground/90">
-                        <span className="mt-1 size-1.5 flex-shrink-0 rounded-full bg-[#d5ae79]" />{d}
+                        <span className="mt-1 size-1.5 flex-shrink-0 rounded-full bg-gold" />{d}
                       </li>
                     ))}
                   </ul>
@@ -273,7 +286,7 @@ function AIEventDesignerResults() {
               {food.length > 0 && (
                 <Card title="Food & beverages">
                   <ul className="grid gap-2 sm:grid-cols-2">
-                    {food.map((f, i) => <li key={i} className="flex items-start gap-2 text-sm text-white/70"><span className="mt-1 size-1.5 flex-shrink-0 rounded-full bg-[#d5ae79]" />{f}</li>)}
+                    {food.map((f, i) => <li key={i} className="flex items-start gap-2 text-sm text-foreground/80"><span className="mt-1 size-1.5 flex-shrink-0 rounded-full bg-gold" />{f}</li>)}
                   </ul>
                 </Card>
               )}
@@ -341,10 +354,10 @@ function AIEventDesignerResults() {
                 <button type="button" onClick={() => setShowBudget(!showBudget)}
                   className="flex w-full items-center justify-between">
                   <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Estimated cost</p>
-                  {showBudget ? <ChevronUp className="size-4 text-muted-foreground/80" /> : <ChevronDown className="size-4 text-muted-foreground/80" />}
+                  {showBudget ? <ChevronUp className="size-4 text-muted-foreground" /> : <ChevronDown className="size-4 text-muted-foreground" />}
                 </button>
                 <p className="mt-2 font-serif text-4xl text-gold-text">{formatCurrency(design.estimatedCost)}</p>
-                <p className="text-xs text-muted-foreground/80">Indicative estimate</p>
+                <p className="text-xs text-muted-foreground">Indicative estimate</p>
 
                 {showBudget && Object.keys(budgetBreakdown).length > 0 && (
                   <div className="mt-4 space-y-2 border-t border-border pt-4">
@@ -364,7 +377,7 @@ function AIEventDesignerResults() {
                   <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Included services</p>
                   <div className="flex flex-wrap gap-2">
                     {design.services.map((s, i) => (
-                      <span key={i} className="bg-[#d5ae79]/10 px-2 py-1 text-[10px] text-[#d5ae79]">{s}</span>
+                      <span key={i} className="bg-gold/10 px-2 py-1 text-[10px] text-gold-text">{s}</span>
                     ))}
                   </div>
                 </div>
@@ -376,7 +389,7 @@ function AIEventDesignerResults() {
                 <div className="mb-3 flex flex-wrap gap-1.5">
                   {REFINE_SUGGESTIONS.slice(0, 6).map((s, i) => (
                     <button type="button" key={i} onClick={() => setRefineInput(s)}
-                      className="border border-border px-2.5 py-1 text-[9px] text-muted-foreground transition hover:border-[#d5ae79]/40 hover:text-gold-text">
+                      className="border border-border px-2.5 py-1 text-[9px] text-muted-foreground transition hover:border-gold/40 hover:text-gold-text">
                       {s}
                     </button>
                   ))}
@@ -385,9 +398,9 @@ function AIEventDesignerResults() {
                   <input value={refineInput} onChange={e => setRefineInput(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleRefine()}
                     placeholder="E.g. reduce budget by 20%…"
-                    className="flex-1 border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/80 focus:border-[#d5ae79] focus:outline-none" />
+                    className="flex-1 border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-gold focus:outline-none" />
                   <button type="button" onClick={handleRefine} disabled={loading || !refineInput.trim()}
-                    className="flex items-center gap-1 border border-[#d5ae79] px-3 py-2.5 text-[#d5ae79] hover:bg-[#d5ae79] hover:text-[#17151d] disabled:opacity-40">
+                    className="flex items-center gap-1 border border-gold px-3 py-2.5 text-gold-text hover:bg-gold hover:text-gold-foreground disabled:opacity-40">
                     {loading ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
                   </button>
                 </div>
@@ -395,12 +408,12 @@ function AIEventDesignerResults() {
 
               {/* CTA */}
               <button type="button" onClick={handleBookDesign}
-                className="w-full bg-[#d5ae79] py-4 text-[10px] uppercase tracking-[0.25em] text-[#17151d] hover:bg-[#e8cfa9]">
+                className="w-full bg-gold py-4 text-[10px] uppercase tracking-[0.25em] text-gold-foreground hover:bg-gold-soft">
                 Book this design →
               </button>
             </div>
           </div>
-        </main>
+        </div>
       )}
     </>
   )

@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: 'Venues & Banquet Halls',
   description:
     'Browse banquet halls, resorts, hotels and outdoor venues for weddings, corporate events and celebrations — capacities, cities and amenities from the live Heptome catalogue.',
+  alternates: { canonical: '/venues' },
 }
 
 export default function VenuesPage() {

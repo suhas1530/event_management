@@ -11,7 +11,7 @@ export default function LoadingSpinner({ size = 'md', fullPage = false, label }:
   const spinner = (
     <div className="flex flex-col items-center gap-3">
       <Loader2 className={`animate-spin text-gold-text ${sizes[size]}`} />
-      {label && <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground/80">{label}</p>}
+      {label && <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{label}</p>}
     </div>
   )
 

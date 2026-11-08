@@ -70,8 +70,8 @@ export default function BookingsPage() {
                 className={cn(
                   'min-h-11 px-4 py-2 text-[10px] uppercase tracking-[0.15em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   active
-                    ? 'bg-[#d5ae79] text-[#17151d]'
-                    : 'border border-border text-muted-foreground hover:border-[#d5ae79] hover:text-gold-text'
+                    ? 'bg-gold text-gold-foreground'
+                    : 'border border-border text-muted-foreground hover:border-gold hover:text-gold-text'
                 )}
               >
                 {s ? labelFor(s) : 'All'}
@@ -99,7 +99,7 @@ export default function BookingsPage() {
           />
         ) : (
           <>
-            <ul className="divide-y divide-white/8 border border-border" role="list">
+            <ul className="divide-y divide-border-subtle border border-border" role="list">
               {bookings.map(b => (
                 <li key={b.id}>
                   <Link
@@ -118,7 +118,7 @@ export default function BookingsPage() {
                         />
                       ) : (
                         <div className="flex size-full items-center justify-center">
-                          <CalendarDays className="size-5 text-muted-foreground/80" aria-hidden="true" />
+                          <CalendarDays className="size-5 text-muted-foreground" aria-hidden="true" />
                         </div>
                       )}
                     </div>
@@ -133,7 +133,7 @@ export default function BookingsPage() {
                         })}
                         {b.venue && ` · ${b.venue.name}`}
                       </p>
-                      <p className="mt-0.5 text-xs text-muted-foreground/80">{b.guestCount} guests</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">{b.guestCount} guests</p>
                     </div>
                     <div className="flex flex-shrink-0 flex-col items-end gap-2">
                       <StatusBadge status={b.status} size="sm" />
@@ -144,7 +144,7 @@ export default function BookingsPage() {
                       )}
                     </div>
                     <ArrowRight
-                      className="size-4 flex-shrink-0 text-muted-foreground/80 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-gold-text"
+                      className="size-4 flex-shrink-0 text-muted-foreground transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-gold-text"
                       aria-hidden="true"
                     />
                   </Link>
@@ -159,7 +159,7 @@ export default function BookingsPage() {
                   type="button"
                   disabled={page === 1}
                   onClick={() => setPage(p => p - 1)}
-                  className="min-h-11 border border-border px-4 py-2 text-xs text-muted-foreground transition-colors duration-200 hover:border-[#d5ae79] hover:text-gold-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-30 disabled:hover:border-border disabled:hover:text-muted-foreground"
+                  className="min-h-11 border border-border px-4 py-2 text-xs text-muted-foreground transition-colors duration-200 hover:border-gold hover:text-gold-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-30 disabled:hover:border-border disabled:hover:text-muted-foreground"
                 >
                   <ArrowLeft className="size-3.5" aria-hidden="true" /> Prev
                 </button>
@@ -170,7 +170,7 @@ export default function BookingsPage() {
                   type="button"
                   disabled={page === totalPages}
                   onClick={() => setPage(p => p + 1)}
-                  className="min-h-11 border border-border px-4 py-2 text-xs text-muted-foreground transition-colors duration-200 hover:border-[#d5ae79] hover:text-gold-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-30 disabled:hover:border-border disabled:hover:text-muted-foreground"
+                  className="min-h-11 border border-border px-4 py-2 text-xs text-muted-foreground transition-colors duration-200 hover:border-gold hover:text-gold-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-30 disabled:hover:border-border disabled:hover:text-muted-foreground"
                 >
                   Next <ArrowRight className="size-3.5" aria-hidden="true" />
                 </button>

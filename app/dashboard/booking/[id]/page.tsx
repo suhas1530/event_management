@@ -8,6 +8,7 @@ import { technicianApi } from '@/lib/api'
 import { useToast } from '@/app/providers'
 import type { TechnicianBooking } from '@/lib/api'
 import SiteShell from '@/components/layout/SiteShell'
+import PaymentButton from '@/components/payments/PaymentButton'
 import {
   ArrowLeft, Loader2, Wrench, MapPin, CalendarDays, Clock,
   User, Star, Phone, CheckCircle2, AlertCircle, X, Check
@@ -101,7 +102,7 @@ export default function TechBookingDetailPage() {
 
   return (
     <SiteShell>
-      <main className="mx-auto max-w-4xl px-5 py-10 lg:px-0">
+      <div className="mx-auto max-w-4xl px-5 py-10 lg:px-0">
         <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="font-serif text-3xl text-foreground">{booking.service?.name ?? 'Technician Service'}</h1>
@@ -115,13 +116,13 @@ export default function TechBookingDetailPage() {
           <div className="flex gap-3">
             {canReview && (
               <button type="button" onClick={() => setShowReview(true)}
-                className="flex items-center gap-2 bg-[#d5ae79] px-5 py-2.5 text-[11px] uppercase tracking-[0.18em] text-[#17151d] hover:bg-[#e8cfa9]">
+                className="flex items-center gap-2 bg-gold px-5 py-2.5 text-[11px] uppercase tracking-[0.18em] text-gold-foreground hover:bg-gold-soft">
                 <Star className="size-4" /> Leave Review
               </button>
             )}
             {isCancellable && (
               <button type="button" onClick={handleCancel} disabled={cancelling}
-                className="flex items-center gap-2 border border-red-500/30 px-5 py-2.5 text-[11px] uppercase tracking-[0.18em] text-red-400 hover:bg-red-500/10 disabled:opacity-50">
+                className="flex items-center gap-2 border border-destructive/30 px-5 py-2.5 text-[11px] uppercase tracking-[0.18em] text-destructive hover:bg-destructive-muted disabled:opacity-50">
                 <X className="size-4" /> {cancelling ? 'Cancelling…' : 'Cancel'}
               </button>
             )}
@@ -143,14 +144,14 @@ export default function TechBookingDetailPage() {
                   ['Payment', booking.paymentMethod ?? 'Not selected'],
                 ].map(([k, v]) => v && (
                   <div key={k as string}>
-                    <dt className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/80">{k}</dt>
+                    <dt className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{k}</dt>
                     <dd className="mt-1 text-foreground/90">{v}</dd>
                   </div>
                 ))}
               </dl>
               {booking.customerNotes && (
                 <div className="mt-4 border-t border-border-subtle pt-4">
-                  <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/80">Your description</p>
+                  <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Your description</p>
                   <p className="mt-1 text-sm leading-6 text-muted-foreground">{booking.customerNotes}</p>
                 </div>
               )}
@@ -164,7 +165,7 @@ export default function TechBookingDetailPage() {
                   {[booking.addressLine1, booking.addressLine2, booking.addressCity, booking.addressState, booking.addressPincode].filter(Boolean).join(', ')}
                 </p>
               </div>
-              <p className="mt-1 ml-7 text-xs text-muted-foreground/80">{booking.addressLabel}</p>
+              <p className="mt-1 ml-7 text-xs text-muted-foreground">{booking.addressLabel}</p>
             </Section>
 
             {/* Technician */}
@@ -176,8 +177,8 @@ export default function TechBookingDetailPage() {
                       ? <img src={booking.technician.avatar} alt="" className="h-full w-full object-cover" />
                       : <div className="flex h-full items-center justify-center text-xl text-muted-foreground">{booking.technician.name?.[0]}</div>}
                     {booking.technician.isVerified && (
-                      <div className="absolute -right-0.5 -top-0.5 flex size-5 items-center justify-center rounded-full bg-[#d5ae79]">
-                        <Check className="size-3 text-[#0b0b0d]" />
+                      <div className="absolute -right-0.5 -top-0.5 flex size-5 items-center justify-center rounded-full bg-gold">
+                        <Check className="size-3 text-gold-foreground" />
                       </div>
                     )}
                   </div>
@@ -185,21 +186,21 @@ export default function TechBookingDetailPage() {
                     <p className="font-medium text-foreground">{booking.technician.name}</p>
                     <div className="mt-0.5 flex items-center gap-3 text-xs text-muted-foreground">
                       {booking.technician.rating > 0 && (
-                        <span className="flex items-center gap-1"><Star className="size-3 fill-[#d5ae79] text-gold-text" />{booking.technician.rating.toFixed(1)}</span>
+                        <span className="flex items-center gap-1"><Star className="size-3 fill-gold text-gold-text" />{booking.technician.rating.toFixed(1)}</span>
                       )}
                       {booking.technician.completedJobs > 0 && <span>{booking.technician.completedJobs} jobs</span>}
                       {booking.technician.experience > 0 && <span>{booking.technician.experience}y exp</span>}
                     </div>
                   </div>
                   <a href={`tel:${booking.technician.phone}`}
-                    className="ml-auto flex items-center gap-1.5 border border-border px-3 py-2 text-xs text-muted-foreground hover:border-[#d5ae79] hover:text-gold-text">
+                    className="ml-auto flex items-center gap-1.5 border border-border px-3 py-2 text-xs text-muted-foreground hover:border-gold hover:text-gold-text">
                     <Phone className="size-3.5" /> Call
                   </a>
                 </div>
               </Section>
             ) : (
               <div className="border border-border bg-card p-5">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/80">Technician</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Technician</p>
                 <p className="mt-2 text-sm text-muted-foreground">A technician will be assigned to your booking shortly.</p>
               </div>
             )}
@@ -222,6 +223,27 @@ export default function TechBookingDetailPage() {
                 {booking.paidAmount > 0 && <PriceLine label="Paid" value={fmt(booking.paidAmount)} green />}
                 {booking.balanceAmount > 0 && <PriceLine label="Balance due" value={fmt(booking.balanceAmount)} red />}
               </div>
+              {booking.status === 'SERVICE_COMPLETED' && booking.balanceAmount > 0 && (
+                <div className="mt-4 border-t border-border-subtle pt-4">
+                  <PaymentButton
+                    targetType="TECHNICIAN_BOOKING"
+                    targetId={booking.id}
+                    amount={booking.balanceAmount}
+                    onSuccess={async () => {
+                      try {
+                        const updated = await technicianApi.bookingById(id)
+                        setBooking(updated)
+                        toast('Payment successful. Thank you!', 'success')
+                      } catch {
+                        toast('Payment verified. Refresh the page to see the updated status.', 'info')
+                      }
+                    }}
+                  />
+                  <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                    Prefer to pay the professional directly? You can still pay cash after the service.
+                  </p>
+                </div>
+              )}
               <p className="mt-4 border-t border-border-subtle pt-3 text-xs leading-5 text-muted-foreground">
                 The service charge is an estimate. If materials or extra labour are needed, the professional
                 tells you and gets your approval first — the final amount can differ.
@@ -236,12 +258,12 @@ export default function TechBookingDetailPage() {
                     const isLast = i === (booking.timeline?.length ?? 0) - 1
                     return (
                       <li key={entry.id}>
-                        <div className={`absolute -left-2 flex size-4 items-center justify-center rounded-full border ${isLast ? 'border-[#d5ae79] bg-[#d5ae79]' : 'border-border bg-background'}`}>
+                        <div className={`absolute -left-2 flex size-4 items-center justify-center rounded-full border ${isLast ? 'border-gold bg-gold' : 'border-border bg-background'}`}>
                           {isLast && <div className="size-1.5 rounded-full bg-background" />}
                         </div>
                         <p className="text-[10px] uppercase tracking-[0.15em] text-gold-text">{entry.title}</p>
                         {entry.description && <p className="mt-0.5 text-xs text-muted-foreground">{entry.description}</p>}
-                        <p className="mt-0.5 text-[10px] text-muted-foreground/80">
+                        <p className="mt-0.5 text-[10px] text-muted-foreground">
                           {new Date(entry.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </li>
@@ -249,12 +271,12 @@ export default function TechBookingDetailPage() {
                   })}
                 </ol>
               ) : (
-                <p className="text-xs text-muted-foreground/80">Timeline updates will appear here.</p>
+                <p className="text-xs text-muted-foreground">Timeline updates will appear here.</p>
               )}
             </Section>
           </div>
         </div>
-      </main>
+      </div>
 
       {/* Review modal */}
       {showReview && (
@@ -267,7 +289,7 @@ export default function TechBookingDetailPage() {
             <div className="mb-4 flex gap-2">
               {[1,2,3,4,5].map(n => (
                 <button type="button" key={n} onClick={() => setReview(r => ({ ...r, rating: n }))}>
-                  <Star className={`size-7 transition ${n <= review.rating ? 'fill-[#d5ae79] text-gold-text' : 'text-muted-foreground/80'}`} />
+                  <Star className={`size-7 transition ${n <= review.rating ? 'fill-gold text-gold-text' : 'text-muted-foreground'}`} />
                 </button>
               ))}
             </div>
@@ -276,10 +298,10 @@ export default function TechBookingDetailPage() {
               onChange={e => setReview(r => ({ ...r, comment: e.target.value }))}
               rows={4}
               placeholder="Tell us about your experience with the technician…"
-              className="w-full border border-border bg-muted/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/80 focus:border-[#d5ae79] focus:outline-none resize-none"
+              className="w-full border border-border bg-muted/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-gold focus:outline-none resize-none"
             />
             <button type="button" onClick={handleSubmitReview} disabled={submittingReview}
-              className="mt-4 w-full bg-[#d5ae79] py-3 text-[11px] uppercase tracking-[0.2em] text-[#17151d] hover:bg-[#e8cfa9] disabled:opacity-50">
+              className="mt-4 w-full bg-gold py-3 text-[11px] uppercase tracking-[0.2em] text-gold-foreground hover:bg-gold-soft disabled:opacity-50">
               {submittingReview ? 'Submitting…' : 'Submit Review'}
             </button>
           </div>
@@ -292,7 +314,7 @@ export default function TechBookingDetailPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="border border-border bg-card p-5">
-      <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-muted-foreground/80">{title}</p>
+      <p className="mb-4 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{title}</p>
       {children}
     </div>
   )
@@ -302,7 +324,7 @@ function PriceLine({ label, value, green, red }: { label: string; value: string;
   return (
     <div className="flex justify-between">
       <span className="text-muted-foreground">{label}</span>
-      <span className={green ? 'text-green-400' : red ? 'text-red-300' : 'text-foreground/90'}>{value}</span>
+      <span className={green ? 'text-success' : red ? 'text-destructive' : 'text-foreground/90'}>{value}</span>
     </div>
   )
 }

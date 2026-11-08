@@ -1,5 +1,4 @@
-'use client'
-
+import Image from 'next/image'
 import Link from 'next/link'
 import {
   ArrowRight,
@@ -19,7 +18,9 @@ import {
   Zap,
   type LucideIcon,
 } from 'lucide-react'
+import ScrollRailButtons from './ScrollRailButtons'
 import { HOME_CATALOG, homeGroupById, type HomeCatalogGroup } from '@/lib/catalog'
+import { HOME_SERVICE_IMAGES } from '@/lib/home-content'
 import { SUPPORTED_CITY } from '@/lib/service-area'
 
 /** Catalog `icon` names resolved to components — catalogue data stays string-only. */
@@ -44,7 +45,7 @@ const ICONS: Record<string, LucideIcon> = {
  * Featured doorstep services. Chosen by catalogue id (not by hand-written copy)
  * so a card can never advertise a service the booking API does not recognise.
  */
-const FEATURED_IDS = ['cleaning', 'ac-service', 'electrical', 'plumbing', 'pest-control', 'appliance-repair']
+const FEATURED_IDS = ['cleaning', 'ac-service', 'electrical', 'plumbing', 'carpentry', 'painting']
 
 const featured = FEATURED_IDS.map(homeGroupById).filter((group): group is HomeCatalogGroup => Boolean(group))
 
@@ -54,84 +55,120 @@ const onRequest = HOME_CATALOG.filter(group => !group.bookingCategory)
 /**
  * The home-services half of the homepage.
  *
- * Deliberately light (ivory + lavender + purple) so the two verticals feel like
- * two products from one brand rather than one dark page with a second section
- * bolted on. Every card starts the real slot-based wizard with its category
- * pre-selected; service lines the backend has no booking category for are
- * listed as "on request" and link to the enquiry-first landing page instead.
+ * A horizontal rail of real catalogue services, each with licensed photography
+ * and a link into the slot-based wizard with its category pre-selected.
  */
 export default function HomeServicesShowcase() {
   return (
-    <section id="home-services" className="surface-ivory scroll-mt-20 px-5 py-24 sm:px-10 lg:py-32">
+    <section id="home-services" className="surface-ivory scroll-mt-20 border-b border-border px-5 py-20 sm:px-8 lg:py-24">
       <div className="mx-auto max-w-[1380px]">
-        <div data-reveal className="flex flex-wrap items-end justify-between gap-6">
+        <div className="mb-9 flex flex-wrap items-end justify-between gap-6">
           <div className="max-w-2xl">
-            <p className="mb-4 text-[10px] uppercase tracking-[0.3em] text-accent">Home services</p>
-            <h2 className="font-display text-[clamp(2rem,4.5vw,3.25rem)] font-semibold tracking-[-0.02em] text-hept-charcoal">
+            <p className="mb-4 text-[10px] uppercase tracking-[0.3em] text-primary">Home services</p>
+            <h2 className="font-display text-[clamp(2rem,4.5vw,3.25rem)] font-semibold tracking-[-0.02em] text-foreground">
               Care for every corner.
             </h2>
-            <p className="surface-ivory-muted mt-5 text-base leading-7">
+            <p className="mt-4 text-base leading-7 text-muted-foreground">
               Cleaning, repairs and improvements booked by the slot. Pick a service, confirm your address and
               a two-hour window — the price is agreed before the professional starts.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-wrap items-center gap-3">
             <Link
               href="/book/technician"
-              className="btn-heptome group inline-flex min-h-12 items-center gap-2.5 px-6 py-3.5 text-sm font-semibold text-foreground shadow-[0_10px_30px_-14px_rgba(109,54,216,0.9)] focus-ring-ivory"
+              className="group inline-flex min-h-12 items-center gap-2.5 rounded-lg bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-muted"
             >
-              Book a Home Service
+              Book a home service
               <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
             </Link>
             <Link
               href="/home-services"
-              className="surface-ivory-muted inline-flex min-h-12 items-center gap-2 text-sm font-medium transition-colors hover:text-accent focus-ring-ivory"
+              className="inline-flex min-h-12 items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
             >
               All home services
             </Link>
           </div>
         </div>
 
-        <div data-reveal-group className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ScrollRailButtons
+          targetId="home-services-rail"
+          leftLabel="Scroll home services left"
+          rightLabel="Scroll home services right"
+          className="mb-4 justify-end"
+          buttonClassName="bg-card"
+        />
+
+        <ul
+          id="home-services-rail"
+         
+          className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 sm:mx-0 sm:px-0"
+          aria-label="Featured home services"
+          tabIndex={0}
+        >
           {featured.map(group => {
             const Icon = ICONS[group.icon] ?? Sparkles
+            const image = HOME_SERVICE_IMAGES[group.id]
             return (
-              <Link
+              <li
                 key={group.id}
-                data-reveal-item
-                href={`/book/technician?category=${group.bookingCategory}`}
-                className="panel-ivory group flex flex-col p-6 focus-ring-ivory hover:-translate-y-1"
+               
+                className="w-[82vw] max-w-[400px] shrink-0 snap-start sm:w-[340px] lg:w-[360px]"
               >
-                <span className="flex size-11 items-center justify-center bg-hept-lavender text-accent">
-                  <Icon className="size-5" aria-hidden="true" />
-                </span>
-                <h3 className="mt-5 text-lg font-semibold text-hept-charcoal">{group.shortName}</h3>
-                <p className="surface-ivory-muted mt-2 text-sm leading-6">{group.blurb}</p>
+                <Link
+                  href={`/book/technician?category=${group.bookingCategory}`}
+                  className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-primary/35 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <div className="relative aspect-[16/10] overflow-hidden bg-muted">
+                    {image ? (
+                      <Image
+                        src={image.src}
+                        alt={image.alt}
+                        fill
+                        loading="eager"
+                        decoding="async"
+                        sizes="(min-width: 1024px) 360px, (min-width: 640px) 340px, 82vw"
+                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    ) : (
+                      <span className="grid size-full place-items-center text-muted-foreground">
+                        <Icon className="size-8" aria-hidden="true" />
+                      </span>
+                    )}
+                    <span className="absolute left-4 top-4 flex size-9 items-center justify-center rounded-lg bg-background/90 text-primary shadow-sm backdrop-blur-sm">
+                      <Icon className="size-4" aria-hidden="true" />
+                    </span>
+                  </div>
 
-                <ul className="surface-ivory-muted mt-4 flex flex-col gap-1.5 text-xs leading-5">
-                  {group.services.slice(0, 3).map(service => (
-                    <li key={service.name} className="flex items-start gap-2">
-                      <span aria-hidden="true" className="mt-[7px] size-1 shrink-0 rounded-full bg-hept-purple/60" />
-                      {service.name}
-                    </li>
-                  ))}
-                </ul>
+                  <div className="flex flex-1 flex-col p-5">
+                    <h3 className="text-lg font-semibold text-foreground">{group.shortName}</h3>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">{group.blurb}</p>
 
-                <span className="mt-5 inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">
-                  Choose a slot
-                  <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
-                </span>
-              </Link>
+                    <ul className="mt-4 flex flex-col gap-1.5 text-xs leading-5 text-muted-foreground">
+                      {group.services.slice(0, 3).map(service => (
+                        <li key={service.name} className="flex items-start gap-2">
+                          <span aria-hidden="true" className="mt-[7px] size-1 shrink-0 rounded-full bg-primary/60" />
+                          {service.name}
+                        </li>
+                      ))}
+                    </ul>
+
+                    <span className="mt-auto pt-5 inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
+                      Choose a slot
+                      <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
+                    </span>
+                  </div>
+                </Link>
+              </li>
             )
           })}
-        </div>
+        </ul>
 
         {/* Honesty row: service lines we advertise but cannot insta-book yet. */}
-        <div data-reveal className="mt-10 border border-hept-line bg-card p-6 sm:flex sm:items-center sm:justify-between sm:gap-8">
+        <div className="mt-10 rounded-2xl border border-border bg-card p-6 sm:flex sm:items-center sm:justify-between sm:gap-8">
           <div>
-            <h3 className="text-sm font-semibold text-hept-charcoal">Also available on request</h3>
-            <p className="surface-ivory-muted mt-1.5 text-sm leading-6">
+            <h3 className="text-sm font-semibold text-foreground">Also available on request</h3>
+            <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
               These service lines are served by appointment with the team rather than an instant slot:
             </p>
           </div>
@@ -140,7 +177,7 @@ export default function HomeServicesShowcase() {
               <li key={group.id}>
                 <Link
                   href={`/home-services#${group.id}`}
-                  className="chip-lavender inline-flex px-3 py-1.5 text-xs font-medium transition-colors hover:bg-hept-purple hover:text-white focus-ring-ivory"
+                  className="inline-flex rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   {group.shortName}
                 </Link>
@@ -149,7 +186,7 @@ export default function HomeServicesShowcase() {
           </ul>
         </div>
 
-        <p className="surface-ivory-muted mt-6 text-xs leading-5">
+        <p className="mt-6 text-xs leading-5 text-muted-foreground">
           Doorstep coverage in {SUPPORTED_CITY}. Prices, visit charge and taxes are itemised in the booking
           step, and your pincode is verified before a slot is reserved.
         </p>

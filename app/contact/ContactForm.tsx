@@ -244,19 +244,19 @@ export default function ContactForm() {
                     aria-describedby={errors.message ? 'message-error' : 'message-hint'}
                     placeholder="Tell us about your requirement, preferred dates, or anything else we should know."
                     className={cn(
-                      'mt-2 w-full resize-y rounded-lg border bg-muted/50 px-4 py-3 text-sm leading-6 text-foreground placeholder:text-muted-foreground/80 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/25',
+                      'mt-2 w-full resize-y rounded-lg border bg-muted/50 px-4 py-3 text-sm leading-6 text-foreground placeholder:text-muted-foreground transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/25',
                       errors.message
-                        ? 'border-red-400/60 focus:border-red-400'
+                        ? 'border-destructive/60 focus:border-destructive'
                         : 'border-border focus:border-primary/60'
                     )}
                   />
                   {errors.message ? (
-                    <p id="message-error" role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs text-red-300">
+                    <p id="message-error" role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs text-destructive">
                       <AlertCircle className="size-3.5" aria-hidden="true" />
                       {errors.message}
                     </p>
                   ) : (
-                    <p id="message-hint" className="mt-1.5 text-xs text-muted-foreground/80">
+                    <p id="message-hint" className="mt-1.5 text-xs text-muted-foreground">
                       The more detail you share, the faster we can help.
                     </p>
                   )}
@@ -284,7 +284,7 @@ export default function ContactForm() {
           </div>
 
           {/* ── Channels ────────────────────────────────────────────────── */}
-          <aside className="space-y-6">
+          <div className="space-y-6">
             <div className="rounded-2xl border border-border-subtle bg-muted/50 p-6 sm:p-7">
               <h2 className="text-lg font-medium text-foreground/90">Reach us directly</h2>
               <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
@@ -297,7 +297,7 @@ export default function ContactForm() {
                       <Icon className="size-[18px]" aria-hidden="true" />
                     </span>
                     <div className="min-w-0">
-                      <p className="text-label text-muted-foreground/80">{label}</p>
+                      <p className="text-label text-muted-foreground">{label}</p>
                       {href ? (
                         <a
                           href={href}
@@ -331,7 +331,7 @@ export default function ContactForm() {
                 </Link>
               </div>
             </div>
-          </aside>
+          </div>
         </div>
     </>
   )
@@ -343,8 +343,8 @@ export default function ContactForm() {
 
 function SuccessIcon() {
   return (
-    <span className="grid size-16 place-items-center rounded-full border border-emerald-400/25 bg-emerald-500/10">
-      <CheckCircle2 className="size-8 text-emerald-300" aria-hidden="true" />
+    <span className="grid size-16 place-items-center rounded-full border border-success/30 bg-success-muted">
+      <CheckCircle2 className="size-8 text-success" aria-hidden="true" />
     </span>
   )
 }
@@ -391,17 +391,17 @@ function Field({
         aria-invalid={error ? 'true' : undefined}
         aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
         className={cn(
-          'mt-2 w-full rounded-lg border bg-muted/50 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/80 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/25',
-          error ? 'border-red-400/60 focus:border-red-400' : 'border-border focus:border-primary/60'
+          'mt-2 w-full rounded-lg border bg-muted/50 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/25',
+          error ? 'border-destructive/60 focus:border-destructive' : 'border-border focus:border-primary/60'
         )}
       />
       {error ? (
-        <p id={`${id}-error`} role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs text-red-300">
+        <p id={`${id}-error`} role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs text-destructive">
           <AlertCircle className="size-3.5" aria-hidden="true" />
           {error}
         </p>
       ) : hint ? (
-        <p id={`${id}-hint`} className="mt-1.5 text-xs text-muted-foreground/80">
+        <p id={`${id}-hint`} className="mt-1.5 text-xs text-muted-foreground">
           {hint}
         </p>
       ) : null}

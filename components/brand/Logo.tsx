@@ -1,63 +1,33 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { brand } from '@/lib/brand'
 
 /**
- * Heptome wordmark.
+ * Heptome brand lockup.
  *
- * The mark is a heptagon (seven sides — the "many moments" of a customer's
- * life) holding a house glyph, so one symbol covers both verticals: events on
- * the outside, home care at the centre. Drawn inline in SVG so it stays crisp
- * at every size, needs no asset pipeline and can be tinted per surface.
+ * The mark is the official Heptome emblem (`public/brand/heptome-emblem.png`,
+ * the transparent cut of `public/logo.jpeg` — the copper hexagon inlay) paired
+ * with the wordmark in the display face. The emblem is used as provided: no
+ * recolouring, no distortion, `object-contain` at every size. It sits happily
+ * on light surfaces, dark chrome and photography, so the only thing `tone`
+ * changes is the wordmark colour.
  */
 
-const SIZES = {
-  sm: { mark: 'size-8 rounded-lg', glyph: 'size-4', word: 'text-xl' },
-  md: { mark: 'size-10 rounded-xl', glyph: 'size-5', word: 'text-2xl' },
-  lg: { mark: 'size-12 rounded-2xl', glyph: 'size-7', word: 'text-3xl' },
-} as const
+export const BRAND_EMBLEM_SRC = '/brand/heptome-emblem.png'
 
-export function HeptomeMark({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      aria-hidden="true"
-      focusable="false"
-    >
-      {/* Heptagon — seven sides, one per facet of a customer's life */}
-      <polygon
-        points="12,3.4 18.72,6.64 20.38,13.91 15.73,19.75 8.27,19.75 3.62,13.91 5.28,6.64"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinejoin="round"
-        opacity="0.75"
-      />
-      {/* House — the home-care vertical at the centre of the mark */}
-      <path
-        d="M8.2 12.2 12 9.4l3.8 2.8"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M9.5 12.4h5v4.1h-5z"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
+const SIZES = {
+  sm: { mark: 32, word: 'text-xl' },
+  md: { mark: 40, word: 'text-2xl' },
+  lg: { mark: 48, word: 'text-3xl' },
+} as const
 
 interface LogoProps {
   /** Wrap the mark in a link to the homepage. */
   linked?: boolean
   size?: keyof typeof SIZES
-  /** `dark` = light wordmark for dark chrome, `light` = charcoal for ivory. */
-  tone?: 'dark' | 'light'
+  /** `auto` follows the theme; `dark` = light wordmark over photography/dark chrome. */
+  tone?: 'auto' | 'dark' | 'light'
   /** Hide the mark and render the wordmark alone (used in tight spaces). */
   markOnly?: boolean
   className?: string
@@ -66,7 +36,7 @@ interface LogoProps {
 export default function Logo({
   linked = true,
   size = 'sm',
-  tone = 'dark',
+  tone = 'auto',
   markOnly = false,
   className,
 }: LogoProps) {
@@ -75,19 +45,30 @@ export default function Logo({
   const content = (
     <>
       {!markOnly && (
-        <span className={cn('flex items-center justify-center bg-primary text-primary-foreground transition-transform duration-300 ease-out group-hover:scale-105', s.mark)}>
-          <HeptomeMark className={s.glyph} />
+        <span
+          className="relative shrink-0 transition-transform duration-300 ease-out group-hover:scale-105"
+          style={{ width: s.mark, height: s.mark }}
+        >
+          <Image
+            src={BRAND_EMBLEM_SRC}
+            alt={`${brand.name} emblem`}
+            width={480}
+            height={480}
+            priority
+            className="object-contain"
+            sizes={`${s.mark}px`}
+          />
         </span>
       )}
       <span
         className={cn(
           'font-display leading-none tracking-tight',
           s.word,
-          tone === 'dark' ? 'text-foreground' : 'text-hept-charcoal'
+          tone === 'dark' ? 'text-white' : 'text-foreground'
         )}
       >
         {brand.wordmark}
-        <span className="text-accent" aria-hidden="true">
+        <span className={tone === 'dark' ? 'text-gold' : 'text-primary'} aria-hidden="true">
           .
         </span>
       </span>
@@ -103,8 +84,7 @@ export default function Logo({
       href="/"
       aria-label={`${brand.name} — home`}
       className={cn(
-        'group flex shrink-0 items-center gap-2.5 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-        tone === 'dark' ? 'focus-visible:ring-offset-[#0b0b0d]' : 'focus-visible:ring-offset-hept-ivory',
+        'group flex shrink-0 items-center gap-2.5 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
         className
       )}
     >

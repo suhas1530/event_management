@@ -1,38 +1,68 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import { clickUntil } from './helpers'
 
 /**
  * Theme system — the visitor-facing contract.
  *
- * The suite pins what the product promises: a dark default, a visible and
- * accessible switcher in the main navigation, the choice surviving refreshes
- * and navigation, no flash of the wrong theme on load, and the switch working
- * on the admin sign-in page and in the mobile drawer.
- *
- * Interactions use `clickUntil` because Next hydrates after `domcontentloaded`
- * — a click in that window is silently dropped (see helpers.ts).
+ * A first visit follows the operating-system preference. An explicit choice is
+ * written to `heptome-theme`, survives refreshes and navigation, and wins over
+ * the OS on the next visit. The inline bootstrap script applies the class
+ * before paint, so there is no flash and no hydration mismatch. The switcher is
+ * present in the desktop header, the mobile drawer and the admin sign-in page.
  */
-test.describe('theme switcher', () => {
-  test('defaults to dark and exposes an accessible toggle in the navigation', async ({ page }) => {
+
+const LIGHT_BG = 'rgb(248, 245, 239)'
+const DARK_BG = 'rgb(16, 22, 19)'
+
+async function bodyBackground(page: Page): Promise<string> {
+  return page.evaluate(() => getComputedStyle(document.body).backgroundColor)
+}
+
+/** Opens the header appearance menu and picks one of Light / Dark / System. */
+async function chooseTheme(page: Page, label: 'Light' | 'Dark' | 'System') {
+  const trigger = page.getByRole('button', { name: 'Theme settings' }).first()
+  await clickUntil(trigger, () => expect(page.getByRole('menu')).toBeVisible({ timeout: 2_000 }))
+  await page.getByRole('menuitemradio', { name: new RegExp(`^${label}`) }).click()
+  await expect(page.getByRole('menu')).toBeHidden()
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+}
+
+test.describe('theme system', () => {
+  test('a first visit follows a light OS preference', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' })
+    await page.goto('/')
+
+    await expect(page.locator('html')).not.toHaveClass(/dark/)
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+    await expect(page.locator('html')).toHaveAttribute('data-theme-mode', 'system')
+
+    const toggle = page.getByRole('button', { name: 'Theme settings' })
+    await expect(toggle).toBeVisible()
+    await expect(toggle).not.toHaveAttribute('aria-pressed')
+    expect(await bodyBackground(page)).toBe(LIGHT_BG)
+  })
+
+  test('a first visit follows a dark OS preference', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' })
     await page.goto('/')
 
     await expect(page.locator('html')).toHaveClass(/dark/)
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+    await expect(page.locator('html')).toHaveAttribute('data-theme-mode', 'system')
 
-    const toggle = page.getByRole('button', { name: 'Switch to light mode' })
-    await expect(toggle).toBeVisible()
-    await expect(toggle).toHaveAttribute('title', 'Switch to light mode')
-    await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+    expect(await bodyBackground(page)).toBe(DARK_BG)
   })
 
-  test('flips the whole interface to light and persists across a refresh', async ({ page }) => {
+  test('an explicit choice flips the whole interface and persists across a refresh', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' })
     await page.goto('/')
 
-    const toggle = page.getByRole('button', { name: 'Switch to light mode' })
-    await clickUntil(toggle, () => expect(page.locator('html')).not.toHaveClass(/dark/, { timeout: 3_000 }))
+    await chooseTheme(page, 'Dark')
 
-    // Body background follows the token, not a hardcoded page colour.
-    const bodyBg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor)
-    expect(bodyBg).toBe('rgb(250, 249, 246)')
+    await expect(page.locator('html')).toHaveClass(/dark/)
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+    await expect(page.locator('html')).toHaveAttribute('data-theme-mode', 'dark')
+    expect(await bodyBackground(page)).toBe(DARK_BG)
 
     await page.reload({ waitUntil: 'domcontentloaded' })
 
@@ -40,75 +70,104 @@ test.describe('theme switcher', () => {
     const early = await page.evaluate(() => ({
       cls: document.documentElement.className,
       theme: document.documentElement.dataset.theme,
+      mode: document.documentElement.dataset.themeMode,
     }))
-    expect(early.theme).toBe('light')
-    expect(early.cls).not.toContain('dark')
+    expect(early.theme).toBe('dark')
+    expect(early.mode).toBe('dark')
+    expect(early.cls).toContain('dark')
 
-    await expect(page.getByRole('button', { name: 'Switch to dark mode' })).toBeVisible()
+    const toggle = page.getByRole('button', { name: 'Theme settings' })
+    await expect(toggle).toHaveAttribute('title', 'Theme: dark')
     const stored = await page.evaluate(() => localStorage.getItem('heptome-theme'))
-    expect(stored).toBe('light')
+    expect(stored).toBe('dark')
+  })
+
+  test('the explicit choice wins over the OS on the next visit', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await page.goto('/')
+    await expect(page.locator('html')).toHaveClass(/dark/)
+
+    await chooseTheme(page, 'Light')
+    await expect(page.locator('html')).not.toHaveClass(/dark/)
+
+    // The OS still says dark, but the stored choice is light.
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await page.reload({ waitUntil: 'domcontentloaded' })
+
+    await expect(page.locator('html')).not.toHaveClass(/dark/)
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+    await expect(page.locator('html')).toHaveAttribute('data-theme-mode', 'light')
+  })
+
+  test('system mode follows a live OS change without a reload', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' })
+    await page.goto('/')
+    await expect(page.locator('html')).not.toHaveClass(/dark/)
+
+    // The first visit is already in system mode; change the OS preference.
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await expect(page.locator('html')).toHaveClass(/dark/)
+    await expect(page.locator('html')).toHaveAttribute('data-theme-mode', 'system')
+
+    // Once the visitor makes an explicit choice, the OS stops winning.
+    await chooseTheme(page, 'Light')
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await expect(page.locator('html')).not.toHaveClass(/dark/)
+    await expect(page.locator('html')).toHaveAttribute('data-theme-mode', 'light')
   })
 
   test('keeps the choice while navigating between pages', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' })
     await page.goto('/')
 
-    const toggle = page.getByRole('button', { name: 'Switch to light mode' })
-    await clickUntil(toggle, () => expect(page.locator('html')).not.toHaveClass(/dark/, { timeout: 3_000 }))
+    await chooseTheme(page, 'Dark')
 
     const header = page.locator('header').first()
-    await clickUntil(
-      header.getByRole('link', { name: 'About', exact: true }),
-      () => expect(page).toHaveURL(/\/about$/, { timeout: 3_000 }),
+    await clickUntil(header.getByRole('link', { name: 'About', exact: true }), () =>
+      expect(page).toHaveURL(/\/about$/, { timeout: 3_000 }),
     )
 
-    await expect(page.locator('html')).not.toHaveClass(/dark/)
-    await expect(page.getByRole('button', { name: 'Switch to dark mode' })).toBeVisible()
-  })
-
-  test('preserves an explicit dark choice across a refresh', async ({ page }) => {
-    await page.goto('/')
-
-    const light = page.getByRole('button', { name: 'Switch to light mode' })
-    await clickUntil(light, () => expect(page.locator('html')).not.toHaveClass(/dark/, { timeout: 3_000 }))
-
-    const dark = page.getByRole('button', { name: 'Switch to dark mode' })
-    await clickUntil(dark, () => expect(page.locator('html')).toHaveClass(/dark/, { timeout: 3_000 }))
-
-    await page.reload({ waitUntil: 'domcontentloaded' })
     await expect(page.locator('html')).toHaveClass(/dark/)
+    await expect(page.locator('html')).toHaveAttribute('data-theme-mode', 'dark')
+    await expect(page.getByRole('button', { name: 'Theme settings' })).toHaveAttribute(
+      'title',
+      'Theme: dark',
+    )
   })
 
   test('the admin sign-in page carries the switcher and honours it', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' })
     await page.goto('/admin/login')
 
-    await expect(page.locator('html')).toHaveClass(/dark/)
+    await expect(page.locator('html')).not.toHaveClass(/dark/)
 
-    const toggle = page.getByRole('button', { name: 'Switch to light mode' })
-    await clickUntil(toggle, () => expect(page.locator('html')).not.toHaveClass(/dark/, { timeout: 3_000 }))
+    await chooseTheme(page, 'Dark')
 
-    // The form stays usable in light mode.
+    // The form stays usable in dark mode.
     await expect(page.getByLabel('Email')).toBeVisible()
     await expect(page.getByLabel('Password', { exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: /access admin panel/i })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Show password' })).toBeVisible()
   })
 
-  test('the mobile drawer offers the switcher too', async ({ page }) => {
+  test('the mobile drawer offers the three-way switcher too', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' })
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto('/')
 
     const open = page.getByRole('button', { name: 'Open menu' })
-    // Two "Close menu" controls exist (banner + drawer); the banner one is the
-    // trigger whose label flips when the drawer opens.
     await clickUntil(open, () =>
       expect(page.getByRole('banner').getByRole('button', { name: 'Close menu' })).toBeVisible({ timeout: 3_000 }),
     )
 
-    const drawerToggle = page.getByRole('navigation', { name: 'Mobile' }).getByRole('button', { name: 'Switch to light mode' })
-    await expect(drawerToggle).toContainText('Appearance')
+    const drawer = page.getByRole('dialog', { name: 'Mobile menu' })
+    await expect(drawer.getByText('Appearance')).toBeVisible()
+    await expect(drawer.getByRole('radio', { name: 'System' })).toBeChecked()
 
-    await clickUntil(drawerToggle, () => expect(page.locator('html')).not.toHaveClass(/dark/, { timeout: 3_000 }))
-    await expect(page.getByRole('button', { name: 'Switch to dark mode' })).toBeVisible()
+    await drawer.getByRole('radio', { name: 'Dark' }).click()
+    await expect(page.locator('html')).toHaveClass(/dark/)
+    await expect(drawer.getByRole('radio', { name: 'Dark' })).toBeChecked()
+    await expect(drawer.getByText('Dark', { exact: true })).toBeVisible()
   })
 
   test('switching themes raises no page errors or hydration warnings', async ({ page }) => {
@@ -124,11 +183,11 @@ test.describe('theme switcher', () => {
       }
     })
 
+    await page.emulateMedia({ colorScheme: 'light' })
     await page.goto('/')
-    const light = page.getByRole('button', { name: 'Switch to light mode' })
-    await clickUntil(light, () => expect(page.locator('html')).not.toHaveClass(/dark/, { timeout: 3_000 }))
-    const dark = page.getByRole('button', { name: 'Switch to dark mode' })
-    await clickUntil(dark, () => expect(page.locator('html')).toHaveClass(/dark/, { timeout: 3_000 }))
+    await chooseTheme(page, 'Dark')
+    await chooseTheme(page, 'Light')
+    await chooseTheme(page, 'System')
     await page.waitForTimeout(600)
 
     expect(problems).toEqual([])

@@ -15,19 +15,19 @@ import { cn } from '@/lib/utils'
 
 /** Notification types carry their own icon + tone so the feed reads at a glance. */
 const TYPE_META: Record<string, { label: string; className: string }> = {
-  BOOKING_CREATED: { label: 'Booking', className: 'text-sky-300 bg-sky-500/12 ring-sky-500/25' },
-  BOOKING_UPDATED: { label: 'Update', className: 'text-sky-300 bg-sky-500/12 ring-sky-500/25' },
-  BOOKING_CONFIRMED: { label: 'Confirmed', className: 'text-emerald-300 bg-emerald-500/12 ring-emerald-500/25' },
-  BOOKING_COMPLETED: { label: 'Completed', className: 'text-emerald-300 bg-emerald-500/12 ring-emerald-500/25' },
-  PAYMENT: { label: 'Payment', className: 'text-amber-300 bg-amber-500/12 ring-amber-500/25' },
+  BOOKING_CREATED: { label: 'Booking', className: 'text-info bg-info-muted ring-info/25' },
+  BOOKING_UPDATED: { label: 'Update', className: 'text-info bg-info-muted ring-info/25' },
+  BOOKING_CONFIRMED: { label: 'Confirmed', className: 'text-success bg-success-muted ring-success/25' },
+  BOOKING_COMPLETED: { label: 'Completed', className: 'text-success bg-success-muted ring-success/25' },
+  PAYMENT: { label: 'Payment', className: 'text-warning bg-warning-muted ring-warning/25' },
   PROPOSAL: { label: 'Proposal', className: 'text-primary bg-primary/12 ring-primary/25' },
   EVENT_REQUEST: { label: 'Event request', className: 'text-primary bg-primary/12 ring-primary/25' },
-  REVIEW: { label: 'Review', className: 'text-muted-foreground bg-muted/60 ring-white/12' },
-  SYSTEM: { label: 'System', className: 'text-muted-foreground bg-muted/60 ring-white/12' },
+  REVIEW: { label: 'Review', className: 'text-muted-foreground bg-muted/60 ring-border' },
+  SYSTEM: { label: 'System', className: 'text-muted-foreground bg-muted/60 ring-border' },
 }
 
 function metaFor(type: string) {
-  return TYPE_META[type?.toUpperCase?.()] ?? { label: 'Notice', className: 'text-muted-foreground bg-muted/60 ring-white/12' }
+  return TYPE_META[type?.toUpperCase?.()] ?? { label: 'Notice', className: 'text-muted-foreground bg-muted/60 ring-border' }
 }
 
 /**
@@ -227,7 +227,7 @@ export default function NotificationsPage() {
                       {item.message && (
                         <p className="mt-1 text-pretty text-sm leading-6 text-muted-foreground">{item.message}</p>
                       )}
-                      <p className="mt-1.5 text-xs text-muted-foreground/80">
+                      <p className="mt-1.5 text-xs text-muted-foreground">
                         {meta.label} · {relativeTime(item.createdAt)}
                       </p>
                     </div>

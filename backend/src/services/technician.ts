@@ -1,6 +1,8 @@
+import { randomInt } from 'node:crypto';
 import { TechnicianBookingStatus, TechnicianCategory, PaymentStatus, Prisma } from '@prisma/client';
 import prisma from '../utils/database';
-import { AppError, NotFoundError, AuthorizationError, ConflictError } from '../middleware/errorHandler';
+import { AppError, NotFoundError, AuthorizationError, ConflictError, ValidationError } from '../middleware/errorHandler';
+import { checkServiceCoverage } from '../utils/serviceArea';
 import type {
   CreateTechnicianBookingInput,
   UpdateTechnicianBookingInput,
@@ -10,11 +12,79 @@ import type {
   CreateTechnicianReviewInput,
 } from '../validators/technician';
 
+/** The two-hour arrival windows the booking UI publishes. */
+const BOOKING_SLOTS: ReadonlyArray<readonly [string, string]> = [
+  ['08:00', '10:00'],
+  ['10:00', '12:00'],
+  ['12:00', '14:00'],
+  ['14:00', '16:00'],
+  ['16:00', '18:00'],
+  ['18:00', '20:00'],
+];
+
+/** How far ahead a doorstep visit may be requested. */
+const BOOKING_WINDOW_DAYS = 90;
+
+/** Stable calendar date in the platform's operating timezone. */
+function dateKey(value: Date): string {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(value);
+  const part = (type: string) => parts.find(item => item.type === type)?.value ?? '';
+  return `${part('year')}-${part('month')}-${part('day')}`;
+}
+
+function weekdayInIndia(value: Date): number {
+  const weekday = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Kolkata',
+    weekday: 'short',
+  }).format(value);
+  const index = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(weekday);
+  return index === -1 ? value.getUTCDay() : index;
+}
+
+/** Current wall-clock time in the platform's operating timezone, as HH:MM. */
+function timeInIndia(value: Date): string {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Kolkata',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(value);
+  const part = (type: string) => parts.find(item => item.type === type)?.value ?? '00';
+  return `${part('hour')}:${part('minute')}`;
+}
+
+/**
+ * Booking numbers are customer-facing but never guessed for authorisation. A
+ * timestamp plus a cryptographic random suffix makes collisions vanishingly
+ * unlikely; `createBooking` still retries on a unique-index violation.
+ */
 function generateBookingNumber(): string {
   const year = new Date().getFullYear();
-  const random = Math.floor(100000 + Math.random() * 900000);
-  return `TECH-${year}-${random}`;
+  const time = Date.now().toString(36).toUpperCase();
+  const random = randomInt(0, 0x100000000).toString(36).toUpperCase().padStart(7, '0');
+  return `TECH-${year}-${time}-${random}`;
 }
+
+/** Statuses a booking may move to from its current state. */
+const STATUS_TRANSITIONS: Record<TechnicianBookingStatus, TechnicianBookingStatus[]> = {
+  PENDING: ['CONFIRMED', 'TECHNICIAN_ASSIGNED', 'CANCELLED', 'REJECTED'],
+  CONFIRMED: ['TECHNICIAN_ASSIGNED', 'TECHNICIAN_CONFIRMED', 'CANCELLED', 'REJECTED'],
+  TECHNICIAN_ASSIGNED: ['TECHNICIAN_CONFIRMED', 'CANCELLED', 'REJECTED'],
+  TECHNICIAN_CONFIRMED: ['TECHNICIAN_ON_THE_WAY', 'CANCELLED', 'REJECTED'],
+  TECHNICIAN_ON_THE_WAY: ['TECHNICIAN_ARRIVED', 'CANCELLED'],
+  TECHNICIAN_ARRIVED: ['SERVICE_STARTED', 'CANCELLED'],
+  SERVICE_STARTED: ['SERVICE_COMPLETED', 'CANCELLED'],
+  SERVICE_COMPLETED: ['PAYMENT_COMPLETED', 'REVIEW_SUBMITTED'],
+  PAYMENT_COMPLETED: ['REVIEW_SUBMITTED'],
+  REVIEW_SUBMITTED: [],
+  CANCELLED: [],
+  REJECTED: [],
+};
 
 // Status transition labels for timeline
 const STATUS_LABELS: Record<TechnicianBookingStatus, string> = {
@@ -148,17 +218,139 @@ export class TechnicianService {
   // ─── Booking creation ──────────────────────────────────────────────────────
 
   async createBooking(customerId: string, data: CreateTechnicianBookingInput) {
-    // Verify service exists
+    // ── Service integrity ──────────────────────────────────────────────────
+    // The service id is the only source of truth for the price. The category
+    // sent by the client must match it, otherwise a caller could buy a cheap
+    // service while filing it under an unrelated category.
     const service = await prisma.technicianService.findUnique({ where: { id: data.serviceId } });
     if (!service || !service.isActive) throw new NotFoundError('Service not found or unavailable');
-
-    // Check technician if specifically chosen
-    if (data.technicianId) {
-      const tech = await prisma.technician.findUnique({ where: { id: data.technicianId } });
-      if (!tech || !tech.isActive) throw new NotFoundError('Technician not found or unavailable');
+    if (service.category !== data.category) {
+      throw new ValidationError('The selected service does not belong to that category.');
     }
 
-    // Price calculation
+    // ── Coverage ───────────────────────────────────────────────────────────
+    // The browser checks this for fast feedback, but a request can be sent
+    // directly to the API, so the same rule is enforced here.
+    const coverage = checkServiceCoverage({
+      city: data.addressCity,
+      pincode: data.addressPincode,
+    });
+    if (!coverage.supported) {
+      throw new ValidationError(coverage.reason ?? 'This address is outside the service area.');
+    }
+
+    // ── Scheduling ─────────────────────────────────────────────────────────
+    const scheduledDate = new Date(data.scheduledDate);
+    if (Number.isNaN(scheduledDate.getTime())) {
+      throw new ValidationError('Invalid scheduled date.');
+    }
+
+    const requestedDay = dateKey(scheduledDate);
+    const today = dateKey(new Date());
+    if (requestedDay < today) {
+      throw new ValidationError('The visit date cannot be in the past.');
+    }
+
+    const latest = new Date();
+    latest.setDate(latest.getDate() + BOOKING_WINDOW_DAYS);
+    if (requestedDay > dateKey(latest)) {
+      throw new ValidationError(`Visits can be requested up to ${BOOKING_WINDOW_DAYS} days ahead.`);
+    }
+
+    const slotIsPublished = BOOKING_SLOTS.some(
+      ([start, end]) => start === data.timeSlotStart && end === data.timeSlotEnd,
+    );
+    if (!slotIsPublished) {
+      throw new ValidationError('Choose one of the published two-hour arrival windows.');
+    }
+
+    // A same-day request for a window that has already started cannot be
+    // fulfilled. The browser disables these windows; the API must enforce it
+    // too because a caller can post directly.
+    if (requestedDay === today && data.timeSlotStart <= timeInIndia(new Date())) {
+      throw new ValidationError('That arrival window has already started. Choose a later window.');
+    }
+
+    // Midnight-to-midnight range in India, used for duplicate and conflict
+    // checks without comparing instants across timezones.
+    const dayStart = new Date(`${requestedDay}T00:00:00+05:30`);
+    const dayEnd = new Date(`${requestedDay}T23:59:59.999+05:30`);
+
+    // ── Preferred technician (optional) ────────────────────────────────────
+    if (data.technicianId) {
+      const tech = await prisma.technician.findUnique({
+        where: { id: data.technicianId },
+        include: { availability: { where: { isActive: true } } },
+      });
+      if (!tech || !tech.isActive || !tech.isAvailable) {
+        throw new NotFoundError('Technician not found or unavailable');
+      }
+      if (!tech.isVerified) {
+        throw new ValidationError('That professional is not available for direct booking yet.');
+      }
+      if (tech.category !== data.category) {
+        throw new ValidationError('That professional does not handle this category.');
+      }
+      // A service belongs to a technician; choosing a different professional
+      // would mean the stored service price is not theirs.
+      if (service.technicianId !== tech.id) {
+        throw new ValidationError('That professional does not offer the selected service.');
+      }
+
+      const weekday = weekdayInIndia(scheduledDate);
+      const windows = tech.availability.filter(item => item.dayOfWeek === weekday);
+      if (
+        windows.length > 0 &&
+        !windows.some(
+          window => data.timeSlotStart >= window.startTime && data.timeSlotEnd <= window.endTime,
+        )
+      ) {
+        throw new ConflictError('The professional does not work during that window.');
+      }
+
+      const clash = await prisma.technicianBooking.findFirst({
+        where: {
+          technicianId: tech.id,
+          scheduledDate: { gte: dayStart, lte: dayEnd },
+          status: { notIn: [TechnicianBookingStatus.CANCELLED, TechnicianBookingStatus.REJECTED] },
+          timeSlotStart: { lt: data.timeSlotEnd },
+          timeSlotEnd: { gt: data.timeSlotStart },
+        },
+        select: { bookingNumber: true },
+      });
+      if (clash) {
+        throw new ConflictError('The professional already has a booking in that window.');
+      }
+    }
+
+    // ── Duplicate submission guard ─────────────────────────────────────────
+    // A double-click or a retried request must not create two identical jobs.
+    // Only very recent, still-open requests count; a customer remains free to
+    // book the same service again later.
+    const duplicate = await prisma.technicianBooking.findFirst({
+      where: {
+        customerId,
+        serviceId: data.serviceId,
+        scheduledDate: { gte: dayStart, lte: dayEnd },
+        timeSlotStart: data.timeSlotStart,
+        status: {
+          in: [
+            TechnicianBookingStatus.PENDING,
+            TechnicianBookingStatus.CONFIRMED,
+            TechnicianBookingStatus.TECHNICIAN_ASSIGNED,
+          ],
+        },
+        createdAt: { gte: new Date(Date.now() - 5 * 60 * 1000) },
+      },
+      select: { bookingNumber: true },
+    });
+    if (duplicate) {
+      throw new ConflictError(
+        `A matching request (${duplicate.bookingNumber}) was just created. Check your dashboard before trying again.`,
+      );
+    }
+
+    // ── Trusted pricing ────────────────────────────────────────────────────
     const estimatedPrice = service.basePrice;
     const visitCharge = 99;
     const taxRate = 0.18;
@@ -166,41 +358,57 @@ export class TechnicianService {
     const taxAmount = Math.round(subtotal * taxRate);
     const totalAmount = subtotal + taxAmount;
 
-    const booking = await prisma.technicianBooking.create({
-      data: {
-        bookingNumber: generateBookingNumber(),
-        customerId,
-        technicianId: data.technicianId ?? null,
-        serviceId: data.serviceId,
-        category: data.category as any,
-        serviceDescription: data.serviceDescription,
-        requestType: 'STANDARD',
-        addressLine1: data.addressLine1,
-        addressLine2: data.addressLine2,
-        addressCity: data.addressCity,
-        addressState: data.addressState,
-        addressPincode: data.addressPincode,
-        addressLabel: data.addressLabel,
-        scheduledDate: new Date(data.scheduledDate),
-        timeSlotStart: data.timeSlotStart,
-        timeSlotEnd: data.timeSlotEnd,
-        estimatedPrice,
-        visitCharge,
-        taxAmount,
-        discountAmount: 0,
-        totalAmount,
-        balanceAmount: totalAmount,
-        paymentMethod: data.paymentMethod as any ?? null,
-        status: TechnicianBookingStatus.PENDING,
-        customerNotes: data.customerNotes,
-        attachments: data.attachments,
-      },
-      include: {
-        service: true,
-        technician: { include: { user: { select: { id: true, name: true, avatar: true } } } },
-        customer: { select: { id: true, name: true, email: true, phone: true } },
-      },
-    });
+    let booking: Awaited<ReturnType<typeof prisma.technicianBooking.create>> | undefined;
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      try {
+        booking = await prisma.technicianBooking.create({
+          data: {
+            bookingNumber: generateBookingNumber(),
+            customerId,
+            technicianId: data.technicianId ?? null,
+            serviceId: data.serviceId,
+            category: data.category as TechnicianCategory,
+            serviceDescription: data.serviceDescription,
+            requestType: 'STANDARD',
+            addressLine1: data.addressLine1,
+            addressLine2: data.addressLine2,
+            addressCity: data.addressCity,
+            addressState: data.addressState,
+            addressPincode: data.addressPincode,
+            addressLabel: data.addressLabel,
+            scheduledDate,
+            timeSlotStart: data.timeSlotStart,
+            timeSlotEnd: data.timeSlotEnd,
+            estimatedPrice,
+            visitCharge,
+            taxAmount,
+            discountAmount: 0,
+            totalAmount,
+            balanceAmount: totalAmount,
+            paymentMethod: (data.paymentMethod as any) ?? null,
+            status: TechnicianBookingStatus.PENDING,
+            customerNotes: data.customerNotes,
+            attachments: data.attachments,
+          },
+          include: {
+            service: true,
+            technician: { include: { user: { select: { id: true, name: true, avatar: true } } } },
+            customer: { select: { id: true, name: true, email: true, phone: true } },
+          },
+        });
+        break;
+      } catch (error) {
+        const isBookingNumberCollision =
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === 'P2002' &&
+          attempt < 4;
+        if (!isBookingNumberCollision) throw error;
+      }
+    }
+
+    if (!booking) {
+      throw new AppError(500, 'Could not allocate a booking number. Please try again.', 'BOOKING_NUMBER_FAILED');
+    }
 
     // Initial timeline entry
     await prisma.technicianBookingTimeline.create({
@@ -333,6 +541,18 @@ export class TechnicianService {
 
     const status = data.status as TechnicianBookingStatus;
 
+    // Status is a workflow, not a free-text field: a completed job cannot go
+    // back to "on the way", and a cancelled booking cannot be revived by a
+    // stray PATCH. Repeating the current status is treated as a no-op.
+    if (status !== booking.status) {
+      const allowed = STATUS_TRANSITIONS[booking.status] ?? [];
+      if (!allowed.includes(status)) {
+        throw new ValidationError(
+          `A booking in "${booking.status}" cannot move to "${status}".`,
+        );
+      }
+    }
+
     const updateData: Record<string, unknown> = { status };
     if (status === TechnicianBookingStatus.CONFIRMED) updateData.confirmedAt = new Date();
     if (status === TechnicianBookingStatus.SERVICE_STARTED) updateData.startedAt = new Date();
@@ -374,13 +594,58 @@ export class TechnicianService {
   async assignTechnician(bookingId: string, technicianId: string, assignedBy: string) {
     const [booking, technician] = await Promise.all([
       prisma.technicianBooking.findUnique({ where: { id: bookingId } }),
-      prisma.technician.findUnique({ where: { id: technicianId } }),
+      prisma.technician.findUnique({
+        where: { id: technicianId },
+        include: { availability: { where: { isActive: true } } },
+      }),
     ]);
 
     if (!booking) throw new NotFoundError('Booking not found');
     if (!technician) throw new NotFoundError('Technician not found');
     if (!technician.isActive || !technician.isAvailable) {
       throw new AppError(400, 'Technician is not available', 'TECHNICIAN_UNAVAILABLE');
+    }
+    if (!technician.isVerified) {
+      throw new ValidationError('Only verified professionals can be assigned to a booking.');
+    }
+    if (
+      booking.status !== TechnicianBookingStatus.PENDING &&
+      booking.status !== TechnicianBookingStatus.CONFIRMED
+    ) {
+      throw new ValidationError(`A booking in "${booking.status}" cannot be assigned.`);
+    }
+    if (technician.category !== booking.category) {
+      throw new ValidationError('The technician does not handle this booking category.');
+    }
+
+    const weekday = weekdayInIndia(booking.scheduledDate);
+    const windows = technician.availability.filter(item => item.dayOfWeek === weekday);
+    if (
+      windows.length > 0 &&
+      !windows.some(
+        window => booking.timeSlotStart >= window.startTime && booking.timeSlotEnd <= window.endTime,
+      )
+    ) {
+      throw new ConflictError('The professional does not work during that window.');
+    }
+
+    const dayStart = new Date(`${dateKey(booking.scheduledDate)}T00:00:00+05:30`);
+    const dayEnd = new Date(`${dateKey(booking.scheduledDate)}T23:59:59.999+05:30`);
+    const clash = await prisma.technicianBooking.findFirst({
+      where: {
+        id: { not: booking.id },
+        technicianId,
+        scheduledDate: { gte: dayStart, lte: dayEnd },
+        status: { notIn: [TechnicianBookingStatus.CANCELLED, TechnicianBookingStatus.REJECTED] },
+        timeSlotStart: { lt: booking.timeSlotEnd },
+        timeSlotEnd: { gt: booking.timeSlotStart },
+      },
+      select: { bookingNumber: true },
+    });
+    if (clash) {
+      throw new ConflictError(
+        `The technician already has booking ${clash.bookingNumber} in that window.`,
+      );
     }
 
     await prisma.technicianBooking.update({

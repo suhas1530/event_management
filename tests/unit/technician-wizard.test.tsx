@@ -1,22 +1,22 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { TechnicianServiceItem } from '@/lib/api'
 
 /**
- * End-to-end behaviour of the home-service booking wizard, exercised through the
+ * Behaviour of the two-screen home-service booking flow, exercised through the
  * real component with only the network, routing and auth boundaries mocked.
  *
- * The point of these tests is honesty: prices come from the API, a category
- * with no catalogue is a stated dead end (never a placeholder price), and an
- * address outside the coverage area stops the flow with the real reason.
+ * The tests protect three things that matter more than the layout:
+ *  1. prices shown are the ones the API returned;
+ *  2. an address outside the published coverage cannot reach review;
+ *  3. a PENDING request is reported as a request, never as a confirmed booking.
  */
 
 const mocks = vi.hoisted(() => ({
   push: vi.fn(),
   searchParams: new URLSearchParams(),
   servicesByCategory: vi.fn(),
-  available: vi.fn(),
   createBooking: vi.fn(),
   auth: { isAuthenticated: true, isLoading: false, user: { id: 'u1', name: 'Test User' } },
 }))
@@ -30,7 +30,6 @@ vi.mock('next/navigation', () => ({
 vi.mock('@/lib/api', () => ({
   technicianApi: {
     servicesByCategory: mocks.servicesByCategory,
-    available: mocks.available,
     createBooking: mocks.createBooking,
   },
 }))
@@ -69,19 +68,34 @@ beforeEach(() => {
   mocks.searchParams = new URLSearchParams()
   mocks.push.mockReset()
   mocks.servicesByCategory.mockReset().mockResolvedValue([acService])
-  mocks.available.mockReset().mockResolvedValue([])
   mocks.createBooking.mockReset()
   mocks.auth.isAuthenticated = true
 })
 
-describe('booking wizard — service step', () => {
-  it('opens on the service step when a category is handed over in the URL', async () => {
+/** Select the catalogue service and fill the one required address line. */
+async function chooseServiceAndAddress(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(await screen.findByRole('button', { name: /AC Deep Clean/ }))
+  fireEvent.change(screen.getByLabelText(/Address Line 1/i), {
+    target: { value: '42, Sunshine Apartments' },
+  })
+}
+
+/** Move from the details screen to the review screen with a covered address. */
+async function goToReview(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole('button', { name: 'Tomorrow' }))
+  await user.click(screen.getByRole('button', { name: /8:00 AM/ }))
+  await user.click(screen.getByRole('button', { name: /Review request/ }))
+  await screen.findByRole('heading', { name: 'Review your request' })
+}
+
+describe('booking flow — service and price', () => {
+  it('opens on a single details screen with the category handed over in the URL', async () => {
     mocks.searchParams = new URLSearchParams('category=AC_SERVICE')
 
     render(<BookTechnicianPage />)
 
-    expect(await screen.findByText('Select the service')).toBeInTheDocument()
-    expect(screen.getByText('Step 2 of 9')).toBeInTheDocument()
+    expect(await screen.findByText('Step 1 of 2')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'What do you need?' })).toBeInTheDocument()
     expect(mocks.servicesByCategory).toHaveBeenCalledWith('AC_SERVICE')
   })
 
@@ -89,11 +103,16 @@ describe('booking wizard — service step', () => {
     mocks.searchParams = new URLSearchParams('category=AC_SERVICE')
     mocks.servicesByCategory.mockResolvedValue([{ ...acService, basePrice: 1234 }])
 
+    const user = userEvent.setup()
     render(<BookTechnicianPage />)
 
-    expect(await screen.findByText('₹1,234')).toBeInTheDocument()
+    await user.click(await screen.findByRole('button', { name: /AC Deep Clean/ }))
+
+    // The card and the estimate panel both read from the same API value.
+    expect(await screen.findAllByText('₹1,234')).toHaveLength(2)
     expect(screen.queryByText('₹499')).not.toBeInTheDocument()
-    expect(screen.getByText('starting from')).toBeInTheDocument()
+    // 1234 + 99 visit charge, 18% GST rounded once, = 1573.
+    expect(screen.getByText('₹1,573')).toBeInTheDocument()
   })
 
   it('states a dead end honestly when the category has no bookable services', async () => {
@@ -106,7 +125,7 @@ describe('booking wizard — service step', () => {
     expect(screen.getByRole('link', { name: /ask the team/i })).toHaveAttribute('href', '/contact')
     expect(screen.getByRole('link', { name: /browse other categories/i })).toHaveAttribute('href', '/services')
     // No invented price anywhere on the screen.
-    expect(screen.queryByText(/starting from/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/₹/)).not.toBeInTheDocument()
   })
 
   it('explains a failed catalogue request instead of blaming the customer', async () => {
@@ -118,92 +137,63 @@ describe('booking wizard — service step', () => {
     expect(await screen.findByText(/could not load services for this category right now/i)).toBeInTheDocument()
   })
 
-  it('starts at the category step when no category was handed over', async () => {
+  it('starts with the category choices when no category was handed over', async () => {
     render(<BookTechnicianPage />)
 
-    expect(await screen.findByText('What do you need help with?')).toBeInTheDocument()
-    expect(screen.getByText('Step 1 of 9')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'What do you need?' })).toBeInTheDocument()
+    expect(screen.getByText('Step 1 of 2')).toBeInTheDocument()
     expect(mocks.servicesByCategory).not.toHaveBeenCalled()
   })
 })
 
-describe('booking wizard — coverage', () => {
-  it('blocks an address outside the coverage area and never reaches the slot step', async () => {
+describe('booking flow — coverage and schedule', () => {
+  it('blocks an address outside the coverage area before review', async () => {
     const user = userEvent.setup()
     mocks.searchParams = new URLSearchParams('category=AC_SERVICE&pincode=562110')
 
     render(<BookTechnicianPage />)
+    await chooseServiceAndAddress(user)
 
-    await user.click(await screen.findByRole('button', { name: /AC Deep Clean/ }))
-    expect(await screen.findByText('Service location')).toBeInTheDocument()
+    expect(screen.getAllByText(/Devanahalli is outside the current doorstep-service zone/i).length).toBeGreaterThan(0)
 
-    // The pincode is checked as soon as it is known, not after a slot is picked.
-    expect(screen.getAllByText(/outside the current doorstep-service zone/i).length).toBeGreaterThan(0)
+    await user.click(screen.getByRole('button', { name: /Review request/ }))
 
-    await user.type(screen.getByLabelText(/Address Line 1/i), '42, Sunshine Apartments')
-    await user.click(screen.getByRole('button', { name: /^Continue$/ }))
-
-    await waitFor(() => {
-      expect(screen.queryByText('When do you need it?')).not.toBeInTheDocument()
-    })
-    expect(screen.getAllByText(/outside the current doorstep-service zone/i).length).toBeGreaterThan(1)
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent(/outside the current doorstep-service zone/i)
+    expect(screen.getByText('Step 1 of 2')).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Review your request' })).not.toBeInTheDocument()
   })
 
-  it('lets a covered address continue to the date and slot step', async () => {
+  it('requires a date and an arrival window before review', async () => {
     const user = userEvent.setup()
     mocks.searchParams = new URLSearchParams('category=AC_SERVICE&pincode=560034')
 
     render(<BookTechnicianPage />)
+    await chooseServiceAndAddress(user)
 
-    await user.click(await screen.findByRole('button', { name: /AC Deep Clean/ }))
-    expect(await screen.findByText('Service location')).toBeInTheDocument()
-    expect(screen.getByText(/Covered — Koramangala/i)).toBeInTheDocument()
+    expect(screen.getByText(/Covered — Koramangala/)).toBeInTheDocument()
 
-    await user.type(screen.getByLabelText(/Address Line 1/i), '42, Sunshine Apartments')
-    await user.click(screen.getByRole('button', { name: /^Continue$/ }))
+    await user.click(screen.getByRole('button', { name: /Review request/ }))
 
-    expect(await screen.findByText('When do you need it?')).toBeInTheDocument()
-    expect(screen.getByText('Step 4 of 9')).toBeInTheDocument()
-  })
+    expect(await screen.findByRole('alert')).toHaveTextContent(/choose a visit date/i)
+    expect(screen.getByText('Step 1 of 2')).toBeInTheDocument()
 
-  it('requires a date and a slot before leaving the schedule step', async () => {
-    const user = userEvent.setup()
-    mocks.searchParams = new URLSearchParams('category=AC_SERVICE&pincode=560034')
+    await user.click(screen.getByRole('button', { name: 'Tomorrow' }))
+    await user.click(screen.getByRole('button', { name: /8:00 AM/ }))
+    await user.click(screen.getByRole('button', { name: /Review request/ }))
 
-    render(<BookTechnicianPage />)
-
-    await user.click(await screen.findByRole('button', { name: /AC Deep Clean/ }))
-    await user.type(await screen.findByLabelText(/Address Line 1/i), '42, Sunshine Apartments')
-    await user.click(screen.getByRole('button', { name: /^Continue$/ }))
-    await user.click(await screen.findByRole('button', { name: /^Continue$/ }))
-
-    expect(await screen.findByText(/please select a date/i)).toBeInTheDocument()
-    expect(screen.getByText('When do you need it?')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Review your request' })).toBeInTheDocument()
+    expect(screen.getByText('Step 2 of 2')).toBeInTheDocument()
   })
 })
 
-describe('booking wizard — submission', () => {
-  /** Walk the wizard to the confirm step with a stubbed catalogue. */
-  async function completeWizard(user: ReturnType<typeof userEvent.setup>) {
-    await user.click(await screen.findByRole('button', { name: /AC Deep Clean/ }))
-    await user.type(await screen.findByLabelText(/Address Line 1/i), '42, Sunshine Apartments')
-    await user.click(screen.getByRole('button', { name: /^Continue$/ })) // location
-    await user.click(await screen.findByRole('button', { name: 'Today' }))
-    await user.click(screen.getByRole('button', { name: /8:00 AM/ }))
-    await user.click(screen.getByRole('button', { name: /^Continue$/ })) // schedule
-    await user.click(await screen.findByRole('button', { name: /Let Heptome assign a professional/ }))
-    await user.click(screen.getByRole('button', { name: /^Continue$/ })) // technician
-    await user.click(screen.getByRole('button', { name: /^Continue$/ })) // problem
-    await user.click(screen.getByRole('button', { name: /^Continue$/ })) // pricing
-    await user.click(screen.getByRole('button', { name: /^Continue$/ })) // payment
-  }
-
+describe('booking flow — submission', () => {
   it('sends the answers to the API and never claims a confirmed booking', async () => {
     const user = userEvent.setup()
     mocks.searchParams = new URLSearchParams('category=AC_SERVICE&pincode=560034')
     mocks.createBooking.mockResolvedValue({
       id: 'bk-1',
-      bookingNumber: 'HB-2026-0001',
+      bookingNumber: 'TECH-2026-ABC123',
       status: 'PENDING',
       technicianId: null,
       scheduledDate: new Date().toISOString(),
@@ -213,15 +203,18 @@ describe('booking wizard — submission', () => {
     })
 
     render(<BookTechnicianPage />)
-    await completeWizard(user)
-    await user.click(await screen.findByRole('button', { name: /Confirm Booking/ }))
+    await chooseServiceAndAddress(user)
+    await goToReview(user)
 
-    expect(await screen.findByText('Slot requested')).toBeInTheDocument()
-    expect(screen.getByText('Request received')).toBeInTheDocument()
+    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('button', { name: /Send booking request/ }))
+
+    expect(await screen.findByText('Request received')).toBeInTheDocument()
+    expect(screen.getByText('Slot requested')).toBeInTheDocument()
     // The critical honesty check: a PENDING booking is not a confirmation.
     expect(screen.queryByText(/booking confirmed/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/you're all set/i)).not.toBeInTheDocument()
-    expect(screen.getByText(/HB-2026-0001/)).toBeInTheDocument()
+    expect(screen.getByText(/TECH-2026-ABC123/)).toBeInTheDocument()
 
     expect(mocks.createBooking).toHaveBeenCalledTimes(1)
     const payload = mocks.createBooking.mock.calls[0][0]
@@ -230,11 +223,35 @@ describe('booking wizard — submission', () => {
     expect(payload.addressPincode).toBe('560034')
     expect(payload.addressCity).toBe('Bengaluru')
     expect(payload.timeSlotStart).toBe('08:00')
-    // Sent as an instant, not a bare date: 09:00 in the customer's own timezone.
+    expect(payload.timeSlotEnd).toBe('10:00')
+    expect(payload.paymentMethod).toBe('CASH')
+    // Sent as an instant, not a bare date: 09:00 in the platform's timezone.
     expect(payload.scheduledDate).toMatch(/T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
-    expect(new Date(payload.scheduledDate).getHours()).toBe(9)
-    // Attachments are a local preview only — they must never be uploaded.
+    expect(
+      new Date(payload.scheduledDate).toLocaleTimeString('en-GB', {
+        timeZone: 'Asia/Kolkata',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      }),
+    ).toBe('09:00')
+    // Attachments are not part of this form and must never be uploaded.
     expect(payload.attachments).toBeUndefined()
+  })
+
+  it('requires the request acknowledgement before sending', async () => {
+    const user = userEvent.setup()
+    mocks.searchParams = new URLSearchParams('category=AC_SERVICE&pincode=560034')
+
+    render(<BookTechnicianPage />)
+    await chooseServiceAndAddress(user)
+    await goToReview(user)
+
+    await user.click(screen.getByRole('button', { name: /Send booking request/ }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/booking request/i)
+    expect(mocks.createBooking).not.toHaveBeenCalled()
+    expect(screen.queryByText('Slot requested')).not.toBeInTheDocument()
   })
 
   it('surfaces a server rejection instead of showing a success screen', async () => {
@@ -243,57 +260,49 @@ describe('booking wizard — submission', () => {
     mocks.createBooking.mockRejectedValue({ error: 'No professional is available for that slot' })
 
     render(<BookTechnicianPage />)
-    await completeWizard(user)
-    await user.click(await screen.findByRole('button', { name: /Confirm Booking/ }))
+    await chooseServiceAndAddress(user)
+    await goToReview(user)
+
+    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('button', { name: /Send booking request/ }))
 
     expect(await screen.findByText(/No professional is available for that slot/)).toBeInTheDocument()
     expect(screen.queryByText('Slot requested')).not.toBeInTheDocument()
   })
 
-  it('asks a signed-out customer to sign in and returns them to the same wizard URL', async () => {
+  it('asks a signed-out customer to sign in and returns them to the wizard', async () => {
     const user = userEvent.setup()
     mocks.auth.isAuthenticated = false
     mocks.searchParams = new URLSearchParams('category=AC_SERVICE&pincode=560034')
 
     render(<BookTechnicianPage />)
-    await completeWizard(user)
-    await user.click(await screen.findByRole('button', { name: /Confirm Booking/ }))
+    await chooseServiceAndAddress(user)
+    await goToReview(user)
+
+    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('button', { name: /Send booking request/ }))
 
     expect(mocks.createBooking).not.toHaveBeenCalled()
     expect(mocks.push).toHaveBeenCalledTimes(1)
     expect(mocks.push.mock.calls[0][0]).toBe(
-      `/login?redirect=${encodeURIComponent('/book/technician?category=AC_SERVICE&pincode=560034')}`
+      `/login?redirect=${encodeURIComponent('/book/technician')}`
     )
+    // The brief is preserved locally so the sign-in round trip loses nothing.
+    await waitFor(() => {
+      expect(window.sessionStorage.getItem('heptome_technician_booking_draft')).toContain('AC_SERVICE')
+    })
   })
 })
 
-describe('booking wizard — pricing steps', () => {
+describe('booking flow — estimate', () => {
   it('shows the itemised estimate that matches the server arithmetic', async () => {
     const user = userEvent.setup()
     mocks.searchParams = new URLSearchParams('category=AC_SERVICE&pincode=560034')
 
     render(<BookTechnicianPage />)
-
-    // Service → location
     await user.click(await screen.findByRole('button', { name: /AC Deep Clean/ }))
-    await user.type(await screen.findByLabelText(/Address Line 1/i), '42, Sunshine Apartments')
-    await user.click(screen.getByRole('button', { name: /^Continue$/ }))
 
-    // Location → schedule, where a date *and* a slot are both required.
-    await user.click(await screen.findByRole('button', { name: /^Continue$/ }))
-    expect(await screen.findByText(/please select a date/i)).toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: 'Today' }))
-    await user.click(screen.getByRole('button', { name: /8:00 AM/ }))
-    await user.click(screen.getByRole('button', { name: /^Continue$/ }))
-
-    // Schedule → technician → problem → pricing
-    await user.click(await screen.findByRole('button', { name: /Let Heptome assign a professional/ }))
-    await user.click(screen.getByRole('button', { name: /^Continue$/ }))
-    await user.click(screen.getByRole('button', { name: /^Continue$/ }))
-
-    expect(await screen.findByText('Price estimate')).toBeInTheDocument()
-    expect(screen.getByText('₹499')).toBeInTheDocument()
+    expect(screen.getAllByText('₹499').length).toBeGreaterThan(0)
     expect(screen.getByText('₹99')).toBeInTheDocument()
     expect(screen.getByText('₹108')).toBeInTheDocument()
     expect(screen.getByText('₹706')).toBeInTheDocument()

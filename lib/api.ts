@@ -197,6 +197,9 @@ export interface EventRequest {
   requirements?: Record<string, unknown>;
   referenceImages?: string[];
   status: string;
+  /** Separate from status; never use this to confirm an event. */
+  paymentStatus?: string;
+  advancePaidAmount?: number;
   assignedManagerId?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -272,6 +275,56 @@ export interface Payment {
   createdAt: string;
 }
 
+export type PaymentTargetType = 'EVENT_BOOKING' | 'TECHNICIAN_BOOKING' | 'EVENT_REQUEST';
+
+export interface PaymentCheckoutConfig {
+  provider: 'razorpay';
+  keyId: string;
+  orderId: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  prefill: { name?: string; email?: string; contact?: string };
+  notes: Record<string, string>;
+}
+
+export interface PaymentOrderResponse {
+  paymentId: string;
+  targetType: PaymentTargetType;
+  targetId: string;
+  amount: number;
+  amountPaise: number;
+  currency: string;
+  status: string;
+  alreadyPaid: boolean;
+  requiresReview: boolean;
+  checkout?: PaymentCheckoutConfig;
+}
+
+export interface PaymentStatusResponse {
+  id: string;
+  targetType: PaymentTargetType;
+  targetId: string;
+  amount: number;
+  amountPaise: number;
+  currency: string;
+  status: string;
+  provider: string;
+  providerOrderId: string | null;
+  providerPaymentId: string | null;
+  paidAt: string | null;
+  verifiedAt: string | null;
+  failureCode: string | null;
+  failureReason: string | null;
+  refundAmount: number;
+  refundStatus: string | null;
+  refundedAt: string | null;
+  checkoutAllowed: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface TimelineEntry {
   id: string;
   bookingId: string;
@@ -327,6 +380,126 @@ export interface AIDesign {
   isBooked: boolean;
   bookingId?: string;
   createdAt: string;
+}
+
+// ─── AI Event Design Assistant ────────────────────────────────────────────────
+//
+// Prices and service ids in these responses come from the live catalog. The
+// client must never treat the indicative catalog total as a confirmed quote.
+
+export type EventDesignStyle =
+  | 'elegant'
+  | 'luxury'
+  | 'modern'
+  | 'traditional'
+  | 'minimalist'
+  | 'floral'
+  | 'colourful'
+  | 'playful'
+  | 'royal';
+
+export interface EventDesignRequirements {
+  eventType: string;
+  eventDate?: string | null;
+  city?: string;
+  guestCount?: number | null;
+  budget?: number | null;
+  style?: EventDesignStyle;
+  colors?: string[];
+  venueType?: 'indoor' | 'outdoor' | 'banquet_hall' | 'home' | 'garden' | 'other';
+  services?: string[];
+  notes?: string;
+  eventId?: string;
+}
+
+export interface EventDesignService {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  price: number | null;
+  priceNote: string;
+  pricingType: string;
+  image: string | null;
+}
+
+export interface EventDesignImage {
+  url: string;
+  alt: string;
+  kind: 'reference_inspiration' | 'catalog_photo';
+  source: string;
+  credit?: string;
+}
+
+export interface EventDesignBudget {
+  type: 'catalog_estimate' | 'quote_required';
+  currency: 'INR';
+  min: number | null;
+  max: number | null;
+  catalogSubtotal: number | null;
+  withinStatedBudget: boolean | null;
+  note: string;
+}
+
+export interface EventDesignRecommendation {
+  id: string;
+  name: string;
+  description: string;
+  style: string;
+  mood: string;
+  colors: string[];
+  elements: string[];
+  stageConcept: string;
+  lighting: string;
+  whyItFits: string;
+  venueType: string;
+  budget: EventDesignBudget;
+  images: EventDesignImage[];
+  imageStatus: 'available' | 'unavailable';
+  services: EventDesignService[];
+  serviceIds: string[];
+  upgrades: string[];
+  source: 'ai' | 'fallback';
+}
+
+export interface EventDesignResponse {
+  recommendations: EventDesignRecommendation[];
+  requirements: EventDesignRequirements;
+  source: 'ai' | 'fallback';
+  notice: string | null;
+  imageDisclaimer: string;
+  generatedAt: string;
+}
+
+export interface SavedEventDesign {
+  id: string;
+  name: string;
+  style: string;
+  colors: string[];
+  image: string | null;
+  services: EventDesignService[];
+  budget: EventDesignBudget | null;
+  eventType: string;
+  eventDate: string | null;
+  city: string | null;
+  createdAt: string;
+}
+
+/** Compact selection carried into the event-request (quotation) flow. */
+export interface SelectedEventDesign {
+  recommendationId: string;
+  name: string;
+  style: string;
+  colors: string[];
+  image: string | null;
+  serviceIds: string[];
+  services: Array<{ id: string; name: string; price: number | null }>;
+  budget: EventDesignBudget | null;
+  eventType: string;
+  eventDate?: string | null;
+  city?: string;
+  guestCount?: number | null;
+  budgetInput?: number | null;
 }
 
 export interface Review {
@@ -608,9 +781,6 @@ export const bookingsApi = {
   rejectQuote: (bookingId: string, quoteId: string) =>
     apiFetch<Quote>(`/bookings/${bookingId}/quotes/${quoteId}/reject`, { method: 'POST' }),
 
-  initiatePayment: (id: string, data: { amount: number; method: string; currency?: string }) =>
-    apiFetch<Payment>(`/bookings/${id}/payments`, { method: 'POST', body: JSON.stringify(data) }),
-
   payments: (id: string) => apiFetch<Payment[]>(`/bookings/${id}/payments`),
 
   timeline: (id: string) => apiFetch<TimelineEntry[]>(`/bookings/${id}/timeline`),
@@ -656,6 +826,83 @@ export const eventRequestsApi = {
 
   requestProposalChanges: (id: string, proposalId: string, message: string) =>
     apiFetch<EventProposal>(`/event-requests/${id}/proposals/${proposalId}/request-changes`, { method: 'POST', body: JSON.stringify({ message }) }),
+};
+
+// ─── Payments API ─────────────────────────────────────────────────────────────
+//
+// The browser only sends a target and an optional retry key. It never sends an
+// amount, currency, customer identity, or success flag; the backend derives all
+// of those from the booking/proposal and verifies Razorpay server-side.
+
+export const paymentsApi = {
+  createOrder: (data: {
+    targetType: PaymentTargetType;
+    targetId: string;
+    idempotencyKey?: string;
+  }) => apiFetch<PaymentOrderResponse>('/payments/orders', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+
+  verify: (data: {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+  }) => apiFetch<PaymentStatusResponse>('/payments/verify', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+
+  status: (orderId: string) =>
+    apiFetch<PaymentStatusResponse>(`/payments/orders/${encodeURIComponent(orderId)}`),
+};
+
+// ─── AI Event Design Assistant API ───────────────────────────────────────────
+
+export const eventDesignApi = {
+  recommendations: (data: EventDesignRequirements) =>
+    apiFetch<EventDesignResponse>('/ai/event-design/recommendations', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      skipAuth: true,
+    }),
+
+  regenerate: (data: EventDesignRequirements & { variation?: number }) =>
+    apiFetch<EventDesignResponse>('/ai/event-design/regenerate', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      skipAuth: true,
+    }),
+
+  customize: (data: {
+    requirements: EventDesignRequirements;
+    change: string;
+    baseId?: string;
+    variation?: number;
+  }) =>
+    apiFetch<{
+      recommendation: EventDesignRecommendation;
+      baseId: string | null;
+      requirements: EventDesignRequirements;
+      source: 'ai' | 'fallback';
+      notice: string | null;
+      imageDisclaimer: string;
+    }>('/ai/event-design/customize', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      skipAuth: true,
+    }),
+
+  save: (data: { requirements: EventDesignRequirements; recommendation: EventDesignRecommendation }) =>
+    apiFetch<{ design: AIDesign }>('/ai/event-design/save', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  saved: () => apiFetch<{ designs: SavedEventDesign[] }>('/ai/event-design/saved'),
+
+  savedDesign: (id: string) =>
+    apiFetch<{ design: AIDesign }>(`/ai/event-design/saved/${encodeURIComponent(id)}`),
 };
 
 // ─── AI API ───────────────────────────────────────────────────────────────────
@@ -769,6 +1016,22 @@ export const contactApi = {
 
   channels: () =>
     apiFetch<ContactChannels>('/contact/info', { skipAuth: true }),
+};
+
+// ─── Newsletter API ───────────────────────────────────────────────────────────
+
+export interface NewsletterSubscription {
+  subscribed: boolean;
+  message: string;
+}
+
+export const newsletterApi = {
+  subscribe: (email: string) =>
+    apiFetch<NewsletterSubscription>('/newsletter', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+      skipAuth: true,
+    }),
 };
 
 // ─── Admin API ────────────────────────────────────────────────────────────────

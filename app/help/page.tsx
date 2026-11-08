@@ -27,6 +27,7 @@ export const metadata: Metadata = {
   title: 'Help Center',
   description:
     'Answers about booking technicians, event requests, proposals, payments, cancellations and your account on Heptome.',
+  alternates: { canonical: '/help' },
 }
 
 const TOPICS = [

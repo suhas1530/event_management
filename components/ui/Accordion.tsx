@@ -11,7 +11,6 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -186,25 +185,19 @@ export const AccordionContent = forwardRef<HTMLDivElement, AccordionContentProps
     const expanded = isOpen(itemValue)
 
     return (
-      <AnimatePresence initial={false}>
+      <div
+        ref={ref}
+        id={`${baseId}-panel-${itemValue}`}
+        role="region"
+        aria-labelledby={`${baseId}-trigger-${itemValue}`}
+        className="overflow-hidden"
+      >
         {expanded && (
-          <motion.div
-            ref={ref}
-            id={`${baseId}-panel-${itemValue}`}
-            role="region"
-            aria-labelledby={`${baseId}-trigger-${itemValue}`}
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
-            className="overflow-hidden"
-          >
-            <div {...props} className={cn('pb-5 pt-1', className)}>
-              {children}
-            </div>
-          </motion.div>
+          <div {...props} className={cn('animate-fade-in pb-5 pt-1', className)}>
+            {children}
+          </div>
         )}
-      </AnimatePresence>
+      </div>
     )
   }
 )

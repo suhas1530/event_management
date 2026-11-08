@@ -50,10 +50,10 @@ export default function PartnerApplicationForm({
   const [sent, setSent] = useState(false)
 
   const fieldClass = ivory
-    ? 'w-full border border-hept-line bg-card px-4 py-3 text-sm text-hept-charcoal placeholder:text-[#9a95a5] outline-none transition focus:border-hept-purple'
-    : 'w-full border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/80 outline-none transition focus:border-champagne'
-  const labelClass = ivory ? 'mb-2 block text-xs font-medium text-hept-charcoal' : 'mb-2 block text-xs font-medium text-foreground/90'
-  const headingClass = ivory ? 'font-display text-xl font-semibold text-hept-charcoal' : 'font-display text-xl font-semibold text-slate-50'
+    ? 'w-full rounded-lg border border-border bg-input px-4 py-3 text-sm text-foreground placeholder:text-subtle-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20'
+    : 'w-full rounded-lg border border-border bg-input px-4 py-3 text-sm text-foreground placeholder:text-subtle-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20'
+  const labelClass = ivory ? 'mb-2 block text-xs font-medium text-foreground' : 'mb-2 block text-xs font-medium text-foreground/90'
+  const headingClass = ivory ? 'font-display text-xl font-semibold text-foreground' : 'font-display text-xl font-semibold text-foreground'
 
   function set<K extends keyof typeof form>(key: K, value: string) {
     setForm(current => ({ ...current, [key]: value }))
@@ -107,8 +107,8 @@ export default function PartnerApplicationForm({
 
   if (sent) {
     return (
-      <div className={cn('p-8', ivory ? 'panel-ivory' : 'border border-white/10 bg-ink-900/60')}>
-        <CheckCircle2 className={cn('size-8', ivory ? 'text-accent' : 'text-champagne')} aria-hidden="true" />
+      <div className={cn('p-8', ivory ? 'panel-ivory' : 'border border-border bg-card')}>
+        <CheckCircle2 className={cn('size-8', ivory ? 'text-primary' : 'text-gold-text')} aria-hidden="true" />
         <h2 className={cn('mt-4', headingClass)}>Application received</h2>
         <p className={cn('mt-3 text-sm leading-6', ivory ? 'surface-ivory-muted' : 'text-fg-dim')}>
           Thank you, {form.name.split(' ')[0] || 'there'}. Your details are with the Heptome team, who review
@@ -120,7 +120,7 @@ export default function PartnerApplicationForm({
   }
 
   return (
-    <form onSubmit={submit} className={cn('p-6 sm:p-8', ivory ? 'panel-ivory' : 'border border-white/10 bg-ink-900/60')}>
+    <form onSubmit={submit} className={cn('p-6 sm:p-8', ivory ? 'panel-ivory' : 'border border-border bg-card')}>
       <h2 className={headingClass}>Apply to join</h2>
       <p className={cn('mt-2 text-sm leading-6', ivory ? 'surface-ivory-muted' : 'text-fg-dim')}>
         Ten fields, two minutes. The team reviews every application — this is not an instant sign-up.
@@ -170,7 +170,7 @@ export default function PartnerApplicationForm({
       </div>
 
       {error && (
-        <p role="alert" className={cn('mt-5 border px-4 py-3 text-sm', ivory ? 'border-[#a4341f]/25 bg-[#a4341f]/5 text-[#a4341f]' : 'border-red-400/20 bg-red-400/5 text-red-300')}>
+        <p role="alert" className={cn('mt-5 border px-4 py-3 text-sm', ivory ? 'border-destructive/30 bg-destructive/5 text-destructive' : 'border-destructive/30 bg-destructive/5 text-destructive')}>
           {error}
         </p>
       )}
@@ -181,8 +181,8 @@ export default function PartnerApplicationForm({
         className={cn(
           'mt-6 inline-flex min-h-12 items-center gap-2.5 px-6 py-3.5 text-sm font-semibold disabled:opacity-60',
           ivory
-            ? 'btn-heptome text-foreground focus-ring-ivory'
-            : 'border border-champagne/45 bg-champagne/15 text-champagne-light transition-colors hover:bg-champagne hover:text-ink-950',
+            ? 'btn-heptome text-primary-foreground focus-ring-ivory'
+            : 'border border-gold/50 bg-gold/15 text-gold-text transition-colors hover:bg-gold hover:text-gold-foreground',
         )}
       >
         {submitting && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}

@@ -1,5 +1,3 @@
-'use client'
-
 import Link from 'next/link'
 import {
   ArrowRight,
@@ -39,12 +37,12 @@ const ICONS: Record<string, LucideIcon> = {
  */
 export default function ServicesSection() {
   return (
-    <section id="event-services" className="scroll-mt-20 bg-ink-950 px-5 py-24 sm:px-10 lg:py-32">
+    <section id="event-services" className="scroll-mt-20 bg-background px-5 py-24 sm:px-10 lg:py-32">
       <div className="mx-auto max-w-[1380px]">
-        <div data-reveal className="mb-14 flex flex-wrap items-end justify-between gap-6">
+        <div className="mb-14 flex flex-wrap items-end justify-between gap-6">
           <div className="max-w-2xl">
-            <p className="mb-4 text-[10px] uppercase tracking-[0.3em] text-champagne">Event services</p>
-            <h2 className="font-display text-[clamp(2rem,4.5vw,3.25rem)] font-semibold tracking-[-0.02em] text-slate-50">
+            <p className="mb-4 text-[10px] uppercase tracking-[0.3em] text-gold-text">Event services</p>
+            <h2 className="font-display text-[clamp(2rem,4.5vw,3.25rem)] font-semibold tracking-[-0.02em] text-foreground">
               Everything your celebration needs.
             </h2>
             <p className="mt-5 text-sm leading-7 text-fg-dim">
@@ -61,22 +59,22 @@ export default function ServicesSection() {
           </Link>
         </div>
 
-        <div data-reveal-group className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {EVENT_SERVICE_CATEGORIES.map(service => {
             const Icon = ICONS[service.icon] ?? Sparkles
             return (
               <Link
                 key={service.id}
-                data-reveal-item
+               
                 href={`/plan-event?service=${encodeURIComponent(service.wizardGroup)}`}
-                className="group flex flex-col border border-white/8 bg-ink-900/50 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-champagne/40 hover:bg-ink-800/70"
+                className="group flex flex-col border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-gold/50 hover:bg-muted/70"
               >
-                <span className="flex size-11 items-center justify-center border border-champagne/25 bg-champagne/10 text-champagne">
+                <span className="flex size-11 items-center justify-center border border-gold/30 bg-gold/10 text-gold-text">
                   <Icon className="size-5" aria-hidden="true" />
                 </span>
-                <h3 className="mt-5 text-base font-medium text-slate-50">{service.name}</h3>
+                <h3 className="mt-5 text-base font-medium text-foreground">{service.name}</h3>
                 <p className="mt-2 text-sm leading-6 text-fg-dim">{service.blurb}</p>
-                <span className="mt-5 inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.16em] text-champagne opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                <span className="mt-5 inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.16em] text-gold-text opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                   Add to your plan
                   <ArrowRight className="size-3.5" aria-hidden="true" />
                 </span>

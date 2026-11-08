@@ -33,8 +33,8 @@ export default function ErrorState({
         className
       )}
     >
-      <span className="mb-5 grid size-14 place-items-center rounded-2xl border border-red-500/20 bg-red-500/10">
-        <AlertTriangle className="size-6 text-red-300" aria-hidden="true" />
+      <span className="mb-5 grid size-14 place-items-center rounded-2xl border border-destructive/20 bg-destructive/10">
+        <AlertTriangle className="size-6 text-destructive" aria-hidden="true" />
       </span>
       <h3 className="text-balance text-base font-medium text-foreground/90">{title}</h3>
       <p className="mt-2 max-w-sm text-pretty text-sm leading-6 text-muted-foreground">{description}</p>
@@ -42,7 +42,7 @@ export default function ErrorState({
         <button
           type="button"
           onClick={onRetry}
-          className="mt-7 inline-flex items-center justify-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-foreground/90 transition-all duration-200 ease-out hover:-translate-y-px hover:border-primary/50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b0b0d]"
+          className="mt-7 inline-flex items-center justify-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-foreground/90 transition-all duration-200 ease-out hover:-translate-y-px hover:border-primary/50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <RefreshCw className="size-4" aria-hidden="true" />
           {retryLabel}

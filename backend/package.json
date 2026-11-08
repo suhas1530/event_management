@@ -11,6 +11,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
+    "db:backfill-payments": "tsx scripts/backfill-payment-fields.ts",
     "lint": "eslint src --ext .ts",
     "test": "vitest"
   },
@@ -27,6 +28,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.3",
     "multer": "^1.4.5-lts.1",
+    "razorpay": "^2.9.8",
     "zod": "^3.23.8"
   },
   "devDependencies": {

@@ -33,7 +33,7 @@ const ROLE_LABEL: Record<string, string> = {
 }
 
 const inputClass =
-  'mt-2 w-full rounded-lg border bg-muted/50 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/80 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/25'
+  'mt-2 w-full rounded-lg border bg-muted/50 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/25'
 
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading: authLoading, refreshUser, logout } = useAuth()
@@ -148,7 +148,7 @@ export default function ProfilePage() {
               <img
                 src={user.avatar}
                 alt=""
-                className="size-20 rounded-2xl object-cover ring-1 ring-white/10"
+                className="size-20 rounded-2xl object-cover ring-1 ring-border"
               />
             ) : (
               <span className="grid size-20 place-items-center rounded-2xl bg-primary/15 font-serif text-2xl text-primary ring-1 ring-primary/25">
@@ -200,7 +200,7 @@ export default function ProfilePage() {
                   autoComplete="name"
                   aria-invalid={profileErrors.name ? 'true' : undefined}
                   aria-describedby={profileErrors.name ? 'name-error' : undefined}
-                  className={cn(inputClass, profileErrors.name ? 'border-red-400/60' : 'border-border focus:border-primary/60')}
+                  className={cn(inputClass, profileErrors.name ? 'border-destructive/60' : 'border-border focus:border-primary/60')}
                 />
                 {profileErrors.name && <FieldError id="name-error">{profileErrors.name}</FieldError>}
               </div>
@@ -216,7 +216,7 @@ export default function ProfilePage() {
                   readOnly
                   className={cn(inputClass, 'cursor-not-allowed border-border-subtle text-muted-foreground')}
                 />
-                <p className="mt-1.5 text-xs text-muted-foreground/80">Email cannot be changed.</p>
+                <p className="mt-1.5 text-xs text-muted-foreground">Email cannot be changed.</p>
               </div>
 
               <div>
@@ -232,7 +232,7 @@ export default function ProfilePage() {
                   placeholder="+91 98765 43210"
                   aria-invalid={profileErrors.phone ? 'true' : undefined}
                   aria-describedby={profileErrors.phone ? 'phone-error' : undefined}
-                  className={cn(inputClass, profileErrors.phone ? 'border-red-400/60' : 'border-border focus:border-primary/60')}
+                  className={cn(inputClass, profileErrors.phone ? 'border-destructive/60' : 'border-border focus:border-primary/60')}
                 />
                 {profileErrors.phone && <FieldError id="phone-error">{profileErrors.phone}</FieldError>}
               </div>
@@ -315,7 +315,7 @@ export default function ProfilePage() {
 
 function FieldError({ id, children }: { id: string; children: React.ReactNode }) {
   return (
-    <p id={id} role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs text-red-300">
+    <p id={id} role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs text-destructive">
       <AlertCircle className="size-3.5" aria-hidden="true" />
       {children}
     </p>
@@ -350,7 +350,7 @@ function PasswordField({
         autoComplete={autoComplete}
         aria-invalid={error ? 'true' : undefined}
         aria-describedby={error ? `${id}-error` : undefined}
-        className={cn(inputClass, error ? 'border-red-400/60' : 'border-border focus:border-primary/60')}
+        className={cn(inputClass, error ? 'border-destructive/60' : 'border-border focus:border-primary/60')}
       />
       {error && <FieldError id={`${id}-error`}>{error}</FieldError>}
     </div>

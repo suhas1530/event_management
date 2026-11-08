@@ -107,7 +107,7 @@ export default function AdminAnalyticsPage() {
             aria-pressed={active}
             className={cn(
               'min-h-9 rounded-md px-3 text-[0.8125rem] font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              active ? 'bg-primary/12 text-accent ring-1 ring-inset ring-accent/30' : 'text-muted-foreground hover:text-foreground'
+              active ? 'bg-primary/12 text-primary ring-1 ring-inset ring-primary/30' : 'text-muted-foreground hover:text-foreground'
             )}
           >
             {p.label}
@@ -185,7 +185,7 @@ export default function AdminAnalyticsPage() {
                 <BarChart3 className="size-[18px] text-primary" aria-hidden="true" />
                 Revenue over time
               </h2>
-              <p className="text-xs text-muted-foreground/80">Peak {money(peak)}</p>
+              <p className="text-xs text-muted-foreground">Peak {money(peak)}</p>
             </div>
 
             {revenue.length === 0 ? (
@@ -217,7 +217,7 @@ export default function AdminAnalyticsPage() {
                     )
                   })}
                 </ul>
-                <div className="mt-3 flex items-center justify-between text-[0.6875rem] text-muted-foreground/80">
+                <div className="mt-3 flex items-center justify-between text-[0.6875rem] text-muted-foreground">
                   <span>{axisLabel(revenue[0].date, period)}</span>
                   <span>{axisLabel(revenue[revenue.length - 1].date, period)}</span>
                 </div>
@@ -267,7 +267,7 @@ export default function AdminAnalyticsPage() {
                     .slice(0, 8)
                     .map((row, index) => (
                       <li key={row.type} className="flex items-center gap-3">
-                        <span className="w-5 shrink-0 text-xs text-muted-foreground/80 tabular-nums">{index + 1}</span>
+                        <span className="w-5 shrink-0 text-xs text-muted-foreground tabular-nums">{index + 1}</span>
                         <span className="min-w-0 flex-1 truncate text-sm text-foreground/90">
                           {row.type.replaceAll('_', ' ').toLowerCase()}
                         </span>

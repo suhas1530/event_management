@@ -54,12 +54,12 @@ export default function PlatformStats() {
   ]
 
   return (
-    <section className="border-b border-hairline/60 bg-ink-900/50" aria-label="Platform at a glance">
+    <section className="border-b border-border/60 bg-card" aria-label="Platform at a glance">
       <div className="mx-auto max-w-7xl">
-        <dl className="grid grid-cols-2 divide-x divide-white/8 lg:grid-cols-4">
+        <dl className="grid grid-cols-2 divide-x divide-border-subtle lg:grid-cols-4">
           {items.map(item => (
             <div key={item.label} className="px-6 py-8 text-center sm:px-8">
-              <dd className="font-display text-3xl text-champagne tabular-nums lg:text-4xl">
+              <dd className="font-display text-3xl text-gold-text tabular-nums lg:text-4xl">
                 {item.value === undefined || item.value === null ? (
                   <CommitmentMark />
                 ) : (
@@ -82,7 +82,7 @@ function CommitmentMark() {
       fill="none"
       stroke="currentColor"
       strokeWidth={1.5}
-      className="mx-auto size-8 text-champagne"
+      className="mx-auto size-8 text-gold-text"
       aria-hidden="true"
     >
       <circle cx="12" cy="12" r="9" />

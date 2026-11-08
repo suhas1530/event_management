@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: 'Become an Event Partner',
   description:
     'Partner with Heptome as a venue, caterer, decorator, photographer, planner or production team — enquiries are reviewed by our event planners before a proposal is sent.',
+  alternates: { canonical: '/become-an-event-partner' },
 }
 
 const ROLES: string[] = [
@@ -53,7 +54,7 @@ const PROMISES = [
 /**
  * Event-partner recruitment page.
  *
- * Dark with champagne, matching the event vertical. Applications are submitted
+ * Warm editorial canvas with champagne accents. Applications are submitted
  * through the contact API with `topic: 'partnership'` — the platform has no
  * dedicated partner pipeline yet — and the page says exactly that, so nobody is
  * promised an onboarding flow that does not exist.
@@ -61,11 +62,11 @@ const PROMISES = [
 export default function BecomeAnEventPartnerPage() {
   return (
     <SiteShell>
-      <section className="immersive bg-ink-950 px-5 py-14 sm:px-10 lg:py-20">
+      <section className="bg-background px-5 py-14 sm:px-10 lg:py-20">
         <div className="mx-auto grid max-w-[1380px] gap-12 lg:grid-cols-[minmax(0,1fr)_560px]">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.3em] text-champagne">For event partners</p>
-            <h1 className="mt-4 font-display text-[clamp(2.25rem,4.8vw,3.5rem)] font-semibold leading-[1.06] tracking-[-0.02em] text-slate-50">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-gold-text">For event partners</p>
+            <h1 className="mt-4 font-display text-[clamp(2.25rem,4.8vw,3.5rem)] font-semibold leading-[1.06] tracking-[-0.02em] text-foreground">
               Supply the moments people remember.
             </h1>
             <p className="mt-5 max-w-xl text-base leading-7 text-fg-dim">
@@ -78,17 +79,17 @@ export default function BecomeAnEventPartnerPage() {
               {PROMISES.map(item => {
                 const Icon = item.icon
                 return (
-                  <li key={item.title} className="border border-white/8 bg-ink-900/60 p-5">
-                    <Icon className="size-5 text-champagne" aria-hidden="true" />
-                    <h2 className="mt-3 text-sm font-semibold text-slate-50">{item.title}</h2>
+                  <li key={item.title} className="border border-border bg-card p-5">
+                    <Icon className="size-5 text-gold-text" aria-hidden="true" />
+                    <h2 className="mt-3 text-sm font-semibold text-foreground">{item.title}</h2>
                     <p className="mt-1.5 text-sm leading-6 text-fg-dim">{item.body}</p>
                   </li>
                 )
               })}
             </ul>
 
-            <div className="mt-10 border-t border-hairline/60 pt-8">
-              <h2 className="text-sm font-semibold text-slate-50">Service lines we plan around</h2>
+            <div className="mt-10 border-t border-border/60 pt-8">
+              <h2 className="text-sm font-semibold text-foreground">Service lines we plan around</h2>
               <ul className="mt-4 flex flex-wrap gap-2">
                 {EVENT_SERVICE_CATEGORIES.map(service => (
                   <li key={service.id} className="border border-border bg-muted/50 px-3 py-1.5 text-xs text-fg-dim">
@@ -98,8 +99,8 @@ export default function BecomeAnEventPartnerPage() {
               </ul>
             </div>
 
-            <div className="mt-8 border border-champagne/25 bg-champagne/[0.06] p-5">
-              <h2 className="text-sm font-semibold text-champagne-light">How applications are handled today</h2>
+            <div className="mt-8 border border-gold/25 bg-gold/5 p-5">
+              <h2 className="text-sm font-semibold text-gold-text">How applications are handled today</h2>
               <p className="mt-2 text-sm leading-6 text-foreground/90">
                 Applications arrive as partnership enquiries in the Heptome inbox and are reviewed by the
                 planning team, who contact you directly to collect portfolios, rates and availability. A
@@ -110,11 +111,11 @@ export default function BecomeAnEventPartnerPage() {
 
             <p className="mt-8 text-sm leading-6 text-fg-dim">
               Prefer to talk first?{' '}
-              <Link href="/contact" className="font-medium text-champagne underline underline-offset-2">
+              <Link href="/contact" className="font-medium text-gold-text underline underline-offset-2">
                 Contact the team
               </Link>{' '}
               or browse{' '}
-              <Link href="/events" className="font-medium text-champagne underline underline-offset-2">
+              <Link href="/events" className="font-medium text-gold-text underline underline-offset-2">
                 the event catalogue
               </Link>
               .

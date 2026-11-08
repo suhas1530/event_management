@@ -158,9 +158,9 @@ export default function TechnicianDashboardPage() {
         {/* Stats */}
         <div className="mt-10 grid gap-4 sm:grid-cols-3">
           {[
-            { label: 'Active jobs', value: stats.active, icon: CalendarClock, tone: 'text-sky-300' },
-            { label: 'Jobs completed', value: stats.completed, icon: CheckCircle2, tone: 'text-emerald-300' },
-            { label: 'Awaiting payout', value: money(stats.pendingPayout), icon: IndianRupee, tone: 'text-amber-300' },
+            { label: 'Active jobs', value: stats.active, icon: CalendarClock, tone: 'text-info' },
+            { label: 'Jobs completed', value: stats.completed, icon: CheckCircle2, tone: 'text-success' },
+            { label: 'Awaiting payout', value: money(stats.pendingPayout), icon: IndianRupee, tone: 'text-warning' },
           ].map(({ label, value, icon: Icon, tone }) => (
             <div key={label} className="rounded-2xl border border-border-subtle bg-muted/50 p-5">
               <div className="flex items-center gap-2.5">
@@ -241,7 +241,7 @@ export default function TechnicianDashboardPage() {
                           </h2>
                           <StatusBadge status={job.status} size="sm" />
                         </div>
-                        <p className="mt-1 text-xs text-muted-foreground/80">{job.bookingNumber}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">{job.bookingNumber}</p>
 
                         {job.serviceDescription && (
                           <p className="mt-3 text-pretty text-sm leading-6 text-muted-foreground">
@@ -251,27 +251,27 @@ export default function TechnicianDashboardPage() {
 
                         <ul className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
                           <li className="flex items-center gap-1.5">
-                            <CalendarClock className="size-3.5 text-muted-foreground/80" aria-hidden="true" />
+                            <CalendarClock className="size-3.5 text-muted-foreground" aria-hidden="true" />
                             {formatSlot(job.scheduledDate, job.timeSlotStart, job.timeSlotEnd)}
                           </li>
                           <li className="flex items-center gap-1.5">
-                            <MapPin className="size-3.5 text-muted-foreground/80" aria-hidden="true" />
+                            <MapPin className="size-3.5 text-muted-foreground" aria-hidden="true" />
                             {job.addressLabel || job.addressCity}
                           </li>
                           {job.customer?.phone && (
                             <li className="flex items-center gap-1.5">
-                              <Phone className="size-3.5 text-muted-foreground/80" aria-hidden="true" />
+                              <Phone className="size-3.5 text-muted-foreground" aria-hidden="true" />
                               {job.customer.phone}
                             </li>
                           )}
                           <li className="flex items-center gap-1.5 font-medium text-muted-foreground">
-                            <IndianRupee className="size-3.5 text-muted-foreground/80" aria-hidden="true" />
+                            <IndianRupee className="size-3.5 text-muted-foreground" aria-hidden="true" />
                             {money(job.totalAmount)}
                           </li>
                         </ul>
 
                         {/* Full address — needed on the day, so not truncated away. */}
-                        <p className="mt-2.5 text-xs leading-5 text-muted-foreground/80">
+                        <p className="mt-2.5 text-xs leading-5 text-muted-foreground">
                           {job.addressLine1}
                           {job.addressLine2 ? `, ${job.addressLine2}` : ''}, {job.addressCity}
                           {job.addressState ? `, ${job.addressState}` : ''} — {job.addressPincode}

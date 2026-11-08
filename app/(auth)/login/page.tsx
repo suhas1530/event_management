@@ -74,27 +74,28 @@ export default function LoginPage() {
       {/* Left decorative panel */}
       <div className="relative hidden w-1/2 overflow-hidden lg:block">
         <img
-          src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1400&q=85"
+          src="/images/hero/modern-interior.webp"
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0b0b0d]/90 via-[#0b0b0d]/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0b0b0d]/95 via-[#0b0b0d]/75 to-[#0b0b0d]/25" />
+        <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-[#0b0b0d]/95 via-[#0b0b0d]/55 to-transparent" />
         <div className="absolute inset-0 flex flex-col justify-between p-14">
           <Logo size="md" tone="dark" />
           <div>
-            <p className="font-serif text-5xl leading-tight text-[#f7f5fa]">
+            <p className="font-serif text-5xl leading-tight text-white">
               Celebrate every<br />moment.<br />
-              <em className="font-light text-champagne">Care for every corner.</em>
+              <em className="font-light text-gold-soft">Care for every corner.</em>
             </p>
-            <p className="mt-4 text-sm leading-6 text-white/70">{brand.heroSupport}</p>
+            <p className="mt-4 text-sm leading-6 text-white/80">{brand.heroSupport}</p>
             <div className="mt-8 flex flex-col gap-2.5">
               {[
                 verticals.events.description,
                 verticals.home.description,
                 'One account for both — no second sign-up',
               ].map(f => (
-                <div key={f} className="flex items-start gap-2.5 text-sm text-white/65">
-                  <div className="mt-2 size-1.5 shrink-0 rounded-full bg-champagne" />
+                <div key={f} className="flex items-start gap-2.5 text-sm text-white/80">
+                  <div className="mt-2 size-1.5 shrink-0 rounded-full bg-gold" />
                   {f}
                 </div>
               ))}
@@ -107,7 +108,7 @@ export default function LoginPage() {
       <div className="flex flex-1 flex-col items-center justify-center px-6 py-16">
         <div className="w-full max-w-[400px]">
           {/* Mobile logo */}
-          <Logo size="sm" tone="dark" className="mb-10 lg:hidden" />
+          <Logo size="sm" tone="auto" className="mb-10 lg:hidden" />
 
           <p className="mb-2 text-[10px] uppercase tracking-[0.3em] text-gold-text">
             {redirectTo ? 'Almost there' : 'Welcome back'}
@@ -115,7 +116,7 @@ export default function LoginPage() {
           <h1 className="mb-2 font-serif text-4xl text-foreground">Sign in</h1>
 
           {redirectTo && (
-            <p className="mb-6 border border-primary/30 bg-primary/10 px-4 py-3 text-sm leading-6 text-white/70">
+            <p className="mb-6 border border-primary/30 bg-primary/10 px-4 py-3 text-sm leading-6 text-foreground/80">
               Sign in to finish what you started — we'll take you straight back.
             </p>
           )}
@@ -124,14 +125,14 @@ export default function LoginPage() {
             Don't have an account?{' '}
             <Link
               href={redirectTo ? `/register?redirect=${encodeURIComponent(redirectTo)}` : '/register'}
-              className="text-gold-text hover:underline"
+              className="text-gold-text underline underline-offset-2 hover:no-underline"
             >
               Create one
             </Link>
           </p>
 
           {error && (
-            <div className="mb-5 border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            <div className="mb-5 border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               {error}
             </div>
           )}
@@ -146,7 +147,7 @@ export default function LoginPage() {
                 required
                 autoComplete="email"
                 placeholder="you@example.com"
-                className="input-field"
+                className="input-base"
               />
             </Field>
 
@@ -160,7 +161,7 @@ export default function LoginPage() {
                   required
                   autoComplete="current-password"
                   placeholder="Your password"
-                  className="input-field pr-11"
+                  className="input-base pr-11"
                 />
                 <button
                   type="button"
@@ -195,7 +196,7 @@ export default function LoginPage() {
           {/* Dividers */}
           <div className="my-6 flex items-center gap-4">
             <div className="flex-1 border-t border-border" />
-            <span className="text-xs text-muted-foreground/80">or continue as</span>
+            <span className="text-xs text-muted-foreground">or continue as</span>
             <div className="flex-1 border-t border-border" />
           </div>
 
@@ -213,19 +214,6 @@ export default function LoginPage() {
 
         <AuthPoweredBy />
       </div>
-
-      <style>{`
-        .input-field {
-          width: 100%;
-          border: 1px solid var(--border);
-          background: var(--card);
-          padding: .75rem 1rem;
-          font-size: .875rem;
-          color: var(--foreground);
-        }
-        .input-field::placeholder { color: var(--muted-foreground); }
-        .input-field:focus { outline: none; border-color: var(--ring); }
-      `}</style>
     </main>
   )
 }

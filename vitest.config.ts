@@ -13,6 +13,11 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./', import.meta.url)),
+      // Backend dependencies live in backend/node_modules. Alias the two that
+      // payment service tests import so the root Vitest run resolves them
+      // without duplicating production packages at the repository root.
+      '@prisma/client': fileURLToPath(new URL('./backend/node_modules/@prisma/client', import.meta.url)),
+      razorpay: fileURLToPath(new URL('./backend/node_modules/razorpay', import.meta.url)),
     },
   },
   esbuild: {

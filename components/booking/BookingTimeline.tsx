@@ -50,23 +50,23 @@ export default function BookingTimeline({ timeline, currentStatus }: BookingTime
             <li key={step.status} className="relative flex gap-6 pb-8 last:pb-0" role="listitem">
               {/* Icon */}
               <div className={`relative z-10 flex size-8 flex-shrink-0 items-center justify-center transition-all ${
-                done ? 'bg-[#d5ae79]' : active ? 'border-2 border-[#d5ae79] bg-card' : 'border border-border bg-background'
+                done ? 'bg-gold' : active ? 'border-2 border-gold bg-card' : 'border border-border bg-background'
               }`}>
                 {done ? (
                   <CheckCircle2 className="size-4 text-foreground" aria-label="Completed" />
                 ) : active ? (
                   <Clock className="size-3.5 text-gold-text animate-pulse" aria-label="Current step" />
                 ) : (
-                  <Circle className="size-3.5 text-muted-foreground/80" aria-label="Pending" />
+                  <Circle className="size-3.5 text-muted-foreground" aria-label="Pending" />
                 )}
               </div>
 
               {/* Content */}
               <div className="flex-1 pt-0.5">
-                <p className={`text-sm font-medium ${done || active ? 'text-foreground' : 'text-muted-foreground/80'}`}>
+                <p className={`text-sm font-medium ${done || active ? 'text-foreground' : 'text-muted-foreground'}`}>
                   {step.label}
                 </p>
-                <p className={`mt-0.5 text-xs ${done || active ? 'text-muted-foreground' : 'text-muted-foreground/80'}`}>
+                <p className={`mt-0.5 text-xs ${done || active ? 'text-muted-foreground' : 'text-muted-foreground'}`}>
                   {entry?.description ?? step.desc}
                 </p>
                 {entry && (
@@ -75,7 +75,7 @@ export default function BookingTimeline({ timeline, currentStatus }: BookingTime
                   </p>
                 )}
                 {active && (
-                  <span className="mt-2 inline-block bg-[#d5ae79]/15 px-2 py-0.5 text-[9px] uppercase tracking-[0.18em] text-[#d5ae79]">
+                  <span className="mt-2 inline-block bg-gold/15 px-2 py-0.5 text-[9px] uppercase tracking-[0.18em] text-gold-text">
                     Current
                   </span>
                 )}

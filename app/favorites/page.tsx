@@ -149,7 +149,7 @@ export default function FavoritesPage() {
                             />
                           ) : (
                             <span className="grid size-full place-items-center">
-                              <Sparkles className="size-6 text-muted-foreground/80" aria-hidden="true" />
+                              <Sparkles className="size-6 text-muted-foreground" aria-hidden="true" />
                             </span>
                           )}
                         </div>
@@ -163,7 +163,7 @@ export default function FavoritesPage() {
                           </h2>
                           {event?.city && (
                             <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-                              <MapPin className="size-3.5 text-muted-foreground/80" aria-hidden="true" />
+                              <MapPin className="size-3.5 text-muted-foreground" aria-hidden="true" />
                               {event.city}
                             </p>
                           )}
@@ -175,7 +175,7 @@ export default function FavoritesPage() {
                         onClick={() => void remove(item.id, title)}
                         disabled={removing === item.id}
                         aria-label={`Remove ${title} from favorites`}
-                        className="absolute right-3 top-3 grid size-9 place-items-center rounded-lg border border-white/10 bg-black/45 text-white/60 backdrop-blur transition-all duration-200 hover:border-red-400/40 hover:text-red-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                        className="absolute right-3 top-3 grid size-9 place-items-center rounded-lg border border-white/10 bg-black/45 text-white/60 backdrop-blur transition-all duration-200 hover:border-destructive/40 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
                       >
                         <Trash2 className="size-4" aria-hidden="true" />
                       </button>

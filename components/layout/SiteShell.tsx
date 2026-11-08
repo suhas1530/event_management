@@ -1,5 +1,3 @@
-'use client'
-
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import Navbar from './Navbar'
@@ -9,7 +7,7 @@ interface SiteShellProps {
   children: ReactNode
   /** Pages with a full-bleed hero can start with a transparent header. */
   transparentHeader?: boolean
-  /** Hide the footer (rarely needed — e.g. immersive wizards). */
+  /** Hide the footer (rarely needed — e.g. wizards). */
   hideFooter?: boolean
   /** Extra classes on the scrolling region. */
   className?: string

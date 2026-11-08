@@ -8,6 +8,7 @@ import { errorHandler } from './middleware/errorHandler';
 import { authMiddleware } from './middleware/auth';
 import { adminMiddleware } from './middleware/adminAuth';
 import routes from './routes';
+import paymentWebhookRoutes from './routes/paymentsWebhook';
 
 const app = express();
 
@@ -24,6 +25,10 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+// Razorpay webhook must receive the raw body before express.json(). Mounting it
+// ahead of the limiter also prevents provider retries from being throttled.
+app.use(`${config.apiPrefix}/payments/webhook`, paymentWebhookRoutes);
 
 // Rate limiting
 const limiter = rateLimit({

@@ -24,33 +24,22 @@ import { SUPPORTED_CITY } from '@/lib/service-area'
 interface LocationListProps {
   location: SelectedLocation
   onSelect: (next: SelectedLocation) => void
-  tone?: 'dark' | 'light'
   /** `flat` drops the outer frame — used inside the mobile drawer. */
   variant?: 'panel' | 'flat'
 }
 
-export function LocationList({ location, onSelect, tone = 'dark', variant = 'panel' }: LocationListProps) {
-  const light = tone === 'light'
+export function LocationList({ location, onSelect, variant = 'panel' }: LocationListProps) {
   const optionClass = (active: boolean) =>
     cn(
       'flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-sm transition-colors duration-150 focus-visible:outline-none',
-      light
-        ? active
-          ? 'bg-hept-lavender text-hept-charcoal'
-          : 'text-muted-foreground hover:bg-hept-lavender/60 hover:text-hept-charcoal focus-visible:bg-hept-lavender/60'
-        : active
-          ? 'bg-primary/15 text-foreground'
-          : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground focus-visible:bg-muted/60'
+      active
+        ? 'bg-primary/15 text-foreground'
+        : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground focus-visible:bg-muted/60'
     )
 
   return (
-    <div className={cn(variant === 'panel' && (light ? 'border border-hept-line bg-card' : 'border border-border bg-popover'))}>
-      <p
-        className={cn(
-          'px-3 pb-1 pt-3 text-[10px] uppercase tracking-[0.18em]',
-          light ? 'text-[#77737f]' : 'text-muted-foreground/80'
-        )}
-      >
+    <div className={cn(variant === 'panel' && 'border border-border bg-popover')}>
+      <p className="px-3 pb-1 pt-3 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
         Doorstep services
       </p>
 
@@ -64,7 +53,7 @@ export function LocationList({ location, onSelect, tone = 'dark', variant = 'pan
         >
           <span>
             All of {SUPPORTED_CITY}
-            <span className={cn('ml-2 text-[11px]', light ? 'text-[#77737f]' : 'text-muted-foreground/80')}>city-wide</span>
+            <span className="ml-2 text-[11px] text-muted-foreground">city-wide</span>
           </span>
           {location.city === SUPPORTED_CITY && location.area === '' && <Check className="size-4 shrink-0 text-primary" aria-hidden="true" />}
         </button>
@@ -87,25 +76,20 @@ export function LocationList({ location, onSelect, tone = 'dark', variant = 'pan
         })}
       </div>
 
-      <div className={cn('border-t px-3 py-3', light ? 'border-hept-line' : 'border-border-subtle')}>
-        <p className={cn('text-[10px] uppercase tracking-[0.18em]', light ? 'text-[#77737f]' : 'text-muted-foreground/80')}>
-          Not available yet
-        </p>
+      <div className="border-t border-border-subtle px-3 py-3">
+        <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Not available yet</p>
         <ul className="mt-2 space-y-1.5" role="list">
           {OTHER_CITIES.map(city => (
-            <li
-              key={city}
-              className={cn('flex items-center gap-2 text-sm', light ? 'text-[#77737f]' : 'text-muted-foreground/80')}
-            >
+            <li key={city} className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="size-3.5 shrink-0" aria-hidden="true" />
               {city}
-              <span className={cn('ml-auto text-[10px] uppercase tracking-[0.12em]', light ? 'text-[#a09ba8]' : 'text-muted-foreground/80')}>
+              <span className="ml-auto text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
                 Coming soon
               </span>
             </li>
           ))}
         </ul>
-        <p className={cn('mt-3 text-xs leading-5', light ? 'text-muted-foreground' : 'text-muted-foreground/80')}>
+        <p className="mt-3 text-xs leading-5 text-muted-foreground">
           Event partners are booked across India — only doorstep home services are limited to {SUPPORTED_CITY}.
         </p>
       </div>
@@ -114,12 +98,10 @@ export function LocationList({ location, onSelect, tone = 'dark', variant = 'pan
 }
 
 interface LocationSelectorProps {
-  /** `chrome` = dark header bar, `light` = ivory surface. */
-  tone?: 'dark' | 'light'
   className?: string
 }
 
-export default function LocationSelector({ tone = 'dark', className }: LocationSelectorProps) {
+export default function LocationSelector({ className }: LocationSelectorProps) {
   const { location, setLocation } = useLocation()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -140,7 +122,6 @@ export default function LocationSelector({ tone = 'dark', className }: LocationS
     }
   }, [open])
 
-  const light = tone === 'light'
   const label = location.area || location.city
 
   return (
@@ -150,12 +131,7 @@ export default function LocationSelector({ tone = 'dark', className }: LocationS
         onClick={() => setOpen(v => !v)}
         aria-expanded={open}
         aria-haspopup="menu"
-        className={cn(
-          'flex max-w-[13rem] items-center gap-2 rounded-lg border px-3 py-2 text-[0.8125rem] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-          light
-            ? 'border-hept-line bg-card text-muted-foreground hover:border-hept-purple/40 hover:text-hept-charcoal'
-            : 'border-border bg-muted/50 text-foreground/90 hover:border-primary/40 hover:text-foreground'
-        )}
+        className="flex max-w-[13rem] items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-2 text-[0.8125rem] text-foreground/90 transition-colors duration-200 hover:border-primary/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <MapPin className="size-4 shrink-0 text-primary" aria-hidden="true" />
         <span className="truncate">
@@ -172,7 +148,6 @@ export default function LocationSelector({ tone = 'dark', className }: LocationS
         <div className="absolute right-0 top-full z-[var(--z-popover)] mt-2 w-72 animate-scale-in">
           <LocationList
             location={location}
-            tone={tone}
             onSelect={next => {
               setLocation(next)
               setOpen(false)

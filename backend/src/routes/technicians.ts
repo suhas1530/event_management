@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { asyncHandler } from '../middleware/errorHandler';
 import { authMiddleware, requireRole } from '../middleware/auth';
 import { adminMiddleware } from '../middleware/adminAuth';
-import { validate, validateQuery, validateParams } from '../middleware/validate';
+import { validate, validateBody, validateQuery, validateParams } from '../middleware/validate';
 import { technicianService } from '../services/technician';
 import prisma from '../utils/database';
 import {
@@ -132,7 +132,7 @@ router.get('/:id', validateParams(objectId), asyncHandler(async (req, res) => {
 
 // ─── Customer: create / manage their own bookings ─────────────────────────────
 
-router.post('/bookings', authMiddleware, validate(createTechnicianBookingSchema), asyncHandler(async (req, res) => {
+router.post('/bookings', authMiddleware, validateBody(createTechnicianBookingSchema), asyncHandler(async (req, res) => {
   const booking = await technicianService.createBooking(req.user!.id, req.body);
   res.status(201).json(booking);
 }));

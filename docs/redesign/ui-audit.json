@@ -1,0 +1,341 @@
+{
+  "generatedAt": "2026-11-01T04:01:11.310Z",
+  "base": "http://localhost:3000",
+  "vitals": {
+    "desktop": {
+      "runs": [
+        {
+          "lcp": 420,
+          "cls": 0,
+          "inpProxy": 72,
+          "fcp": 420,
+          "ttfb": 13,
+          "load": 529,
+          "events": [
+            {
+              "name": "pointerdown",
+              "duration": 72
+            },
+            {
+              "name": "pointerup",
+              "duration": 72
+            },
+            {
+              "name": "click",
+              "duration": 72
+            },
+            {
+              "name": "pointerdown",
+              "duration": 24
+            },
+            {
+              "name": "pointerup",
+              "duration": 24
+            },
+            {
+              "name": "click",
+              "duration": 24
+            },
+            {
+              "name": "keydown",
+              "duration": 40
+            },
+            {
+              "name": "keyup",
+              "duration": 40
+            }
+          ],
+          "images": {
+            "image/avif": 6
+          }
+        },
+        {
+          "lcp": 384,
+          "cls": 0,
+          "inpProxy": 72,
+          "fcp": 384,
+          "ttfb": 20,
+          "load": 505,
+          "events": [
+            {
+              "name": "pointerdown",
+              "duration": 72
+            },
+            {
+              "name": "pointerup",
+              "duration": 72
+            },
+            {
+              "name": "click",
+              "duration": 72
+            },
+            {
+              "name": "pointerdown",
+              "duration": 40
+            },
+            {
+              "name": "pointerup",
+              "duration": 40
+            },
+            {
+              "name": "click",
+              "duration": 40
+            },
+            {
+              "name": "keydown",
+              "duration": 24
+            },
+            {
+              "name": "keyup",
+              "duration": 40
+            }
+          ],
+          "images": {
+            "image/avif": 6
+          }
+        },
+        {
+          "lcp": 856,
+          "cls": 0,
+          "inpProxy": 144,
+          "fcp": 856,
+          "ttfb": 35,
+          "load": 1062,
+          "events": [
+            {
+              "name": "pointerdown",
+              "duration": 144
+            },
+            {
+              "name": "pointerup",
+              "duration": 144
+            },
+            {
+              "name": "click",
+              "duration": 144
+            },
+            {
+              "name": "pointerdown",
+              "duration": 112
+            },
+            {
+              "name": "pointerup",
+              "duration": 104
+            },
+            {
+              "name": "click",
+              "duration": 104
+            },
+            {
+              "name": "keydown",
+              "duration": 24
+            },
+            {
+              "name": "keyup",
+              "duration": 32
+            }
+          ],
+          "images": {
+            "image/avif": 6
+          }
+        }
+      ],
+      "median": {
+        "lcp": 420,
+        "cls": 0,
+        "inpProxy": 72,
+        "fcp": 420,
+        "ttfb": 20
+      },
+      "imageContentTypes": {
+        "image/avif": 6
+      }
+    },
+    "mobile": {
+      "runs": [
+        {
+          "lcp": 836,
+          "cls": 0,
+          "inpProxy": 376,
+          "fcp": 836,
+          "ttfb": 43,
+          "load": 1016,
+          "events": [
+            {
+              "name": "pointerdown",
+              "duration": 312
+            },
+            {
+              "name": "pointerup",
+              "duration": 312
+            },
+            {
+              "name": "click",
+              "duration": 312
+            },
+            {
+              "name": "pointerdown",
+              "duration": 376
+            },
+            {
+              "name": "pointerup",
+              "duration": 376
+            },
+            {
+              "name": "click",
+              "duration": 376
+            },
+            {
+              "name": "keydown",
+              "duration": 48
+            },
+            {
+              "name": "keyup",
+              "duration": 56
+            }
+          ],
+          "images": {
+            "image/avif": 6
+          }
+        },
+        {
+          "lcp": 908,
+          "cls": 0,
+          "inpProxy": 208,
+          "fcp": 908,
+          "ttfb": 42,
+          "load": 1127,
+          "events": [
+            {
+              "name": "pointerdown",
+              "duration": 208
+            },
+            {
+              "name": "pointerup",
+              "duration": 208
+            },
+            {
+              "name": "click",
+              "duration": 208
+            },
+            {
+              "name": "pointerdown",
+              "duration": 160
+            },
+            {
+              "name": "pointerup",
+              "duration": 160
+            },
+            {
+              "name": "click",
+              "duration": 160
+            },
+            {
+              "name": "keydown",
+              "duration": 32
+            },
+            {
+              "name": "keyup",
+              "duration": 24
+            }
+          ],
+          "images": {
+            "image/avif": 6
+          }
+        },
+        {
+          "lcp": 888,
+          "cls": 0,
+          "inpProxy": 200,
+          "fcp": 888,
+          "ttfb": 43,
+          "load": 1095,
+          "events": [
+            {
+              "name": "pointerdown",
+              "duration": 176
+            },
+            {
+              "name": "pointerup",
+              "duration": 176
+            },
+            {
+              "name": "click",
+              "duration": 176
+            },
+            {
+              "name": "pointerdown",
+              "duration": 200
+            },
+            {
+              "name": "pointerup",
+              "duration": 200
+            },
+            {
+              "name": "click",
+              "duration": 200
+            },
+            {
+              "name": "keydown",
+              "duration": 40
+            },
+            {
+              "name": "keyup",
+              "duration": 48
+            }
+          ],
+          "images": {
+            "image/avif": 6
+          }
+        }
+      ],
+      "median": {
+        "lcp": 888,
+        "cls": 0,
+        "inpProxy": 208,
+        "fcp": 888,
+        "ttfb": 43
+      },
+      "imageContentTypes": {
+        "image/avif": 6
+      }
+    }
+  },
+  "axe": [],
+  "screenshots": [
+    "docs\\redesign\\screenshots\\home--light-desktop.jpg",
+    "docs\\redesign\\screenshots\\home--light-mobile.jpg",
+    "docs\\redesign\\screenshots\\home--dark-desktop.jpg",
+    "docs\\redesign\\screenshots\\home--dark-mobile.jpg",
+    "docs\\redesign\\screenshots\\event-management--light-desktop.jpg",
+    "docs\\redesign\\screenshots\\event-management--light-mobile.jpg",
+    "docs\\redesign\\screenshots\\event-management--dark-desktop.jpg",
+    "docs\\redesign\\screenshots\\event-management--dark-mobile.jpg",
+    "docs\\redesign\\screenshots\\home-services--light-desktop.jpg",
+    "docs\\redesign\\screenshots\\home-services--light-mobile.jpg",
+    "docs\\redesign\\screenshots\\home-services--dark-desktop.jpg",
+    "docs\\redesign\\screenshots\\home-services--dark-mobile.jpg",
+    "docs\\redesign\\screenshots\\ai-design-assistant--light-desktop.jpg",
+    "docs\\redesign\\screenshots\\ai-design-assistant--light-mobile.jpg",
+    "docs\\redesign\\screenshots\\ai-design-assistant--dark-desktop.jpg",
+    "docs\\redesign\\screenshots\\ai-design-assistant--dark-mobile.jpg",
+    "docs\\redesign\\screenshots\\plan-event--light-desktop.jpg",
+    "docs\\redesign\\screenshots\\plan-event--light-mobile.jpg",
+    "docs\\redesign\\screenshots\\plan-event--dark-desktop.jpg",
+    "docs\\redesign\\screenshots\\plan-event--dark-mobile.jpg",
+    "docs\\redesign\\screenshots\\book-technician--light-desktop.jpg",
+    "docs\\redesign\\screenshots\\book-technician--light-mobile.jpg",
+    "docs\\redesign\\screenshots\\book-technician--dark-desktop.jpg",
+    "docs\\redesign\\screenshots\\book-technician--dark-mobile.jpg",
+    "docs\\redesign\\screenshots\\login--light-desktop.jpg",
+    "docs\\redesign\\screenshots\\login--light-mobile.jpg",
+    "docs\\redesign\\screenshots\\login--dark-desktop.jpg",
+    "docs\\redesign\\screenshots\\login--dark-mobile.jpg",
+    "docs\\redesign\\screenshots\\contact--light-desktop.jpg",
+    "docs\\redesign\\screenshots\\contact--light-mobile.jpg",
+    "docs\\redesign\\screenshots\\contact--dark-desktop.jpg",
+    "docs\\redesign\\screenshots\\contact--dark-mobile.jpg",
+    "docs\\redesign\\screenshots\\home--light-desktop-fullpage.jpg",
+    "docs\\redesign\\screenshots\\home--dark-desktop-fullpage.jpg"
+  ]
+}
