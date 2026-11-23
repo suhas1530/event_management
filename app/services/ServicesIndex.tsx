@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState, type FormEvent } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
@@ -36,6 +37,7 @@ import {
 import SearchParamsBoundary from '@/components/layout/SearchParamsBoundary'
 import { EVENT_SERVICE_CATEGORIES, HOME_CATALOG, type HomeCatalogGroup } from '@/lib/catalog'
 import { useCategoryPrices, type CategoryPriceState } from '@/lib/use-category-prices'
+import { homeServicePhoto, serviceDetailHref } from '@/lib/home-service-images'
 
 const ICONS: Record<string, LucideIcon> = {
   Sparkles,
@@ -253,13 +255,14 @@ function ServicesIndexInner() {
                 <NoMatch query={query} onClear={() => setQuery('')} />
               ) : (
                 <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {homeResults.map(group => (
+                  {homeResults.map((group, index) => (
                     <HomeServiceCard
                       key={group.id}
                       group={group}
                       price={group.bookingCategory ? prices[group.bookingCategory] : undefined}
                       expanded={expanded === group.id}
                       onToggle={() => setExpanded(expanded === group.id ? null : group.id)}
+                      eager={index < 3}
                     />
                   ))}
                 </div>
@@ -365,18 +368,37 @@ function HomeServiceCard({
   price,
   expanded,
   onToggle,
+  eager = false,
 }: {
   group: HomeCatalogGroup
   price?: CategoryPriceState
   expanded: boolean
   onToggle: () => void
+  eager?: boolean
 }) {
   const Icon = ICONS[group.icon] ?? Sparkles
+  const image = homeServicePhoto(group.id)
   const bookable = Boolean(group.bookingCategory) && typeof price === 'number'
   const openingSoon = Boolean(group.bookingCategory) && (price === undefined || price === 'empty')
 
   return (
-    <article className="flex flex-col border border-border bg-card p-6 transition-colors hover:border-primary/50">
+    <article className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-colors hover:border-primary/50">
+      <Link
+        href={serviceDetailHref(group.id)}
+        className="group relative block aspect-[16/9] overflow-hidden bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+        aria-label={`View ${group.name} details and photos`}
+      >
+        <Image
+          src={image.src}
+          alt={image.alt}
+          fill
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
+          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+          className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+        />
+      </Link>
+      <div className="flex flex-1 flex-col p-6">
       <div className="flex items-start justify-between gap-4">
         <span className="flex size-11 items-center justify-center bg-primary-muted text-primary">
           <Icon className="size-5" aria-hidden="true" />
@@ -445,6 +467,7 @@ function HomeServiceCard({
           ))}
         </ul>
       )}
+      </div>
     </article>
   )
 }

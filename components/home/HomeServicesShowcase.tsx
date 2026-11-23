@@ -20,7 +20,7 @@ import {
 } from 'lucide-react'
 import ScrollRailButtons from './ScrollRailButtons'
 import { HOME_CATALOG, homeGroupById, type HomeCatalogGroup } from '@/lib/catalog'
-import { HOME_SERVICE_IMAGES } from '@/lib/home-content'
+import { homeServicePhoto, serviceDetailHref } from '@/lib/home-service-images'
 import { SUPPORTED_CITY } from '@/lib/service-area'
 
 /** Catalog `icon` names resolved to components — catalogue data stays string-only. */
@@ -108,41 +108,35 @@ export default function HomeServicesShowcase() {
         >
           {featured.map(group => {
             const Icon = ICONS[group.icon] ?? Sparkles
-            const image = HOME_SERVICE_IMAGES[group.id]
+            const image = homeServicePhoto(group.id)
             return (
               <li
                 key={group.id}
-               
-                className="w-[82vw] max-w-[400px] shrink-0 snap-start sm:w-[340px] lg:w-[360px]"
+                className="w-[82vw] max-w-[420px] shrink-0 snap-start sm:w-[380px] lg:w-[400px]"
               >
-                <Link
-                  href={`/book/technician?category=${group.bookingCategory}`}
-                  className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-primary/35 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-                    {image ? (
-                      <Image
-                        src={image.src}
-                        alt={image.alt}
-                        fill
-                        loading="eager"
-                        decoding="async"
-                        sizes="(min-width: 1024px) 360px, (min-width: 640px) 340px, 82vw"
-                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                    ) : (
-                      <span className="grid size-full place-items-center text-muted-foreground">
-                        <Icon className="size-8" aria-hidden="true" />
-                      </span>
-                    )}
+                <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-primary/35 hover:shadow-xl">
+                  <Link
+                    href={serviceDetailHref(group.id)}
+                    className="relative block aspect-[4/3] overflow-hidden rounded-t-2xl bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                    aria-label={`View ${group.name} details and photos`}
+                  >
+                    <Image
+                      src={image.src}
+                      alt={image.alt}
+                      fill
+                      loading="eager"
+                      decoding="async"
+                      sizes="(min-width: 1024px) 400px, (min-width: 640px) 380px, 82vw"
+                      className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                    />
                     <span className="absolute left-4 top-4 flex size-9 items-center justify-center rounded-lg bg-background/90 text-primary shadow-sm backdrop-blur-sm">
                       <Icon className="size-4" aria-hidden="true" />
                     </span>
-                  </div>
+                  </Link>
 
                   <div className="flex flex-1 flex-col p-5">
                     <h3 className="text-lg font-semibold text-foreground">{group.shortName}</h3>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">{group.blurb}</p>
+                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">{group.blurb}</p>
 
                     <ul className="mt-4 flex flex-col gap-1.5 text-xs leading-5 text-muted-foreground">
                       {group.services.slice(0, 3).map(service => (
@@ -153,12 +147,23 @@ export default function HomeServicesShowcase() {
                       ))}
                     </ul>
 
-                    <span className="mt-auto pt-5 inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
-                      Choose a slot
-                      <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
-                    </span>
+                    <div className="mt-auto flex flex-wrap items-center gap-4 pt-5">
+                      <Link
+                        href={`/book/technician?category=${group.bookingCategory}`}
+                        className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-primary px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-primary-foreground transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
+                      >
+                        Book Now
+                        <ArrowRight className="size-3.5" aria-hidden="true" />
+                      </Link>
+                      <Link
+                        href={serviceDetailHref(group.id)}
+                        className="inline-flex min-h-10 items-center text-[11px] font-semibold uppercase tracking-[0.12em] text-primary transition-colors hover:text-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        View Details
+                      </Link>
+                    </div>
                   </div>
-                </Link>
+                </article>
               </li>
             )
           })}

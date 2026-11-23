@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useId, useRef, useState, cloneElement, isValidElement } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
@@ -38,6 +39,7 @@ import {
 import SearchParamsBoundary from '@/components/layout/SearchParamsBoundary'
 import SiteShell from '@/components/layout/SiteShell'
 import { BOOKABLE_HOME_GROUPS, VISIT_CHARGE, GST_RATE, estimateHomeServiceTotal } from '@/lib/catalog'
+import { homeServicePhoto } from '@/lib/home-service-images'
 import { checkCoverage, SUPPORTED_CITY } from '@/lib/service-area'
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -643,6 +645,8 @@ function BookTechnicianInner() {
     : null
   const selectedDateLabel = days.find(day => day.value === state.scheduledDate)?.label
   const selectedPayment = PAYMENT_METHODS.find(method => method.id === state.paymentMethod)
+  const selectedGroup = BOOKABLE_HOME_GROUPS.find(group => group.bookingCategory === state.category)
+  const bannerPhoto = selectedGroup ? homeServicePhoto(selectedGroup.id) : null
 
   return (
     <>
@@ -662,6 +666,31 @@ function BookTechnicianInner() {
           <span className="hidden w-[6.5rem] sm:block" aria-hidden="true" />
         </div>
       </div>
+
+      {bannerPhoto && selectedGroup && (
+        <div className="relative h-36 overflow-hidden bg-muted sm:h-44">
+          <Image
+            src={bannerPhoto.src}
+            alt={bannerPhoto.alt}
+            fill
+            loading="eager"
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+          <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[#0b0f0d]/85 via-[#0b0f0d]/45 to-transparent" />
+          <div className="relative mx-auto flex h-full max-w-5xl flex-col justify-center px-5 text-white">
+            <p className="text-[10px] uppercase tracking-[0.24em] text-gold-soft">Your service</p>
+            <p className="mt-1 font-display text-xl font-semibold sm:text-2xl">{selectedGroup.name}</p>
+            <Link
+              href={`/home-services/${selectedGroup.id}`}
+              className="mt-1 inline-flex w-fit items-center gap-1 text-xs text-white/80 underline-offset-2 hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            >
+              View service details
+              <ArrowRight className="size-3" aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      )}
 
       <div className="mx-auto max-w-5xl px-5 py-8 sm:py-10">
         <div className="mb-8">

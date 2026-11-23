@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import {
   ArrowRight,
@@ -28,10 +29,17 @@ import {
 import { technicianApi } from '@/lib/api'
 import { HOME_CATALOG, type HomeCatalogGroup } from '@/lib/catalog'
 import { HOME_STEPS } from '@/lib/home-content'
+import HomeServicesHeroSlider from '@/components/home/HomeServicesHeroSlider'
+import {
+  HOME_SERVICE_GALLERY,
+  homeServicePhoto,
+  serviceDetailHref,
+} from '@/lib/home-service-images'
 import { checkCoverage, SERVICE_AREA_NAMES, SUPPORTED_CITY, type CoverageResult } from '@/lib/service-area'
 import { useLocation } from '@/lib/location'
 import { siteConfig } from '@/lib/site-config'
 import { useCategoryPrices, type CategoryPriceState } from '@/lib/use-category-prices'
+import { cn } from '@/lib/utils'
 
 const ICONS: Record<string, LucideIcon> = {
   Sparkles,
@@ -214,6 +222,9 @@ export default function HomeServicesLanding() {
         </div>
       </section>
 
+      {/* ── Photography-led service slider ────────────────────────── */}
+      <HomeServicesHeroSlider />
+
       {/* ── Catalogue ─────────────────────────────────────────────── */}
       <section className="surface-ivory px-5 pb-20 sm:px-10" aria-labelledby="catalogue-heading">
         <div className="mx-auto max-w-[1380px]">
@@ -237,8 +248,69 @@ export default function HomeServicesLanding() {
           </div>
 
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {HOME_CATALOG.map(group => (
-              <ServiceGroupCard key={group.id} group={group} price={group.bookingCategory ? prices[group.bookingCategory] : undefined} />
+            {HOME_CATALOG.map((group, index) => (
+              <ServiceGroupCard
+                key={group.id}
+                group={group}
+                price={group.bookingCategory ? prices[group.bookingCategory] : undefined}
+                eager={index < 3}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Photography gallery ───────────────────────────────────── */}
+      <section className="surface-ivory px-5 pb-20 sm:px-10" aria-labelledby="gallery-heading">
+        <div className="mx-auto max-w-[1380px] border-t border-border pt-12">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="max-w-2xl">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-gold-text">Our work, up close</p>
+              <h2 id="gallery-heading" className="mt-3 font-display text-2xl font-semibold text-foreground sm:text-3xl">
+                Professional Home Services at Your Doorstep
+              </h2>
+              <p className="surface-ivory-muted mt-2 text-sm leading-6">
+                A closer look at the trades we book every day — plumbing, electrical work, cleaning,
+                appliance repair, painting, carpentry and general home maintenance.
+              </p>
+            </div>
+            <Link
+              href="/services"
+              className="btn-heptome inline-flex min-h-11 items-center gap-2 px-5 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-primary-foreground focus-ring-ivory"
+            >
+              Explore Services
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          </div>
+
+          <div className="mt-9 grid auto-rows-[190px] grid-cols-2 gap-3 sm:auto-rows-[220px] lg:grid-cols-4">
+            {HOME_SERVICE_GALLERY.map(tile => (
+              <Link
+                key={tile.id}
+                href={serviceDetailHref(tile.category)}
+                className={cn(
+                  'group relative overflow-hidden rounded-2xl border border-border bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-muted',
+                  tile.size === 'large' ? 'col-span-2 row-span-2' : 'col-span-1 row-span-1',
+                )}
+                aria-label={`${tile.label} — ${tile.caption}`}
+              >
+                <Image
+                  src={tile.image.src}
+                  alt={tile.image.alt}
+                  fill
+                  loading="lazy"
+                  decoding="async"
+                  sizes="(min-width: 1024px) 50vw, (min-width: 640px) 50vw, 100vw"
+                  className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+                />
+                <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#111114]/85 via-transparent to-transparent" />
+                <span className="absolute inset-x-0 bottom-0 p-4">
+                  <span className="block text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-soft">
+                    {tile.label}
+                  </span>
+                  <span className="mt-1 block text-sm font-medium text-white sm:text-base">{tile.caption}</span>
+                </span>
+              </Link>
             ))}
           </div>
         </div>
@@ -316,13 +388,36 @@ export default function HomeServicesLanding() {
  * category, no services, API unreachable — ends in an enquiry route, which is
  * the honest option: the wizard could not complete for those.
  */
-function ServiceGroupCard({ group, price }: { group: HomeCatalogGroup; price?: CategoryPriceState }) {
+function ServiceGroupCard({ group, price, eager = false }: { group: HomeCatalogGroup; price?: CategoryPriceState; eager?: boolean }) {
   const Icon = ICONS[group.icon] ?? Sparkles
+  const image = homeServicePhoto(group.id)
   const bookable = Boolean(group.bookingCategory) && typeof price === 'number'
   const awaitingCatalogue = Boolean(group.bookingCategory) && (price === undefined || price === 'empty')
 
   return (
-    <article id={group.id} className="panel-ivory flex scroll-mt-28 flex-col p-6">
+    <article id={group.id} className="panel-ivory flex scroll-mt-28 flex-col overflow-hidden rounded-2xl">
+      <Link
+        href={serviceDetailHref(group.id)}
+        className="group relative block aspect-[16/10] overflow-hidden bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+        aria-label={`View ${group.name} details and photos`}
+      >
+        <Image
+          src={image.src}
+          alt={image.alt}
+          fill
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
+          sizes="(min-width: 1024px) 440px, (min-width: 640px) 50vw, 100vw"
+          className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+        />
+        <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#111114]/45 to-transparent" />
+        <span className="absolute bottom-3 left-4 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white">
+          View photo gallery
+          <ArrowRight className="size-3" aria-hidden="true" />
+        </span>
+      </Link>
+
+      <div className="flex flex-1 flex-col p-6">
       <div className="flex items-start justify-between gap-4">
         <span className="flex size-11 items-center justify-center bg-primary/10 text-primary">
           <Icon className="size-5" aria-hidden="true" />
@@ -382,11 +477,12 @@ function ServiceGroupCard({ group, price }: { group: HomeCatalogGroup; price?: C
           </Link>
         )}
         <Link
-          href="/book/technician"
+          href={serviceDetailHref(group.id)}
           className="surface-ivory-muted inline-flex min-h-11 items-center text-xs font-medium transition-colors hover:text-primary focus-ring-ivory"
         >
-          See all services
+          View Details
         </Link>
+      </div>
       </div>
     </article>
   )

@@ -1,5 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { absoluteUrl } from '@/lib/seo'
+import { HOME_CATALOG } from '@/lib/catalog'
+import { serviceDetailHref } from '@/lib/home-service-images'
 
 /**
  * Public, indexable routes only. Authenticated dashboards, booking review
@@ -31,6 +33,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/privacy', changeFrequency: 'yearly', priority: 0.3 },
     { path: '/terms', changeFrequency: 'yearly', priority: 0.3 },
   ]
+
+  for (const group of HOME_CATALOG) {
+    routes.push({
+      path: serviceDetailHref(group.id),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    })
+  }
 
   return routes.map(route => ({
     url: absoluteUrl(route.path),
