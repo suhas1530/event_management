@@ -114,7 +114,7 @@ test.describe('footer', () => {
     await page.reload({ waitUntil: 'domcontentloaded' })
 
     await expect(page.locator('html')).toHaveClass(/dark/)
-    await expect(footer).toHaveCSS('background-color', 'rgb(11, 16, 13)')
+    await expect(footer).toHaveCSS('background-color', 'rgb(15, 20, 17)')
     await expect(footer).toHaveCSS('color', 'rgb(244, 240, 232)')
   })
 

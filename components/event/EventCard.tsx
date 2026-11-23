@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { Star, Heart, MapPin, Users, ArrowRight } from 'lucide-react'
 import type { Event } from '@/lib/api'
+import { resolveEventImage } from '@/lib/event-images'
 
 interface EventCardProps {
   event: Event
@@ -42,23 +43,25 @@ export default function EventCard({ event, onFavoriteToggle, initialFavorited = 
   }
 
   const categoryLabel = event.category?.name ?? TYPE_LABELS[event.type] ?? event.type
+  const { src, fallback } = resolveEventImage(event)
 
   return (
-    <article className="group relative flex flex-col overflow-hidden border border-border bg-card transition-all duration-300 hover:border-gold/30 hover:shadow-[0_0_30px_rgba(213,174,121,0.06)]">
+    <article className="group relative flex flex-col overflow-hidden border border-border bg-card transition-all duration-300 hover:border-gold/30 hover:shadow-lg">
       {/* Image */}
-      <Link href={`/events/${event.slug}`} className="relative block aspect-[1.15] overflow-hidden" tabIndex={-1} aria-hidden="true">
-        {event.heroImages?.[0] ? (
-          <img
-            src={event.heroImages[0]}
-            alt={event.title}
-            className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-            loading="lazy"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-muted/60">
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">No image</span>
-          </div>
-        )}
+      <Link href={`/events/${event.slug}`} className="relative block aspect-[1.15] overflow-hidden bg-muted/60" tabIndex={-1} aria-hidden="true">
+        <img
+          src={src}
+          alt={event.title}
+          className="h-full w-full object-cover object-center transition duration-700 group-hover:scale-105"
+          loading="lazy"
+          decoding="async"
+          onError={(e) => {
+            const img = e.currentTarget
+            if (img.dataset.fallbackApplied === '1') return
+            img.dataset.fallbackApplied = '1'
+            img.src = fallback
+          }}
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-[#111114]/70 via-transparent to-transparent" />
 
         {/* Badges */}
@@ -69,7 +72,7 @@ export default function EventCard({ event, onFavoriteToggle, initialFavorited = 
             </span>
           )}
           {event.isLuxury && (
-            <span className="border border-gold/50 bg-black/50 px-2 py-0.5 text-[8px] uppercase tracking-[0.18em] text-gold-text backdrop-blur-sm">
+            <span className="border border-gold/50 bg-black/50 px-2 py-0.5 text-[8px] uppercase tracking-[0.18em] text-gold-soft backdrop-blur-sm">
               Luxury
             </span>
           )}
@@ -93,8 +96,8 @@ export default function EventCard({ event, onFavoriteToggle, initialFavorited = 
           aria-pressed={favorited}
           className={`absolute right-3 top-3 flex size-8 items-center justify-center border backdrop-blur-sm transition ${
             favorited
-              ? 'border-gold bg-gold/20 text-gold-text'
-              : 'border-white/25 bg-black/40 text-white hover:border-gold hover:text-gold-text'
+              ? 'border-gold bg-gold/20 text-gold-soft'
+              : 'border-white/25 bg-black/40 text-white hover:border-gold hover:text-gold-soft'
           } ${toggling ? 'opacity-60' : ''}`}
         >
           <Heart className={`size-3.5 ${favorited ? 'fill-current' : ''}`} />

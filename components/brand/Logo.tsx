@@ -62,7 +62,7 @@ export default function Logo({
       )}
       <span
         className={cn(
-          'font-display leading-none tracking-tight',
+          'font-brand leading-none tracking-tight',
           s.word,
           tone === 'dark' ? 'text-white' : 'text-foreground'
         )}

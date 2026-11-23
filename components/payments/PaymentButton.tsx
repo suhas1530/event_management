@@ -258,7 +258,7 @@ export default function PaymentButton({
         order_id: order.checkout.orderId,
         prefill: order.checkout.prefill,
         notes: order.checkout.notes,
-        theme: { color: '#22382d' },
+        theme: { color: '#283b32' },
         handler: response => {
           void verifyResponse(order.checkout!.orderId, response);
         },

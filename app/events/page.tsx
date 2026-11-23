@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { eventsApi } from '@/lib/api'
 import type { Event, EventCategory } from '@/lib/api'
+import { resolveEventImage } from '@/lib/event-images'
 import SiteShell from '@/components/layout/SiteShell'
 import SearchParamsBoundary from '@/components/layout/SearchParamsBoundary'
 import {
@@ -31,31 +32,8 @@ function fmt(n: number) {
   return `₹${n}`
 }
 
-const EVENT_IMAGE_FALLBACKS: Record<string, string> = {
-  WEDDING: '/images/featured/production-wedding.webp',
-  BIRTHDAY: '/images/featured/birthday-soiree.webp',
-  ANNIVERSARY: '/images/featured/floral-studio.webp',
-  ENGAGEMENT: '/images/hero/engagement-ceremony.webp',
-  BABY_SHOWER: '/images/featured/floral-studio.webp',
-  CORPORATE: '/images/featured/annual-summit.webp',
-  CONFERENCE: '/images/featured/annual-summit.webp',
-  KIDS_PARTY: '/images/featured/birthday-soiree.webp',
-  GRADUATION: '/images/featured/annual-summit.webp',
-  HOUSEWARMING: '/images/hero/modern-interior.webp',
-  PROPOSAL: '/images/hero/engagement-ceremony.webp',
-  THEME_PARTY: '/images/featured/live-music.webp',
-  PRIVATE_CELEBRATION: '/images/hero/outdoor-celebration.webp',
-  CUSTOM: '/images/featured/product-launch.webp',
-}
-
-function eventImageFor(event: Event): string {
-  return EVENT_IMAGE_FALLBACKS[event.type] ?? '/images/featured/product-launch.webp'
-}
-
 function EventCard({ event, onFavoriteToggle }: { event: Event; onFavoriteToggle?: (id: string) => void }) {
-  const fallback = eventImageFor(event)
-  const raw = event.heroImages?.[0]
-  const src = raw && raw.startsWith('/') ? raw : fallback
+  const { src, fallback } = resolveEventImage(event)
   return (
     <article className="group relative flex flex-col overflow-hidden border border-border bg-card transition hover:border-gold/30">
       <Link href={`/events/${event.slug}`} className="block relative aspect-[1.2] overflow-hidden bg-muted">
@@ -66,10 +44,11 @@ function EventCard({ event, onFavoriteToggle }: { event: Event; onFavoriteToggle
           decoding="async"
           onError={(e) => {
             const img = e.currentTarget
-            if (img.src.endsWith(fallback)) return
+            if (img.dataset.fallbackApplied === '1') return
+            img.dataset.fallbackApplied = '1'
             img.src = fallback
           }}
-          className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+          className="h-full w-full object-cover object-center transition duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#111114]/80 via-transparent to-transparent" />
         {event.isFeatured && (
@@ -85,7 +64,7 @@ function EventCard({ event, onFavoriteToggle }: { event: Event; onFavoriteToggle
         <button type="button"
           onClick={e => { e.preventDefault(); onFavoriteToggle?.(event.id) }}
           aria-label="Save event"
-          className="absolute right-3 top-3 flex size-8 items-center justify-center border border-white/20 bg-black/40 backdrop-blur-sm transition hover:bg-gold hover:text-gold-foreground hover:border-transparent">
+          className="absolute right-3 top-3 flex size-8 items-center justify-center border border-white/20 bg-black/40 text-white backdrop-blur-sm transition hover:border-transparent hover:bg-gold hover:text-gold-foreground">
           <Heart className="size-3.5" />
         </button>
       </Link>

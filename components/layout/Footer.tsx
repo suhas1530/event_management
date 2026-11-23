@@ -39,9 +39,13 @@ function SocialRow({ className }: { className?: string }) {
         if (!href) {
           return (
             <li key={key}>
-              <span className="flex size-10 cursor-default items-center justify-center rounded-xl border border-footer-border bg-white/[0.02] text-footer-subtle" title={`${label} — coming soon`}>
+              <span
+                role="img"
+                aria-label={`${label} (coming soon)`}
+                className="flex size-10 cursor-default items-center justify-center rounded-xl border border-footer-border bg-white/[0.02] text-footer-subtle"
+                title={`${label} — coming soon`}
+              >
                 <Icon className="size-[18px]" aria-hidden="true" />
-                <span className="sr-only">{label} (coming soon)</span>
               </span>
             </li>
           )

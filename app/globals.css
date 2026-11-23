@@ -5,8 +5,9 @@
 @theme inline {
   --font-sans: var(--font-inter);
   --font-serif: var(--font-cormorant);
-  --font-display: var(--font-space);
-  --font-mono: var(--font-mono);
+  --font-display: var(--font-manrope);
+  --font-brand: var(--font-space);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Colors */
   --color-background: var(--background);
@@ -170,59 +171,59 @@
   /* ── HEPTOME — Warm Minimal / light ───────────────────────────────────
      One semantic source of truth. Components never introduce a second
      palette; aliases below exist only so older screens resolve here too.
-     The brand direction is deep evergreen + copper, warmed by an ivory
-     canvas and a sage-neutral support surface. */
-  --background: #f8f5ef;
-  --foreground: #20261f;
+     The brand direction is deep forest green + champagne, warmed by an ivory
+     canvas and a soft neutral support surface. */
+  --background: #f8f6f2;
+  --foreground: #25251f;
   --surface: #ffffff;
-  --surface-foreground: #20261f;
-  --surface-secondary: #f0eae0;
+  --surface-foreground: #25251f;
+  --surface-secondary: #f0ece5;
   --surface-elevated: #ffffff;
-  --surface-muted: #f0eae0;
-  --border: #e5ded2;
-  --border-subtle: #eee8dd;
-  --ring: #22382d;
+  --surface-muted: #f0ece5;
+  --border: #e6e1d8;
+  --border-subtle: #eeeae2;
+  --ring: #283b32;
   --input: #ffffff;
-  --muted: #f0eae0;
-  --muted-foreground: #64625b;
+  --muted: #f0ece5;
+  --muted-foreground: #68645d;
   /* Lower-emphasis text still clears WCAG AA on both the ivory canvas and
      white cards. */
-  --subtle-foreground: #6b685f;
+  --subtle-foreground: #6f6b62;
 
   /* Primary — deep evergreen (brand, primary actions, active navigation) */
-  --primary: #22382d;
-  --primary-foreground: #fbfaf7;
-  --primary-hover: #182a20;
-  --primary-muted: rgba(34, 56, 45, 0.09);
+  --primary: #283b32;
+  --primary-foreground: #ffffff;
+  --primary-hover: #1e2d26;
+  --primary-muted: rgba(40, 59, 50, 0.09);
 
   /* Secondary — warm neutral surface */
-  --secondary: #f0eae0;
-  --secondary-foreground: #20261f;
-  --secondary-hover: #e6ddd0;
+  --secondary: #f0ece5;
+  --secondary-foreground: #25251f;
+  --secondary-hover: #e6e1d8;
 
-  /* Accent — copper (celebration detail, highlights, decorative fills).
+  /* Accent — champagne (celebration detail, highlights, decorative fills).
      The established `gold-*` names are retained so every existing screen
      inherits the brand accent without a component-by-component rewrite. */
-  --accent: #b35432;
-  --accent-foreground: #fff8f4;
+  --accent: #b99b69;
+  --accent-foreground: #25251f;
 
-  --gold: #b35432;
-  --gold-soft: #e3b6a1;
-  --gold-foreground: #fff8f4;
-  --gold-text: #8f3c22;
+  --gold: #b99b69;
+  --gold-soft: #d8c49b;
+  --gold-foreground: #25251f;
+  --gold-text: #7a5f2e;
 
   /* Status */
   --success: #26734d;
-  --success-foreground: #f7fff9;
-  --success-muted: rgba(38, 115, 77, 0.11);
+  --success-foreground: #ffffff;
+  --success-muted: rgba(38, 115, 77, 0.10);
 
-  --warning: #9a5f18;
-  --warning-foreground: #fffdf7;
-  --warning-muted: rgba(154, 95, 24, 0.13);
+  --warning: #a66a20;
+  --warning-foreground: #ffffff;
+  --warning-muted: rgba(166, 106, 32, 0.12);
 
   --destructive: #b64040;
-  --destructive-foreground: #fff8f6;
-  --destructive-muted: rgba(182, 64, 64, 0.11);
+  --destructive-foreground: #ffffff;
+  --destructive-muted: rgba(182, 64, 64, 0.10);
 
   --info: #3f6070;
   --info-foreground: #f7fcfe;
@@ -230,15 +231,15 @@
 
   /* Cards, popovers and chrome */
   --card: #ffffff;
-  --card-foreground: #20261f;
-  --card-border: #e5ded2;
+  --card-foreground: #25251f;
+  --card-border: #e6e1d8;
 
   --popover: #ffffff;
-  --popover-foreground: #20261f;
-  --popover-border: #ded7cb;
+  --popover-foreground: #25251f;
+  --popover-border: #ded8cd;
 
-  --card-shadow: 0 1px 2px rgba(32, 38, 31, 0.04), 0 18px 40px -32px rgba(32, 38, 31, 0.28);
-  --popover-shadow: 0 24px 60px -24px rgba(32, 38, 31, 0.26);
+  --card-shadow: 0 1px 2px rgba(37, 37, 31, 0.04), 0 18px 40px -32px rgba(37, 37, 31, 0.26);
+  --popover-shadow: 0 24px 60px -24px rgba(37, 37, 31, 0.24);
 
   /* Footer — deep evergreen in both themes, with its own legible pair. */
   --footer: #101613;
@@ -247,18 +248,18 @@
   --footer-muted: #b8bdb5;
   --footer-subtle: #929a91;
   --footer-border: rgba(244, 240, 232, 0.14);
-  --footer-accent: #d98a63;
-  --footer-accent-foreground: #1a0f09;
+  --footer-accent: #c5a878;
+  --footer-accent-foreground: #171b19;
 
   /* Legacy aliases — all resolve to the semantic tokens above. */
   --hept-charcoal: var(--foreground);
   --hept-ivory: var(--surface-secondary);
   --hept-purple: var(--primary);
-  --hept-lavender: #e7eee5;
+  --hept-lavender: #e8e2d3;
   --hept-gold: var(--gold);
   --hept-grey: var(--muted-foreground);
   --hept-line: var(--border);
-  --on-lavender: #2c4436;
+  --on-lavender: #283b32;
 
   --ink-950: var(--background);
   --ink-900: var(--surface);
@@ -273,46 +274,46 @@
   --champagne: var(--gold);
   --champagne-light: var(--gold-text);
 
-  --glass: rgba(248, 245, 239, 0.82);
+  --glass: rgba(248, 246, 242, 0.82);
 }
 
 /* ── HEPTOME — Midnight Premium / dark ──────────────────────────────── */
 .dark {
   color-scheme: dark;
 
-  --background: #101613;
-  --foreground: #f2eee5;
-  --surface: #171f1a;
-  --surface-foreground: #f2eee5;
-  --surface-secondary: #1c2620;
-  --surface-elevated: #1c2620;
-  --surface-muted: #1c2620;
-  --border: #303c33;
-  --border-subtle: #273229;
-  --ring: #a9c5b0;
-  --input: #161e18;
-  --muted: #1c2620;
-  --muted-foreground: #c0c5bd;
-  --subtle-foreground: #929b92;
+  --background: #171b19;
+  --foreground: #f4f0e8;
+  --surface: #202622;
+  --surface-foreground: #f4f0e8;
+  --surface-secondary: #272f2a;
+  --surface-elevated: #272f2a;
+  --surface-muted: #272f2a;
+  --border: #353e37;
+  --border-subtle: #2d362f;
+  --ring: #a9bca9;
+  --input: #222923;
+  --muted: #272f2a;
+  --muted-foreground: #c0c1b9;
+  --subtle-foreground: #92978f;
 
   /* Primary — sage in dark mode. Primary buttons use the dark ink
      foreground, so text and control contrast stay AA. */
-  --primary: #a9c5b0;
-  --primary-foreground: #101613;
-  --primary-hover: #c2d8c7;
-  --primary-muted: rgba(169, 197, 176, 0.14);
+  --primary: #a9bca9;
+  --primary-foreground: #171b19;
+  --primary-hover: #c2d2c1;
+  --primary-muted: rgba(169, 188, 169, 0.14);
 
-  --secondary: #1c2620;
-  --secondary-foreground: #f2eee5;
-  --secondary-hover: #26332b;
+  --secondary: #272f2a;
+  --secondary-foreground: #f4f0e8;
+  --secondary-hover: #303a32;
 
-  --accent: #d98a63;
-  --accent-foreground: #1a0f09;
+  --accent: #c5a878;
+  --accent-foreground: #171b19;
 
-  --gold: #d98a63;
-  --gold-soft: #e8b59d;
-  --gold-foreground: #1a0f09;
-  --gold-text: #e7a585;
+  --gold: #c5a878;
+  --gold-soft: #dcc18c;
+  --gold-foreground: #171b19;
+  --gold-text: #dcc18c;
 
   --success: #78b991;
   --success-foreground: #0f1e16;
@@ -330,35 +331,35 @@
   --info-foreground: #0d1a1f;
   --info-muted: rgba(143, 184, 199, 0.12);
 
-  --card: #171f1a;
-  --card-foreground: #f2eee5;
-  --card-border: #303c33;
+  --card: #202622;
+  --card-foreground: #f4f0e8;
+  --card-border: #353e37;
 
-  --popover: #1c2620;
-  --popover-foreground: #f2eee5;
-  --popover-border: #3a473d;
+  --popover: #272f2a;
+  --popover-foreground: #f4f0e8;
+  --popover-border: #414c43;
 
-  --card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 22px 48px -32px rgba(0, 0, 0, 0.8);
-  --popover-shadow: 0 26px 60px -24px rgba(0, 0, 0, 0.75);
+  --card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 22px 48px -32px rgba(0, 0, 0, 0.55);
+  --popover-shadow: 0 26px 60px -24px rgba(0, 0, 0, 0.6);
 
   /* Footer — a deeper evergreen under the already-dark canvas. */
-  --footer: #0b100d;
-  --footer-surface: #121a14;
+  --footer: #0f1411;
+  --footer-surface: #161c18;
   --footer-foreground: #f4f0e8;
   --footer-muted: #b8bdb5;
   --footer-subtle: #929a91;
   --footer-border: rgba(244, 240, 232, 0.14);
-  --footer-accent: #d98a63;
-  --footer-accent-foreground: #1a0f09;
+  --footer-accent: #c5a878;
+  --footer-accent-foreground: #171b19;
 
   --hept-charcoal: var(--foreground);
   --hept-ivory: var(--surface-secondary);
   --hept-purple: var(--primary);
-  --hept-lavender: #26372c;
+  --hept-lavender: #2a352d;
   --hept-gold: var(--gold);
   --hept-grey: var(--muted-foreground);
   --hept-line: var(--border);
-  --on-lavender: #cad8c9;
+  --on-lavender: #cdd8cd;
 
   --ink-950: var(--background);
   --ink-900: var(--surface);
@@ -373,7 +374,7 @@
   --champagne: var(--gold);
   --champagne-light: var(--gold-text);
 
-  --glass: rgba(16, 22, 19, 0.82);
+  --glass: rgba(23, 27, 25, 0.82);
 }
 
 
@@ -472,6 +473,12 @@ select {
 /* Typography Scale */
 .font-serif {
   font-family: var(--font-serif), Georgia, serif;
+}
+
+/* Brand wordmark only — preserves the original logo face after the rest of
+   the display typography moved to Manrope. */
+.font-brand {
+  font-family: var(--font-brand), var(--font-display), sans-serif;
 }
 
 .font-sans {

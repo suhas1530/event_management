@@ -9,7 +9,7 @@ import {
 } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeft, ArrowRight, ChevronDown, Pause, Play } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { HERO_SLIDES } from '@/lib/home-content'
 import { usePrefersReducedMotion } from '@/lib/motion'
@@ -28,24 +28,20 @@ const AUTOPLAY_GRACE_MS = 1200
  * carries the range of the product while the visitor reads one clear message
  * and can start either booking journey without waiting for a transition.
  *
- * Autoplay is deliberately conservative — it runs every five seconds, pauses
- * on hover, focus, a hidden tab, an explicit pause, or reduced-motion, and
- * never stacks timers. The active indicator doubles as the progress meter.
+ * The slider advances automatically every 5 seconds, loops continuously, and
+ * keeps running after manual navigation. Autoplay pauses only when the tab is
+ * hidden or the user prefers reduced motion.
  */
 export default function HeroSection() {
   const reduced = usePrefersReducedMotion()
   const [index, setIndex] = useState(0)
-  const [hovered, setHovered] = useState(false)
-  const [focused, setFocused] = useState(false)
-  const [manualPaused, setManualPaused] = useState(false)
-  const [forcePlay, setForcePlay] = useState(false)
   const [hidden, setHidden] = useState(false)
   const [settled, setSettled] = useState(false)
   const pointerStart = useRef<number | null>(null)
 
   const count = HERO_SLIDES.length
   const slide = HERO_SLIDES[index]
-  const paused = hidden || reduced || manualPaused || ((hovered || focused) && !forcePlay)
+  const paused = hidden || reduced
 
   const go = useCallback(
     (next: number) => {
@@ -57,21 +53,25 @@ export default function HeroSection() {
   const next = useCallback(() => go(index + 1), [go, index])
   const previous = useCallback(() => go(index - 1), [go, index])
 
-  /* Give the first frame a beat to paint before the story starts moving. */
+  /* Give the first frame a beat to paint before autoplay begins. */
   useEffect(() => {
-    if (reduced) return
+    if (reduced) {
+      setSettled(true)
+      return
+    }
     const grace = window.setTimeout(() => setSettled(true), AUTOPLAY_GRACE_MS)
     return () => window.clearTimeout(grace)
   }, [reduced])
 
-  /* One timeout per cycle — never an interval that can stack. */
+  /* One timer per cycle — never stacked. Manual navigation changes `index`,
+     which resets this timer so autoplay continues after the configured interval. */
   useEffect(() => {
     if (!settled || paused) return
     const timer = window.setTimeout(() => setIndex(current => (current + 1) % count), AUTOPLAY_MS)
     return () => window.clearTimeout(timer)
   }, [count, index, paused, settled])
 
-  /* Stop the clock when the tab is in the background. */
+  /* Pause when the tab is in the background. */
   useEffect(() => {
     const sync = () => setHidden(document.hidden)
     sync()
@@ -113,18 +113,6 @@ export default function HeroSection() {
         } else if (event.key === 'End') {
           event.preventDefault()
           go(count - 1)
-        }
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => {
-        setHovered(false)
-        setForcePlay(false)
-      }}
-      onFocusCapture={() => setFocused(true)}
-      onBlurCapture={event => {
-        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-          setFocused(false)
-          setForcePlay(false)
         }
       }}
       onPointerDown={onPointerDown}
@@ -269,26 +257,6 @@ export default function HeroSection() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              if (paused) {
-                setManualPaused(false)
-                if (hovered || focused) setForcePlay(true)
-              } else {
-                setManualPaused(true)
-                setForcePlay(false)
-              }
-            }}
-            aria-label={paused ? 'Play slideshow' : 'Pause slideshow'}
-            className="flex size-10 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-          >
-            {paused ? (
-              <Play className="size-4" aria-hidden="true" />
-            ) : (
-              <Pause className="size-4" aria-hidden="true" />
-            )}
-          </button>
           <button
             type="button"
             onClick={previous}

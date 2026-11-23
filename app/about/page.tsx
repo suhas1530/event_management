@@ -231,7 +231,7 @@ export default function AboutPage() {
         <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/[0.10] via-transparent to-transparent px-6 py-14 text-center sm:px-12">
           <div
             className="pointer-events-none absolute inset-0"
-            style={{ background: 'radial-gradient(50% 100% at 50% 100%, rgba(213,174,121,0.14), transparent 70%)' }}
+            style={{ background: 'radial-gradient(50% 100% at 50% 100%, color-mix(in srgb, var(--gold) 14%, transparent), transparent 70%)' }}
             aria-hidden="true"
           />
           <div className="relative">

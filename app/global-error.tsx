@@ -22,7 +22,7 @@ export default function GlobalError({
           minHeight: '100vh',
           display: 'grid',
           placeItems: 'center',
-          background: '#101613',
+          background: '#171b19',
           color: '#f4f0e8',
           fontFamily: 'system-ui, -apple-system, Segoe UI, sans-serif',
           padding: '2rem',
@@ -34,7 +34,7 @@ export default function GlobalError({
               fontSize: '0.6875rem',
               letterSpacing: '0.25em',
               textTransform: 'uppercase',
-              color: '#d98a63',
+              color: '#c5a878',
               margin: 0,
             }}
           >
@@ -54,8 +54,8 @@ export default function GlobalError({
               cursor: 'pointer',
               border: 0,
               borderRadius: '0.5rem',
-              background: '#d98a63',
-              color: '#1a0f09',
+              background: '#c5a878',
+              color: '#171b19',
               fontWeight: 600,
               padding: '0.875rem 1.75rem',
             }}

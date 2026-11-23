@@ -9,6 +9,7 @@ import ErrorState from '@/components/shared/ErrorState'
 import { PageHeader, buttonClass } from '@/components/shared/Primitives'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { useToast } from '@/components/ui/Toast'
+import { resolveEventImage } from '@/lib/event-images'
 import { favoritesApi, type Event } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
 
@@ -131,6 +132,7 @@ export default function FavoritesPage() {
               {items.map(item => {
                 const event = item.event
                 const title = event?.title ?? 'Saved item'
+                const image = event ? resolveEventImage(event) : null
                 return (
                   <li key={item.id} className="group relative">
                     <article className="h-full overflow-hidden rounded-2xl border border-border-subtle bg-muted/50 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-primary/30">
@@ -139,12 +141,19 @@ export default function FavoritesPage() {
                         className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       >
                         <div className="relative aspect-[16/10] overflow-hidden bg-muted/50">
-                          {event?.heroImages?.[0] ? (
+                          {image ? (
                             // eslint-disable-next-line @next/next/no-img-element -- remote, user-supplied event imagery cannot be optimised ahead of time
                             <img
-                              src={event.heroImages[0]}
+                              src={image.src}
                               alt=""
                               loading="lazy"
+                              decoding="async"
+                              onError={(e) => {
+                                const img = e.currentTarget
+                                if (img.dataset.fallbackApplied === '1') return
+                                img.dataset.fallbackApplied = '1'
+                                img.src = image.fallback
+                              }}
                               className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                             />
                           ) : (

@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -27,6 +28,14 @@ import {
 
 export type Theme = 'light' | 'dark' | 'system'
 export type ResolvedTheme = 'light' | 'dark'
+
+/**
+ * React Strict Mode remounts client trees in development and resets attributes
+ * the inline bootstrap script wrote on <html>. Re-applying in a layout effect
+ * restores the correct theme before the browser paints. This is a no-op in
+ * production, where the inline script alone is authoritative.
+ */
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 export const THEME_STORAGE_KEY = 'heptome-theme'
 
@@ -61,6 +70,13 @@ export function applyTheme(mode: Theme, animate = false): ResolvedTheme {
   root.classList.toggle('dark', resolved === 'dark')
   root.dataset.theme = resolved
   root.dataset.themeMode = mode
+
+  /* Keep the browser chrome (mobile address bar, tab strip) in step with the
+     resolved theme, including when `system` changes at runtime. */
+  document.querySelector('meta[name="theme-color"]')?.setAttribute(
+    'content',
+    resolved === 'dark' ? '#171b19' : '#f8f6f2',
+  )
 
   if (animate && typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -126,9 +142,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [commit])
 
   /* Hydrate from the values the inline script already applied. The first
-     render intentionally renders no mode-dependent label; this effect then
-     syncs React with the DOM without changing the painted theme. */
-  useEffect(() => {
+     render intentionally renders no mode-dependent label; this layout effect
+     then syncs React with the DOM before paint, and also repairs the state a
+     development Strict Mode remount can reset. */
+  useIsomorphicLayoutEffect(() => {
     const root = document.documentElement
     const stored = readStoredTheme()
     const appliedMode = root.dataset.themeMode

@@ -1,16 +1,17 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight, ArrowUpRight, MapPin } from 'lucide-react'
 import { eventsApi, type Event as ApiEvent } from '@/lib/api'
+import { resolveEventImage } from '@/lib/event-images'
 import { FEATURED_FALLBACK } from '@/lib/home-content'
 
 interface FeaturedCard {
   key: string
   title: string
   img: string
+  fallback: string
   badge: string
   location: string
   price: number | null
@@ -24,32 +25,20 @@ const FALLBACK_CARDS: FeaturedCard[] = FEATURED_FALLBACK.map(item => ({
   key: item.id,
   title: item.title,
   img: item.img,
+  fallback: item.img,
   badge: item.date,
   location: item.location,
   price: item.price,
   href: '/events',
 }))
 
-const EVENT_CARD_FALLBACKS: Record<string, string> = {
-  WEDDING: '/images/featured/production-wedding.webp',
-  BIRTHDAY: '/images/featured/birthday-soiree.webp',
-  CORPORATE: '/images/featured/annual-summit.webp',
-  CONFERENCE: '/images/featured/annual-summit.webp',
-  THEME_PARTY: '/images/featured/live-music.webp',
-  PRODUCT_LAUNCH: '/images/featured/product-launch.webp',
-}
-
-function localEventImage(event: ApiEvent): string {
-  const src = event.heroImages?.[0]
-  if (src && src.startsWith('/')) return src
-  return EVENT_CARD_FALLBACKS[event.type] ?? '/images/featured/product-launch.webp'
-}
-
 function toCard(event: ApiEvent): FeaturedCard {
+  const { src, fallback } = resolveEventImage(event)
   return {
     key: event.id,
     title: event.title,
-    img: localEventImage(event),
+    img: src,
+    fallback,
     badge: event.type.replaceAll('_', ' ').toLowerCase(),
     location: event.location || event.city,
     price: event.startingPrice > 0 ? event.startingPrice : null,
@@ -150,14 +139,18 @@ export default function FeaturedEvents() {
                   href={card.href}
                   className="group relative block aspect-[4/5] overflow-hidden rounded-2xl border border-border bg-neutral-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
-                  <Image
+                  <img
                     src={card.img}
                     alt={card.title}
-                    fill
                     loading="eager"
                     decoding="async"
-                    sizes="(min-width: 1024px) 380px, (min-width: 640px) 360px, 82vw"
-                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                    onError={(e) => {
+                      const img = e.currentTarget
+                      if (img.dataset.fallbackApplied === '1') return
+                      img.dataset.fallbackApplied = '1'
+                      img.src = card.fallback
+                    }}
+                    className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
                   />
                   <div
                     aria-hidden="true"

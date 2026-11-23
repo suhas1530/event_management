@@ -1,6 +1,6 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Cormorant_Garamond, Inter, Space_Grotesk } from 'next/font/google'
+import { Cormorant_Garamond, Inter, Manrope, Space_Grotesk } from 'next/font/google'
 import Providers from './providers'
 import './globals.css'
 import { brand } from '@/lib/brand'
@@ -16,6 +16,15 @@ const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   weight: ['400', '500', '600', '700'],
+})
+/* Manrope carries headings and UI display type; Inter carries body copy.
+   Space Grotesk is retained solely as the brand wordmark face so the existing
+   Heptome logo is pixel-for-pixel unchanged. Cormorant stays as the editorial
+   serif accent that is part of the current visual identity. */
+const manrope = Manrope({
+  subsets: ['latin'],
+  variable: '--font-manrope',
+  weight: ['400', '500', '600', '700', '800'],
 })
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -59,10 +68,9 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: 'light dark',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f8f5ef' },
-    { media: '(prefers-color-scheme: dark)', color: '#101613' },
-  ],
+  // A single theme-color meta is kept in sync by the bootstrap script and the
+  // provider, so browser chrome follows the chosen mode rather than the OS
+  // alone. Media-specific static tags would fight an explicit override.
 }
 
 /** Runs before first paint: stored choice first, otherwise the OS preference.
@@ -70,7 +78,7 @@ export const viewport: Viewport = {
  *  `prefers-color-scheme` and records both the resolved theme and the mode.
  *  The key is inlined because the provider is a client module and its constant
  *  cannot be referenced as a value from a server component. */
-const themeBootstrap = `(function(){var stored=null;try{stored=localStorage.getItem('heptome-theme');}catch(e){}var mode=stored==='light'||stored==='dark'||stored==='system'?stored:'system';var dark=mode==='dark';if(mode==='system'){try{dark=!!(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);}catch(e){dark=false;}}var r=document.documentElement;r.classList.toggle('dark',dark);r.dataset.theme=dark?'dark':'light';r.dataset.themeMode=mode;})();`
+const themeBootstrap = `(function(){var stored=null;try{stored=localStorage.getItem('heptome-theme');}catch(e){}var mode=stored==='light'||stored==='dark'||stored==='system'?stored:'system';var dark=mode==='dark';if(mode==='system'){try{dark=!!(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);}catch(e){dark=false;}}var r=document.documentElement;r.classList.toggle('dark',dark);r.dataset.theme=dark?'dark':'light';r.dataset.themeMode=mode;var m=document.querySelector('meta[name="theme-color"]');if(!m){m=document.createElement('meta');m.name='theme-color';document.head.appendChild(m);}m.setAttribute('content',dark?'#171b19':'#f8f6f2');})();`
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -78,7 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>
-      <body className={`${cormorant.variable} ${inter.variable} ${spaceGrotesk.variable} bg-background text-foreground antialiased`}>
+      <body className={`${cormorant.variable} ${inter.variable} ${manrope.variable} ${spaceGrotesk.variable} bg-background text-foreground antialiased`}>
         <Providers>
           {children}
         </Providers>

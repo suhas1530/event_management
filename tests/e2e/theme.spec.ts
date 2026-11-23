@@ -11,8 +11,8 @@ import { clickUntil } from './helpers'
  * present in the desktop header, the mobile drawer and the admin sign-in page.
  */
 
-const LIGHT_BG = 'rgb(248, 245, 239)'
-const DARK_BG = 'rgb(16, 22, 19)'
+const LIGHT_BG = 'rgb(248, 246, 242)'
+const DARK_BG = 'rgb(23, 27, 25)'
 
 async function bodyBackground(page: Page): Promise<string> {
   return page.evaluate(() => getComputedStyle(document.body).backgroundColor)

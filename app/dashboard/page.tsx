@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { bookingsApi, eventRequestsApi, notificationsApi, technicianApi } from '@/lib/api'
 import type { Booking, EventRequest, Notification, TechnicianBooking } from '@/lib/api'
+import { resolveEventImage } from '@/lib/event-images'
 import SiteShell from '@/components/layout/SiteShell'
 import {
   Wrench, Sparkles, CalendarDays, Bell, ArrowRight, MapPin, Star,
@@ -281,11 +282,24 @@ export default function CustomerDashboard() {
         {showEvent && upcomingEvent && (
           <Link href={`/bookings/${upcomingEvent.id}`}
             className="mb-8 flex items-center gap-5 border border-gold/20 bg-gold/5 p-5 transition hover:bg-gold/8">
-            {upcomingEvent.event?.heroImages?.[0] && (
-              <div className="hidden size-16 flex-shrink-0 overflow-hidden sm:block">
-                <img src={upcomingEvent.event.heroImages[0]} alt="" className="h-full w-full object-cover" />
-              </div>
-            )}
+            {upcomingEvent.event && (() => {
+              const { src, fallback } = resolveEventImage(upcomingEvent.event)
+              return (
+                <div className="hidden size-16 flex-shrink-0 overflow-hidden sm:block">
+                  <img
+                    src={src}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      const img = e.currentTarget
+                      if (img.dataset.fallbackApplied === '1') return
+                      img.dataset.fallbackApplied = '1'
+                      img.src = fallback
+                    }}
+                  />
+                </div>
+              )
+            })()}
             <div className="flex-1">
               <p className="text-[10px] uppercase tracking-[0.2em] text-gold-text">Upcoming event</p>
               <p className="mt-1 font-serif text-xl text-foreground">{upcomingEvent.event?.title ?? 'Your event'}</p>
@@ -422,9 +436,24 @@ export default function CustomerDashboard() {
                     <Link key={b.id} href={`/bookings/${b.id}`}
                       className="group flex items-center gap-4 px-5 py-4 transition hover:bg-muted/60">
                       <div className="size-10 flex-shrink-0 overflow-hidden border border-border bg-muted/60">
-                        {b.event?.heroImages?.[0]
-                          ? <img src={b.event.heroImages[0]} alt="" className="h-full w-full object-cover" />
-                          : <div className="flex h-full items-center justify-center"><Sparkles className="size-4 text-muted-foreground" /></div>}
+                        {b.event ? (() => {
+                          const { src, fallback } = resolveEventImage(b.event)
+                          return (
+                            <img
+                              src={src}
+                              alt=""
+                              className="h-full w-full object-cover"
+                              onError={(e) => {
+                                const img = e.currentTarget
+                                if (img.dataset.fallbackApplied === '1') return
+                                img.dataset.fallbackApplied = '1'
+                                img.src = fallback
+                              }}
+                            />
+                          )
+                        })() : (
+                          <div className="flex h-full items-center justify-center"><Sparkles className="size-4 text-muted-foreground" /></div>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="truncate text-sm text-foreground">{b.event?.title ?? 'Event'}</p>

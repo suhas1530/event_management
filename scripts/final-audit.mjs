@@ -230,10 +230,9 @@ const heroReport = {}
   await page.getByRole('button', { name: 'Previous photograph' }).click()
   heroReport.previousWorks = await page.locator('#hero').getByText('02 / 08', { exact: true }).isVisible()
 
-  await page.getByRole('button', { name: 'Pause slideshow' }).click()
-  await page.waitForTimeout(6000)
-  heroReport.pauseWorks = await page.locator('#hero').getByText('02 / 08', { exact: true }).isVisible()
-  await page.getByRole('button', { name: 'Play slideshow' }).click()
+  heroReport.playPauseRemoved = await page.getByRole('button', { name: /Play slideshow|Pause slideshow/ }).count() === 0
+  await page.waitForTimeout(6200)
+  heroReport.autoplayContinuesAfterManualNav = await page.locator('#hero').getByText('03 / 08', { exact: true }).isVisible()
 
   await page.locator('#hero').focus()
   await page.keyboard.press('End')

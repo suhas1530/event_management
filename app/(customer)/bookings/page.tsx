@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { bookingsApi } from '@/lib/api'
 import type { Booking } from '@/lib/api'
+import { resolveEventImage } from '@/lib/event-images'
 import { CalendarDays, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react'
 import SiteShell from '@/components/layout/SiteShell'
 import EmptyState from '@/components/shared/EmptyState'
@@ -108,15 +109,25 @@ export default function BookingsPage() {
                   >
                     {/* Event image */}
                     <div className="size-14 flex-shrink-0 overflow-hidden bg-muted/60">
-                      {b.event?.heroImages?.[0] ? (
-                        // eslint-disable-next-line @next/next/no-img-element -- remote, user-supplied event imagery
-                        <img
-                          src={b.event.heroImages[0]}
-                          alt=""
-                          loading="lazy"
-                          className="size-full object-cover"
-                        />
-                      ) : (
+                      {b.event ? (() => {
+                        const { src, fallback } = resolveEventImage(b.event)
+                        return (
+                          // eslint-disable-next-line @next/next/no-img-element -- remote, user-supplied event imagery
+                          <img
+                            src={src}
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                            onError={(e) => {
+                              const img = e.currentTarget
+                              if (img.dataset.fallbackApplied === '1') return
+                              img.dataset.fallbackApplied = '1'
+                              img.src = fallback
+                            }}
+                            className="size-full object-cover"
+                          />
+                        )
+                      })() : (
                         <div className="flex size-full items-center justify-center">
                           <CalendarDays className="size-5 text-muted-foreground" aria-hidden="true" />
                         </div>
